@@ -1,58 +1,62 @@
-/* Design tokens — an engineer's notebook: cool dotted paper, deep ink, teal for structure, amber for "now". */
+/* Design tokens — a fine textbook: warm paper, deep ink, crimson for structure, olive bands, amber for "now". */
 @import '@fontsource/ibm-plex-sans-arabic/400.css';
 @import '@fontsource/ibm-plex-sans-arabic/500.css';
 @import '@fontsource/ibm-plex-sans-arabic/600.css';
 @import '@fontsource/ibm-plex-sans-arabic/700.css';
-@import '@fontsource-variable/noto-kufi-arabic';
+@import '@fontsource-variable/noto-naskh-arabic';
+@import '@fontsource-variable/fraunces';
 @import '@fontsource/jetbrains-mono/400.css';
 @import '@fontsource/jetbrains-mono/700.css';
 @import 'katex/dist/katex.min.css';
 
 :root {
-  --paper: #f6f7f9;
-  --paper-2: #eceff3;
+  --paper: #fbf8f1;
+  --paper-2: #f3eee2;
   --card: #ffffff;
-  --ink: #142033;
-  --ink-2: #4a5568;
-  --ink-3: #8592a6;
-  --line: #dde2ea;
-  --dot: #d3d9e2;
-  --teal: #0f766e;
-  --teal-soft: #e0f2ef;
-  --amber: #c2700a;
-  --amber-soft: #fdf0dc;
-  --red: #d1434b;
-  --red-soft: #fce8e8;
-  --green: #1f8a4c;
-  --green-soft: #e1f4e8;
-  --blue: #2b63d9;
-  --blue-soft: #e5edfc;
-  --violet: #7445c4;
-  --violet-soft: #efe8fb;
-  --shadow: 0 1px 2px rgb(20 32 51 / 6%), 0 6px 18px rgb(20 32 51 / 6%);
+  --ink: #1f1d1a;
+  --ink-2: #5b564d;
+  --ink-3: #8d877b;
+  --line: #e4ddcc;
+  --brand: #b3263a;
+  --brand-soft: #fbe7e6;
+  --olive: #7c7c44;
+  --olive-soft: #eeeedc;
+  --gold: #a8842c;
+  --amber: #b7791f;
+  --amber-soft: #fbf0d9;
+  --red: #c8323c;
+  --red-soft: #fbe7e6;
+  --green: #2e8b57;
+  --green-soft: #e1f3e8;
+  --blue: #2f62c9;
+  --blue-soft: #e5edfb;
+  --violet: #7a4cc2;
+  --violet-soft: #efe7fa;
+  --shadow: 0 1px 2px rgb(40 30 10 / 6%), 0 6px 20px rgb(40 30 10 / 6%);
   --radius: 14px;
   --font-sans: 'IBM Plex Sans Arabic', system-ui, sans-serif;
-  --font-head: 'Noto Kufi Arabic Variable', 'IBM Plex Sans Arabic', sans-serif;
+  --font-head: 'Noto Naskh Arabic Variable', 'Fraunces Variable', Georgia, serif;
+  --font-num: 'Fraunces Variable', Georgia, serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
   color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --paper: #0f141c; --paper-2: #18202b; --card: #161e29; --ink: #e8edf4; --ink-2: #aab4c3; --ink-3: #738096;
-    --line: #273242; --dot: #1f2a38;
-    --teal: #3cc7b5; --teal-soft: #12302d; --amber: #f2b046; --amber-soft: #352915; --red: #ff7a7f; --red-soft: #3a1e22;
-    --green: #5fd08f; --green-soft: #15301f; --blue: #7ea6ff; --blue-soft: #1a2846; --violet: #b796f7; --violet-soft: #2a2142;
-    --shadow: 0 1px 2px rgb(0 0 0 / 30%), 0 8px 24px rgb(0 0 0 / 28%);
+    --paper: #17161a; --paper-2: #1f1e23; --card: #232228; --ink: #f1ede4; --ink-2: #bdb6a8; --ink-3: #8a8478;
+    --line: #36343b; --brand: #ff6b78; --brand-soft: #3a2124; --olive: #c4c486; --olive-soft: #2c2c22; --gold: #e0bd62;
+    --amber: #f0b45a; --amber-soft: #3a2e17; --red: #ff6b6b; --red-soft: #3a2124;
+    --green: #5cd08d; --green-soft: #19352a; --blue: #7aa2ff; --blue-soft: #1e2a44; --violet: #b794f6; --violet-soft: #2d2341;
+    --shadow: 0 1px 2px rgb(0 0 0 / 30%), 0 8px 24px rgb(0 0 0 / 25%);
     color-scheme: dark;
   }
 }
 :root[data-theme='dark'] {
-  --paper: #0f141c; --paper-2: #18202b; --card: #161e29; --ink: #e8edf4; --ink-2: #aab4c3; --ink-3: #738096;
-  --line: #273242; --dot: #1f2a38;
-  --teal: #3cc7b5; --teal-soft: #12302d; --amber: #f2b046; --amber-soft: #352915; --red: #ff7a7f; --red-soft: #3a1e22;
-  --green: #5fd08f; --green-soft: #15301f; --blue: #7ea6ff; --blue-soft: #1a2846; --violet: #b796f7; --violet-soft: #2a2142;
-  --shadow: 0 1px 2px rgb(0 0 0 / 30%), 0 8px 24px rgb(0 0 0 / 28%);
+  --paper: #17161a; --paper-2: #1f1e23; --card: #232228; --ink: #f1ede4; --ink-2: #bdb6a8; --ink-3: #8a8478;
+  --line: #36343b; --brand: #ff6b78; --brand-soft: #3a2124; --olive: #c4c486; --olive-soft: #2c2c22; --gold: #e0bd62;
+  --amber: #f0b45a; --amber-soft: #3a2e17; --red: #ff6b6b; --red-soft: #3a2124;
+  --green: #5cd08d; --green-soft: #19352a; --blue: #7aa2ff; --blue-soft: #1e2a44; --violet: #b794f6; --violet-soft: #2d2341;
+  --shadow: 0 1px 2px rgb(0 0 0 / 30%), 0 8px 24px rgb(0 0 0 / 25%);
   color-scheme: dark;
 }
 
@@ -61,16 +65,14 @@ html { -webkit-text-size-adjust: 100%; }
 body {
   margin: 0;
   background-color: var(--paper);
-  background-image: radial-gradient(var(--dot) 1px, transparent 1.2px);
-  background-size: 22px 22px;
   color: var(--ink);
   font-family: var(--font-sans);
   font-size: 17.5px;
   line-height: 1.85;
 }
-a { color: var(--teal); text-underline-offset: 4px; }
-h1, h2, h3 { font-family: var(--font-head); line-height: 1.45; }
-h1 { font-size: clamp(1.8rem, 4.5vw, 2.6rem); font-weight: 700; margin: 0.2em 0 0.3em; }
+a { color: var(--brand); text-underline-offset: 4px; }
+h1, h2, h3 { font-family: var(--font-head); line-height: 1.5; letter-spacing: 0; }
+h1 { font-size: clamp(1.9rem, 4.6vw, 2.7rem); font-weight: 700; margin: 0.2em 0 0.3em; }
 h2 { font-size: 1.5rem; font-weight: 700; margin: 2.4em 0 0.6em; }
 h3 { font-size: 1.15rem; font-weight: 650; margin: 1.8em 0 0.4em; }
 strong { font-weight: 700; }
@@ -90,7 +92,7 @@ html[data-theme='dark'] .astro-code, html[data-theme='dark'] .astro-code span { 
 .ltr { direction: ltr; unicode-bidi: isolate; }
 .en { font-family: var(--font-mono); font-size: 0.82em; color: var(--ink-3); direction: ltr; unicode-bidi: isolate; }
 button { font: inherit; }
-:focus-visible { outline: 3px solid var(--teal); outline-offset: 2px; }
+:focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; }
 
 .container { max-width: 1200px; margin: 0 auto; padding: 0 18px; }
 
@@ -104,9 +106,8 @@ button { font: inherit; }
 .btn:hover { border-color: var(--ink-3); }
 .btn:active { transform: translateY(1px); }
 .btn:disabled { opacity: 0.45; cursor: not-allowed; }
-.btn-primary { background: var(--teal); color: #fff; border-color: var(--teal); }
-html[data-theme='dark'] .btn-primary { color: #06231f; }
-.btn-primary:hover { filter: brightness(1.08); border-color: var(--teal); }
+.btn-primary { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.btn-primary:hover { background: var(--brand); border-color: var(--brand); color: #fff; }
 .btn-ghost { background: transparent; border-color: transparent; color: var(--ink-2); }
 .btn-ghost:hover { background: var(--paper-2); border-color: transparent; }
 .btn-sm { padding: 5px 11px; font-size: 0.86rem; border-radius: 8px; }
@@ -128,8 +129,9 @@ html[data-theme='dark'] .btn-primary { color: #06231f; }
 .callout.tip .callout-title { color: var(--green); }
 .callout.problem { background: var(--amber-soft); border-color: var(--amber); }
 .callout.problem .callout-title { color: var(--amber); }
-.callout.algo { background: var(--teal-soft); border-color: var(--teal); }
-.callout.algo .callout-title { color: var(--teal); }
+.callout.algo { background: var(--olive-soft); border-color: var(--brand); }
+.callout.algo { border-color: var(--olive); }
+.callout.algo .callout-title { color: var(--olive); }
 
 /* Colors that tie words to symbols (P, Q, R and connectives). */
 .c-p { color: var(--blue); font-weight: 700; }
@@ -140,7 +142,7 @@ html[data-theme='dark'] .btn-primary { color: #06231f; }
 .c-f { color: var(--red); font-weight: 700; }
 
 .tag { display: inline-block; font-size: 0.78rem; font-weight: 600; padding: 2px 10px; border-radius: 99px; background: var(--paper-2); color: var(--ink-2); }
-.tag.teal { background: var(--teal-soft); color: var(--teal); }
+.tag.teal { background: var(--olive-soft); color: var(--olive); }
 .tag.amber { background: var(--amber-soft); color: var(--amber); }
 
 table.nice { border-collapse: collapse; width: 100%; margin: 1em 0; font-size: 0.95rem; background: var(--card); border-radius: 12px; overflow: hidden; border: 1px solid var(--line); }
