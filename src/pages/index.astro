@@ -1,0 +1,83 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import CourseMap from '../components/CourseMap.tsx';
+import { allLessons, curriculum, lessonById, lessonHref, phaseHref, refs, rhythm } from '../data/curriculum';
+
+const base = import.meta.env.BASE_URL;
+const entries = await getCollection('lessons');
+const available = Object.fromEntries(entries.map((e) => [e.data.id, lessonHref(base, lessonById(e.data.id)!)]));
+const phaseLinks = Object.fromEntries(curriculum.map((p) => [p.key, phaseHref(base, p)]));
+const first = allLessons.find((l) => available[l.id])!;
+
+const refList = [
+  { ...refs.ocw6006, role: 'العمود الفقري للمراحل 1–4: محاضرات وملاحظات وواجبات بحلولها.' },
+  { ...refs.ocw6046, role: 'للمرحلتين 3 و5: التصميم المتقدم والعشوائية والتقريب.' },
+  { ...refs.jeffe, role: 'كتاب مجاني ممتاز لاستراتيجيات التصميم، ومسائله كثيرة.' },
+  { ...refs.mcs, role: 'كتاب مجاني يغطي المرحلة 0 كاملة، ومعها الاحتمالات.' },
+  { ...refs.bop, role: 'كتاب مجاني في المنطق وأساليب البرهان.' },
+  { ...refs.ods, role: 'كتاب مجاني لهياكل البيانات، للمرحلة 2.' },
+  { ...refs.tim, role: 'شرح مرئي واضح جدًا، مرجع ثانٍ حين يصعب موضوع.' },
+];
+---
+
+<Base title="الخوارزميات · رحلة الأشهر الستة">
+  <section class="hero">
+    <div class="container hero-inner">
+      <div>
+        <div class="hero-kicker">6 مراحل · <span class="ltr">{allLessons.length}</span> درسًا · 26 أسبوعًا</div>
+        <h1>ادرس الخوارزميات <em>كما تُدرَّس</em> في الجامعة.</h1>
+        <p class="hero-lede">
+          من المنطق والاستقراء إلى NP-Completeness. كل درس مبني على مراجع جامعية مجانية، وفيه محاكاة تشغّلها خطوة بخطوة، وبراهين، وتمارين بحلول مخفية، ومختبر برمجي تقيس فيه زمن كودك بنفسك.
+        </p>
+        <div class="hero-cta">
+          <a class="btn btn-primary" href={available[first.id]}>ابدأ بالدرس {first.id}: {first.title} ←</a>
+          <a class="btn" href="#map">خريطة الرحلة</a>
+        </div>
+      </div>
+      <ol class="rhythm" aria-label="أقسام كل درس">
+        {rhythm.map(([name, desc]) => <li><b>{name}</b> {desc}</li>)}
+      </ol>
+    </div>
+  </section>
+
+  <section class="container" id="map">
+    <h2 class="map-title">خريطة الرحلة</h2>
+    <CourseMap client:load phases={curriculum} available={available} phaseLinks={phaseLinks} />
+  </section>
+
+  <section class="container" id="refs">
+    <h2>المراجع المجانية</h2>
+    <div class="ref-grid">
+      {refList.map((r) => (
+        <a class="ref card" href={r.url} target="_blank" rel="noopener">
+          <span class="ref-name ltr">{r.name}</span>
+          <span class="ref-by ltr">{r.by}</span>
+          <span class="ref-role">{r.role}</span>
+        </a>
+      ))}
+    </div>
+  </section>
+</Base>
+
+<style>
+  .hero { padding: 56px 0 44px; background: linear-gradient(180deg, var(--teal-soft), transparent); }
+  .hero-inner { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 48px; align-items: center; }
+  .hero-kicker { color: var(--teal); font-weight: 700; font-size: 0.9rem; }
+  .hero h1 { font-size: clamp(2rem, 5.4vw, 3.1rem); margin: 0.25em 0 0.35em; }
+  .hero h1 em { font-style: normal; color: var(--teal); }
+  .hero-lede { font-size: 1.1rem; color: var(--ink-2); max-width: 38em; }
+  .hero-cta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+  .rhythm { list-style: none; counter-reset: r; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 7px; }
+  .rhythm li { counter-increment: r; display: grid; grid-template-columns: 30px 1fr; column-gap: 12px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 7px 14px; font-size: 0.9rem; color: var(--ink-2); box-shadow: var(--shadow); line-height: 1.6; }
+  .rhythm li::before { content: counter(r); grid-row: span 2; width: 26px; height: 26px; border-radius: 50%; background: var(--teal); color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 0.8rem; align-self: center; font-family: var(--font-mono); }
+  .rhythm b { color: var(--ink); }
+  .map-title { margin-top: 1.2em; }
+  .ref-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+  .ref { display: flex; flex-direction: column; gap: 2px; padding: 16px 18px; text-decoration: none; color: var(--ink); transition: border-color 0.15s; }
+  .ref:hover { border-color: var(--teal); }
+  .ref-name { font-weight: 700; text-align: right; }
+  .ref-by { font-size: 0.82rem; color: var(--ink-3); text-align: right; }
+  .ref-role { font-size: 0.9rem; color: var(--ink-2); margin-top: 6px; }
+  @media (max-width: 860px) { .hero-inner { grid-template-columns: 1fr; gap: 28px; } }
+</style>

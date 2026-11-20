@@ -1,0 +1,165 @@
+/* Design tokens — an engineer's notebook: cool dotted paper, deep ink, teal for structure, amber for "now". */
+@import '@fontsource/ibm-plex-sans-arabic/400.css';
+@import '@fontsource/ibm-plex-sans-arabic/500.css';
+@import '@fontsource/ibm-plex-sans-arabic/600.css';
+@import '@fontsource/ibm-plex-sans-arabic/700.css';
+@import '@fontsource-variable/noto-kufi-arabic';
+@import '@fontsource/jetbrains-mono/400.css';
+@import '@fontsource/jetbrains-mono/700.css';
+@import 'katex/dist/katex.min.css';
+
+:root {
+  --paper: #f6f7f9;
+  --paper-2: #eceff3;
+  --card: #ffffff;
+  --ink: #142033;
+  --ink-2: #4a5568;
+  --ink-3: #8592a6;
+  --line: #dde2ea;
+  --dot: #d3d9e2;
+  --teal: #0f766e;
+  --teal-soft: #e0f2ef;
+  --amber: #c2700a;
+  --amber-soft: #fdf0dc;
+  --red: #d1434b;
+  --red-soft: #fce8e8;
+  --green: #1f8a4c;
+  --green-soft: #e1f4e8;
+  --blue: #2b63d9;
+  --blue-soft: #e5edfc;
+  --violet: #7445c4;
+  --violet-soft: #efe8fb;
+  --shadow: 0 1px 2px rgb(20 32 51 / 6%), 0 6px 18px rgb(20 32 51 / 6%);
+  --radius: 14px;
+  --font-sans: 'IBM Plex Sans Arabic', system-ui, sans-serif;
+  --font-head: 'Noto Kufi Arabic Variable', 'IBM Plex Sans Arabic', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --paper: #0f141c; --paper-2: #18202b; --card: #161e29; --ink: #e8edf4; --ink-2: #aab4c3; --ink-3: #738096;
+    --line: #273242; --dot: #1f2a38;
+    --teal: #3cc7b5; --teal-soft: #12302d; --amber: #f2b046; --amber-soft: #352915; --red: #ff7a7f; --red-soft: #3a1e22;
+    --green: #5fd08f; --green-soft: #15301f; --blue: #7ea6ff; --blue-soft: #1a2846; --violet: #b796f7; --violet-soft: #2a2142;
+    --shadow: 0 1px 2px rgb(0 0 0 / 30%), 0 8px 24px rgb(0 0 0 / 28%);
+    color-scheme: dark;
+  }
+}
+:root[data-theme='dark'] {
+  --paper: #0f141c; --paper-2: #18202b; --card: #161e29; --ink: #e8edf4; --ink-2: #aab4c3; --ink-3: #738096;
+  --line: #273242; --dot: #1f2a38;
+  --teal: #3cc7b5; --teal-soft: #12302d; --amber: #f2b046; --amber-soft: #352915; --red: #ff7a7f; --red-soft: #3a1e22;
+  --green: #5fd08f; --green-soft: #15301f; --blue: #7ea6ff; --blue-soft: #1a2846; --violet: #b796f7; --violet-soft: #2a2142;
+  --shadow: 0 1px 2px rgb(0 0 0 / 30%), 0 8px 24px rgb(0 0 0 / 28%);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background-color: var(--paper);
+  background-image: radial-gradient(var(--dot) 1px, transparent 1.2px);
+  background-size: 22px 22px;
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 17.5px;
+  line-height: 1.85;
+}
+a { color: var(--teal); text-underline-offset: 4px; }
+h1, h2, h3 { font-family: var(--font-head); line-height: 1.45; }
+h1 { font-size: clamp(1.8rem, 4.5vw, 2.6rem); font-weight: 700; margin: 0.2em 0 0.3em; }
+h2 { font-size: 1.5rem; font-weight: 700; margin: 2.4em 0 0.6em; }
+h3 { font-size: 1.15rem; font-weight: 650; margin: 1.8em 0 0.4em; }
+strong { font-weight: 700; }
+code, pre, kbd, textarea, .pseudo, .en { font-variant-ligatures: none; font-feature-settings: 'liga' 0, 'calt' 0; }
+code { font-family: var(--font-mono); font-size: 0.86em; background: var(--paper-2); padding: 0.1em 0.4em; border-radius: 6px; direction: ltr; unicode-bidi: isolate; }
+pre { direction: ltr; text-align: left; }
+pre.astro-code { padding: 16px 18px; border-radius: 12px; border: 1px solid var(--line); font-size: 0.86rem; line-height: 1.65; overflow-x: auto; }
+pre.astro-code code { background: none; padding: 0; font-size: inherit; }
+html[data-theme='dark'] .astro-code, html[data-theme='dark'] .astro-code span { color: var(--shiki-dark) !important; background-color: var(--shiki-dark-bg) !important; }
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme='light']) .astro-code, html:not([data-theme='light']) .astro-code span { color: var(--shiki-dark) !important; background-color: var(--shiki-dark-bg) !important; }
+}
+/* Math always reads left-to-right, even inside Arabic text. */
+.katex { font-size: 1.06em; direction: ltr; unicode-bidi: isolate; }
+.katex .katex-mathml { left: 0; top: 0; }
+.katex-display { margin: 1.1em 0; overflow-x: auto; overflow-y: hidden; padding: 4px 0; direction: ltr; }
+.ltr { direction: ltr; unicode-bidi: isolate; }
+.en { font-family: var(--font-mono); font-size: 0.82em; color: var(--ink-3); direction: ltr; unicode-bidi: isolate; }
+button { font: inherit; }
+:focus-visible { outline: 3px solid var(--teal); outline-offset: 2px; }
+
+.container { max-width: 1200px; margin: 0 auto; padding: 0 18px; }
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  border: 1px solid var(--line); background: var(--card); color: var(--ink);
+  border-radius: 10px; padding: 8px 16px; font-weight: 600; cursor: pointer; text-decoration: none;
+  transition: transform 0.08s ease, background 0.15s ease, border-color 0.15s;
+}
+.btn:hover { border-color: var(--ink-3); }
+.btn:active { transform: translateY(1px); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn-primary { background: var(--teal); color: #fff; border-color: var(--teal); }
+html[data-theme='dark'] .btn-primary { color: #06231f; }
+.btn-primary:hover { filter: brightness(1.08); border-color: var(--teal); }
+.btn-ghost { background: transparent; border-color: transparent; color: var(--ink-2); }
+.btn-ghost:hover { background: var(--paper-2); border-color: transparent; }
+.btn-sm { padding: 5px 11px; font-size: 0.86rem; border-radius: 8px; }
+
+/* ---------- Card / callouts ---------- */
+.card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
+
+.callout { border-radius: var(--radius); padding: 16px 20px; margin: 1.5em 0; border-inline-start: 5px solid; background: var(--card); }
+.callout > :first-child { margin-top: 0; }
+.callout > :last-child { margin-bottom: 0; }
+.callout-title { font-family: var(--font-head); font-weight: 700; font-size: 0.92rem; margin-bottom: 6px; display: flex; gap: 8px; align-items: center; }
+.callout.definition { background: var(--blue-soft); border-color: var(--blue); }
+.callout.definition .callout-title { color: var(--blue); }
+.callout.theorem { background: var(--violet-soft); border-color: var(--violet); }
+.callout.theorem .callout-title { color: var(--violet); }
+.callout.warning { background: var(--red-soft); border-color: var(--red); }
+.callout.warning .callout-title { color: var(--red); }
+.callout.tip { background: var(--green-soft); border-color: var(--green); }
+.callout.tip .callout-title { color: var(--green); }
+.callout.problem { background: var(--amber-soft); border-color: var(--amber); }
+.callout.problem .callout-title { color: var(--amber); }
+.callout.algo { background: var(--teal-soft); border-color: var(--teal); }
+.callout.algo .callout-title { color: var(--teal); }
+
+/* Colors that tie words to symbols (P, Q, R and connectives). */
+.c-p { color: var(--blue); font-weight: 700; }
+.c-q { color: var(--amber); font-weight: 700; }
+.c-r { color: var(--violet); font-weight: 700; }
+.c-op { color: var(--red); font-weight: 700; }
+.c-t { color: var(--green); font-weight: 700; }
+.c-f { color: var(--red); font-weight: 700; }
+
+.tag { display: inline-block; font-size: 0.78rem; font-weight: 600; padding: 2px 10px; border-radius: 99px; background: var(--paper-2); color: var(--ink-2); }
+.tag.teal { background: var(--teal-soft); color: var(--teal); }
+.tag.amber { background: var(--amber-soft); color: var(--amber); }
+
+table.nice { border-collapse: collapse; width: 100%; margin: 1em 0; font-size: 0.95rem; background: var(--card); border-radius: 12px; overflow: hidden; border: 1px solid var(--line); }
+table.nice th, table.nice td { text-align: start; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+table.nice tr:last-child td { border-bottom: none; }
+table.nice th { font-size: 0.82rem; color: var(--ink-3); font-weight: 650; background: var(--paper-2); }
+table.nice.center th, table.nice.center td { text-align: center; }
+table.nice.tt { direction: ltr; }
+table.nice.tt td, table.nice.tt th { text-align: center; font-family: var(--font-mono); direction: ltr; }
+.T { color: var(--green); font-weight: 700; }
+.F { color: var(--red); font-weight: 700; }
+
+@media (max-width: 640px) {
+  body { font-size: 16.5px; }
+  table.nice { font-size: 0.88rem; }
+  table.nice th, table.nice td { padding: 7px 6px; }
+}
+
+.table-scroll { max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.fig-center { display: flex; justify-content: center; margin: 1em 0; }
+.fig-center svg { max-width: 100%; height: auto; }
+.fig-caption { text-align: center; font-size: 0.88rem; color: var(--ink-3); margin: -0.4em auto 1.2em; max-width: 560px; }

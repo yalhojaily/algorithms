@@ -1,0 +1,72 @@
+---
+import '../styles/global.css';
+import '../styles/widgets.css';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+const { title, description = 'رحلة جامعية في الخوارزميات خلال ستة أشهر: شرح من المراجع الجامعية، ومحاكاة تفاعلية، وتمارين، ومختبرات برمجية.' } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href={`${base}/favicon.svg`} />
+    <title>{title}</title>
+    <script is:inline>
+      try {
+        const t = localStorage.getItem('algo:theme');
+        if (t) document.documentElement.dataset.theme = t;
+      } catch {}
+    </script>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container site-header-inner">
+        <a class="brand" href={`${base}/`}>
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 64 64" width="22" height="22"><path d="M18 44 L32 18 L46 44" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="32" cy="18" r="6" fill="#f5b23d"/><circle cx="18" cy="44" r="6" fill="currentColor"/><circle cx="46" cy="44" r="6" fill="currentColor"/></svg>
+          </span>
+          <span class="brand-name">الخوارزميات<span class="brand-sub"> · رحلة الأشهر الستة</span></span>
+        </a>
+        <nav class="site-nav">
+          <a href={`${base}/#map`}>خريطة الرحلة</a>
+          <a href={`${base}/#refs`}>المراجع</a>
+          <button class="theme-btn" id="theme-btn" aria-label="تبديل الوضع الداكن" title="تبديل الوضع الداكن"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/></svg></button>
+        </nav>
+      </div>
+    </header>
+    <slot />
+    <footer class="site-footer">
+      <div class="container">المحتوى مبني على مراجع جامعية مجانية: MIT 6.006 و6.046J و6.042J، وكتاب Jeff Erickson، وكتاب Book of Proof، وغيرها. تقدّمك محفوظ في هذا المتصفح.</div>
+    </footer>
+    <script is:inline>
+      document.getElementById('theme-btn')?.addEventListener('click', () => {
+        const root = document.documentElement;
+        const dark = root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+        root.dataset.theme = dark ? 'light' : 'dark';
+        try { localStorage.setItem('algo:theme', root.dataset.theme); } catch {}
+      });
+    </script>
+  </body>
+</html>
+
+<style is:global>
+  .site-header { position: sticky; top: 0; z-index: 20; background: color-mix(in srgb, var(--paper) 86%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+  .site-header-inner { display: flex; align-items: center; justify-content: space-between; height: 62px; }
+  .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); }
+  .brand-mark { background: var(--teal); color: #fff; width: 38px; height: 38px; border-radius: 11px; display: grid; place-items: center; }
+  .brand-name { font-family: var(--font-head); font-weight: 700; font-size: 1.08rem; }
+  .brand-sub { color: var(--ink-3); font-weight: 500; font-size: 0.9rem; }
+  .site-nav { display: flex; align-items: center; gap: 16px; }
+  .site-nav a { color: var(--ink-2); text-decoration: none; font-weight: 600; font-size: 0.92rem; }
+  .site-nav a:hover { color: var(--teal); }
+  .theme-btn { border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 9px; width: 36px; height: 36px; cursor: pointer; display: grid; place-items: center; }
+  .site-footer { border-top: 1px solid var(--line); margin-top: 80px; padding: 28px 0 calc(64px + env(safe-area-inset-bottom)); color: var(--ink-3); font-size: 0.86rem; background: var(--paper); }
+  @media (max-width: 600px) { .brand-sub { display: none; } .site-nav a[href$='#refs'] { display: none; } }
+</style>

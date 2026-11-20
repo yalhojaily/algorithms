@@ -1,0 +1,651 @@
+---
+id: "0.1"
+title: المنطق القضوي
+summary: اللغة الدقيقة التي نكتب بها شروط البرامج وفرضيات البراهين. ونرى فيها أول خوارزمية في الرحلة، وأول مسألة لا يعرف أحد حلًا سريعًا لها.
+minutes: 170
+objectives:
+  - تميّز القضية من الجملة التي ليست قضية.
+  - تستخدم الروابط الستة (¬، ∧، ∨، ⊕، →، ↔) وتعرف جدول صدق كل منها.
+  - تترجم جملًا عربية فيها «إذا» و«فقط إذا» و«إلا إذا» إلى صيغ منطقية.
+  - تبني جدول صدق لأي صيغة، وتحكم بأنها صالحة أو قابلة للتحقق أو متناقضة.
+  - تثبت تكافؤ صيغتين بجدول الصدق وبقوانين جبر القضايا.
+  - تحلل زمن خوارزمية جدول الصدق، وتشرح لماذا تصبح مستحيلة عمليًا مع زيادة المتغيرات.
+readings:
+  - source: "Mathematics for Computer Science (MIT)"
+    part: "الفصل 3: Logical Formulas، الأقسام 3.1–3.5"
+    url: "https://courses.csail.mit.edu/6.042/spring18/mcs.pdf"
+  - source: "Book of Proof (Hammack)"
+    part: "الفصل 2: Logic، الأقسام 2.1–2.6"
+    url: "https://richardhammack.github.io/BookOfProof/"
+  - source: "MIT 6.042J (OCW, Spring 2015)"
+    part: "Unit I، الجلسة 1.4: Propositional Logic"
+    url: "https://ocw.mit.edu/courses/6-042j-mathematics-for-computer-science-spring-2015/"
+---
+
+import Callout from '../../components/Callout.astro';
+import Exercise from '../../components/Exercise.astro';
+import StepReveal from '../../components/StepReveal.tsx';
+import QuickCheck from '../../components/QuickCheck.tsx';
+import ConnectiveExplorer from '../../components/ConnectiveExplorer.tsx';
+import TruthTableLab from '../../components/TruthTableLab.tsx';
+import EquivChecker from '../../components/EquivChecker.tsx';
+import CodeLab from '../../components/CodeLab.tsx';
+import * as lab from '../../labs/0-1-propositional-logic.ts';
+
+## <span class="sec">1</span>المشكلة: هل الشرطان متكافئان؟
+
+<Callout type="problem" title="مراجعة كود">
+كتبت سارة هذا الشرط في نظام لمنح الصلاحيات:
+
+```js
+if (x > 0 || (x <= 0 && y > 100)) grant();
+```
+
+فاقترح عمر في المراجعة أن تختصره إلى:
+
+```js
+if (x > 0 || y > 100) grant();
+```
+
+هل يعمل الشرطان بالطريقة نفسها **لكل** القيم الممكنة لـ `x` و`y`؟ إن لم يكونا كذلك فهذه ثغرة أمنية.
+</Callout>
+
+لا يمكن اختبار كل القيم، لأن قيم `x` و`y` لا نهاية لها. لكن لاحظ أن الشرطين لا يعتمدان على قيمتي `x` و`y` نفسيهما، بل على حقيقتين فقط: هل $x > 0$؟ وهل $y > 100$؟
+
+سمِّ الحقيقة الأولى $\htmlClass{c-p}{A}$ والثانية $\htmlClass{c-q}{B}$. لاحظ أن `x <= 0` هي نفي $A$. يصبح السؤال:
+
+$$
+\htmlClass{c-p}{A} \lor (\lnot \htmlClass{c-p}{A} \land \htmlClass{c-q}{B}) \quad \overset{?}{\equiv} \quad \htmlClass{c-p}{A} \lor \htmlClass{c-q}{B}
+$$
+
+لكل من $A$ و$B$ قيمتان فقط: صادقة أو كاذبة. فالحالات أربع فقط، وفحصها كلها ممكن. هذه هي فكرة الدرس: **المنطق القضوي يحوّل سؤالًا عن عدد لا نهائي من المدخلات إلى عدد محدود من الحالات**، فنستطيع الإجابة عنه بخوارزمية. سنحل هذه المسألة في القسم 5.
+
+هذا المثال مبني على مثال مشابه في الفصل 3.2 من كتاب MIT، وهو الفصل الذي يربط المنطق بشروط البرامج.
+
+## <span class="sec">2</span>القضايا
+
+<Callout type="definition" title="القضية (Proposition)">
+**القضية** جملة خبرية إما صادقة وإما كاذبة، ولا تكون الاثنين معًا. نسمي صدقها أو كذبها **قيمة الصدق** (truth value)، ونرمز لها بـ **T** (صادقة) أو **F** (كاذبة).
+</Callout>
+
+<div class="table-scroll">
+<table class="nice">
+  <thead><tr><th>الجملة</th><th>قضية؟</th><th>السبب</th></tr></thead>
+  <tbody>
+    <tr><td>$2 + 3 = 5$</td><td class="T">نعم (T)</td><td>جملة خبرية صادقة.</td></tr>
+    <tr><td>كل عدد أولي فردي.</td><td class="T">نعم (F)</td><td>كاذبة لأن 2 عدد أولي زوجي. والقضية الكاذبة تبقى قضية.</td></tr>
+    <tr><td>كل عدد زوجي أكبر من 2 مجموع عددين أوليين.</td><td class="T">نعم</td><td>هذه حدسية Goldbach، ولا يعرف أحد حتى اليوم أصادقة هي أم كاذبة. لكنها حتمًا إحداهما، فهي قضية.</td></tr>
+    <tr><td>أغلق الباب.</td><td class="F">لا</td><td>أمر، لا يوصف بصدق ولا كذب.</td></tr>
+    <tr><td>كم الساعة؟</td><td class="F">لا</td><td>سؤال.</td></tr>
+    <tr><td>$x > 3$</td><td class="F">لا (بعد)</td><td>قيمتها تعتمد على $x$. هذه **دالة قضوية** (predicate)، وهي موضوع الدرس 0.2.</td></tr>
+    <tr><td>هذه الجملة كاذبة.</td><td class="F">لا</td><td>إن كانت صادقة فهي كاذبة، وإن كانت كاذبة فهي صادقة. هذه مفارقة الكذّاب.</td></tr>
+  </tbody>
+</table>
+</div>
+
+لا يهتم المنطق القضوي بمعنى القضية، بل بقيمة صدقها فقط، وبالطريقة التي نركّب بها قضايا جديدة من قضايا أبسط. لذلك نرمز للقضايا البسيطة بمتغيرات مثل $P$ و$Q$ و$R$، ونسميها **المتغيرات القضوية**.
+
+<QuickCheck
+  client:visible
+  id="q1"
+  question="أي هذه الجمل **ليست** قضية؟"
+  options={['$7$ عدد أولي.', '$1 + 1 = 3$', '$n^2 + n$ عدد زوجي.', 'يوجد عدد أولي أكبر من $10^{100}$.']}
+  answer={2}
+  explain="الجملة «$n^2 + n$ عدد زوجي» تعتمد على $n$، ولن يكون لها قيمة صدق قبل أن نحدد $n$. سنرى في الدرس 0.2 أن «لكل $n$، $n^2+n$ زوجي» قضية، وأنها صادقة."
+  wrong={{ 1: 'هذه قضية كاذبة، لكنها قضية. القضية لا يلزم أن تكون صادقة.', 3: 'هذه قضية صادقة، حتى لو لم نكتب ذلك العدد الأولي صراحة.' }}
+/>
+
+## <span class="sec">3</span>الروابط المنطقية
+
+نركّب القضايا بستة **روابط** (connectives). كل رابط معرَّف تعريفًا كاملًا بجدول يذكر قيمته في كل الحالات الممكنة لمدخلاته، ويسمى هذا الجدول **جدول الصدق** (truth table):
+
+<div class="table-scroll">
+<table class="nice tt">
+  <thead>
+    <tr><th>P</th><th>Q</th><th>¬P</th><th>P ∧ Q</th><th>P ∨ Q</th><th>P ⊕ Q</th><th>P → Q</th><th>P ↔ Q</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="T">T</td><td class="T">T</td><td class="F">F</td><td class="T">T</td><td class="T">T</td><td class="F">F</td><td class="T">T</td><td class="T">T</td></tr>
+    <tr><td class="T">T</td><td class="F">F</td><td class="F">F</td><td class="F">F</td><td class="T">T</td><td class="T">T</td><td class="F">F</td><td class="F">F</td></tr>
+    <tr><td class="F">F</td><td class="T">T</td><td class="T">T</td><td class="F">F</td><td class="T">T</td><td class="T">T</td><td class="T">T</td><td class="F">F</td></tr>
+    <tr><td class="F">F</td><td class="F">F</td><td class="T">T</td><td class="F">F</td><td class="F">F</td><td class="F">F</td><td class="T">T</td><td class="T">T</td></tr>
+  </tbody>
+</table>
+</div>
+
+- **النفي** $\lnot P$ (NOT): يقلب قيمة الصدق.
+- **الوصل** $P \land Q$ (AND): صادق إذا كانت القضيتان صادقتين معًا.
+- **الفصل** $P \lor Q$ (OR): صادق إذا كانت **إحداهما على الأقل** صادقة، ومنها حالة صدقهما معًا. انتبه: كلمة «أو» في الكلام اليومي تعني أحيانًا «واحد فقط». مثال ذلك قول المضيف «شاي أو قهوة؟». أما «أو» الرياضية فتقبل الاثنين.
+- **الفصل الحصري** $P \oplus Q$ (XOR): صادق إذا كانت **واحدة فقط** صادقة. وهو المقصود بعبارة «إما… وإما…».
+- **الاستلزام** $P \rightarrow Q$ (IMPLIES): تسمى $P$ **المقدَّم** (hypothesis) و$Q$ **التالي** (conclusion). الاستلزام كاذب في حالة واحدة فقط: أن يكون المقدَّم صادقًا والتالي كاذبًا.
+- **الاستلزام الثنائي** $P \leftrightarrow Q$ (IFF): صادق إذا كان للقضيتين قيمة الصدق نفسها.
+
+غيّر قيمتي $P$ و$Q$ وراقب كيف يتغيّر كل رابط، ولماذا:
+
+<ConnectiveExplorer client:visible />
+
+### الاستلزام: الرابط الذي يخدع الجميع
+
+تخيّل أن أبًا وعد ابنه: «**إذا** نجحت في الامتحان **فـ**سأشتري لك حاسوبًا». متى يكون الأب قد أخلف وعده؟
+
+1. نجح الابن واشترى الأب الحاسوب: الوعد محفوظ (**T**).
+2. نجح الابن ولم يشترِ الأب الحاسوب: هنا فقط نُقض الوعد (**F**).
+3. رسب الابن واشترى الأب الحاسوب رغم ذلك: لم يَعِد الأب بشيء في حالة الرسوب، فلم يُنقض الوعد (**T**).
+4. رسب الابن ولم يشترِ الأب الحاسوب: الوعد لم يُنقض أيضًا (**T**).
+
+الحالتان 3 و4 هما مصدر الحيرة. حين يكون المقدَّم كاذبًا يكون الاستلزام كله صادقًا، ويسمى هذا **الصدق بانتفاء الشرط** (vacuous truth). فالقضية «إذا كان القمر مصنوعًا من الجبن فإن $2 + 2 = 5$» **صادقة**، لأن مقدَّمها كاذب.
+
+<Callout type="warning" title="الاستلزام ليس سببية">
+القضية $P \rightarrow Q$ لا تعني أن $P$ تسبّب $Q$، ولا أن بينهما علاقة أصلًا. هي ادعاء واحد فقط: لا يحدث أن تكون $P$ صادقة و$Q$ كاذبة معًا. ولهذا يمكن كتابتها بطريقة مكافئة: $P \rightarrow Q \;\equiv\; \lnot P \lor Q$.
+</Callout>
+
+هذا المعنى بالضبط هو ما يحتاجه الرياضيون. فحين نقول «إذا كان $n$ قابلًا للقسمة على 4 فهو زوجي»، نريد أن تكون القضية صادقة لكل $n$، ومنها $n = 7$ الذي لا يحقق الشرط أصلًا.
+
+#### طرق قول $P \rightarrow Q$ بالعربية
+
+الرياضيات مليئة بصيغ مختلفة للاستلزام، وأكثر الأخطاء في الترجمة تقع في «فقط إذا» و«إلا إذا»:
+
+<div class="table-scroll">
+<table class="nice">
+  <thead><tr><th>العبارة</th><th>الصيغة</th><th>ملاحظة</th></tr></thead>
+  <tbody>
+    <tr><td>إذا P فإن Q</td><td>$P \rightarrow Q$</td><td>الصيغة الأساسية.</td></tr>
+    <tr><td>Q إذا P</td><td>$P \rightarrow Q$</td><td>الترتيب في الجملة معكوس، والمعنى واحد.</td></tr>
+    <tr><td>P شرط كافٍ لـ Q</td><td>$P \rightarrow Q$</td><td>يكفي وقوع P ليقع Q.</td></tr>
+    <tr><td>Q شرط لازم لـ P</td><td>$P \rightarrow Q$</td><td>لا يمكن أن تقع P دون Q.</td></tr>
+    <tr><td>P **فقط إذا** Q</td><td>$P \rightarrow Q$</td><td>انتبه: ليست $Q \rightarrow P$.</td></tr>
+    <tr><td>لا P **إلا إذا** Q</td><td>$P \rightarrow Q$</td><td>«لا تنجح إلا إذا ذاكرت»: النجاح يستلزم المذاكرة.</td></tr>
+    <tr><td>P إذا وفقط إذا Q</td><td>$P \leftrightarrow Q$</td><td>شرط لازم وكافٍ معًا.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<QuickCheck
+  client:visible
+  id="q2"
+  question="ليكن $G$: «تحصل على الشهادة»، و$C$: «تجتاز كل المقررات». ما الصيغة المناسبة للجملة «تحصل على الشهادة **فقط إذا** اجتزت كل المقررات»؟"
+  options={['$G \\rightarrow C$', '$C \\rightarrow G$', '$G \\leftrightarrow C$', '$G \\land C$']}
+  answer={0}
+  explain="«P فقط إذا Q» تعني أن P لا تقع دون Q، أي $P \rightarrow Q$. اجتياز المقررات هنا شرط **لازم** للشهادة. قد لا يكون شرطًا كافيًا، فربما تحتاج أيضًا إلى دفع الرسوم."
+  wrong={{ 1: 'هذه «تحصل على الشهادة **إذا** اجتزت المقررات»، أي أن الاجتياز يكفي. لكن الجملة تقول إنه **لازم**، لا إنه كافٍ.', 2: 'هذا يقول إن كلًّا منهما يستلزم الآخر. الجملة الأصلية تقول اتجاهًا واحدًا فقط.' }}
+/>
+
+### الأسبقية
+
+كما أن الضرب يُحسب قبل الجمع في الحساب، للروابط ترتيب أسبقية. هذا هو الترتيب المتّبع في كتاب MIT وفي محاكاة هذا الموقع، من الأقوى ارتباطًا إلى الأضعف:
+
+$$
+\lnot \quad\succ\quad \land \quad\succ\quad \oplus \quad\succ\quad \lor \quad\succ\quad \rightarrow \quad\succ\quad \leftrightarrow
+$$
+
+فالصيغة $\lnot P \land Q \lor R \rightarrow S$ تعني $\big(((\lnot P) \land Q) \lor R\big) \rightarrow S$. ويتجمّع الاستلزام من اليمين: $P \rightarrow Q \rightarrow R$ تعني $P \rightarrow (Q \rightarrow R)$. وموضع $\oplus$ بين الروابط يختلف من كتاب إلى آخر، فإن شككت في الأسبقية فضع أقواسًا. الأقواس الزائدة لا تضر أبدًا.
+
+<QuickCheck
+  client:visible
+  id="q3"
+  question="كيف تُقرأ الصيغة $P \lor Q \land R$؟"
+  options={['$(P \\lor Q) \\land R$', '$P \\lor (Q \\land R)$', 'لها القراءتان المعنى نفسه', 'الصيغة غير صحيحة']}
+  answer={1}
+  explain="الوصل $\land$ أقوى ارتباطًا من الفصل $\lor$، كما أن الضرب أقوى من الجمع في $a + b \times c$. والقراءتان مختلفتان فعلًا: جرّب $P = T$ و$R = F$."
+  wrong={{ 2: 'جرّب $P = T$ و$R = F$: القراءة الأولى تعطي F، والثانية تعطي T.' }}
+/>
+
+## <span class="sec">4</span>جداول الصدق
+
+**الصيغة المنطقية** (formula) تتكون من متغيرات قضوية وروابط. لكي نعرف قيمة صيغة في كل الحالات نبني **جدول صدقها**: صف لكل إسناد ممكن لقيم المتغيرات، وعمود لكل صيغة جزئية، من الأبسط إلى الأعقد.
+
+<Callout type="theorem" title="عدد الصفوف">
+صيغة فيها $n$ متغيرات لها جدول صدق من $2^n$ صفًا.
+
+**لماذا؟** للمتغير الأول قيمتان. ومع كل قيمة منهما للمتغير الثاني قيمتان، فهذه $2 \times 2 = 4$ حالات. وكل متغير جديد يضاعف العدد. هذا **مبدأ الضرب** في العدّ، وسنبرهنه في الدرس 0.7.
+</Callout>
+
+نرتب الصفوف ترتيبًا ثابتًا لنقارن الجداول بسهولة: يبدأ الجدول بصف كل المتغيرات فيه صادقة، ويتغيّر المتغير الأول أبطأ من غيره. انظر جدول أحد قانوني De Morgan:
+
+<div class="table-scroll">
+<table class="nice tt">
+  <thead><tr><th>P</th><th>Q</th><th>P ∧ Q</th><th>¬(P ∧ Q)</th><th>¬P</th><th>¬Q</th><th>¬P ∨ ¬Q</th></tr></thead>
+  <tbody>
+    <tr><td class="T">T</td><td class="T">T</td><td class="T">T</td><td class="F">F</td><td class="F">F</td><td class="F">F</td><td class="F">F</td></tr>
+    <tr><td class="T">T</td><td class="F">F</td><td class="F">F</td><td class="T">T</td><td class="F">F</td><td class="T">T</td><td class="T">T</td></tr>
+    <tr><td class="F">F</td><td class="T">T</td><td class="F">F</td><td class="T">T</td><td class="T">T</td><td class="F">F</td><td class="T">T</td></tr>
+    <tr><td class="F">F</td><td class="F">F</td><td class="F">F</td><td class="T">T</td><td class="T">T</td><td class="T">T</td><td class="T">T</td></tr>
+  </tbody>
+</table>
+</div>
+
+العمودان الرابع والأخير متطابقان في كل الصفوف، فالصيغتان متكافئتان: «ليس (P و Q)» تعني «(ليس P) أو (ليس Q)».
+
+<StepReveal
+  client:visible
+  title="حساب قيمة صيغة عند إسناد واحد"
+  problem="احسب قيمة $\lnot P \lor Q \rightarrow Q \land R$ عندما $P = F$ و$Q = F$ و$R = T$."
+  steps={[
+    { show: '$\\big((\\lnot P) \\lor Q\\big) \\rightarrow (Q \\land R)$', why: 'نضع الأقواس حسب الأسبقية أولًا: $\\lnot$ ثم $\\land$ ثم $\\lor$ ثم $\\rightarrow$.' },
+    { show: '$\\lnot P = \\lnot F = T$', why: 'نبدأ بأعمق صيغة جزئية.' },
+    { show: '$(\\lnot P) \\lor Q = T \\lor F = T$', why: 'يكفي طرف صادق واحد لصدق الفصل.' },
+    { show: '$Q \\land R = F \\land T = F$', why: 'يكفي طرف كاذب واحد لكذب الوصل.' },
+    { show: '$T \\rightarrow F = F$', why: 'المقدَّم صادق والتالي كاذب، وهي الحالة الوحيدة التي يكذب فيها الاستلزام.' },
+  ]}
+  answer="قيمة الصيغة عند هذا الإسناد هي **F**."
+/>
+
+لاحظ أن ما فعلناه في هذا المثال خوارزمية: نحسب قيم الصيغ الجزئية من الداخل إلى الخارج، وكل خطوة تستخدم جدول رابط واحد. ولبناء جدول الصدق كله نكرر هذه الخوارزمية لكل الصفوف الـ $2^n$. سنشغّلها خطوة بخطوة في القسم 7.
+
+## <span class="sec">5</span>الصلاحية وقابلية التحقق والتكافؤ
+
+<Callout type="definition" title="ثلاثة أنواع من الصيغ">
+- **صالحة** (valid)، وتسمى أيضًا **تحصيل حاصل** (tautology): صادقة في **كل** الصفوف. مثالها $P \lor \lnot P$.
+- **قابلة للتحقق** (satisfiable): صادقة في صف **واحد على الأقل**. مثالها $P \land \lnot Q$، فهي صادقة عندما $P = T$ و$Q = F$.
+- **غير قابلة للتحقق** (unsatisfiable)، وتسمى أيضًا **تناقضًا** (contradiction): كاذبة في **كل** الصفوف. مثالها $P \land \lnot P$.
+
+وكل صيغة صالحة هي قابلة للتحقق أيضًا.
+</Callout>
+
+<Callout type="definition" title="التكافؤ (Equivalence)">
+تكون الصيغتان $F$ و$G$ **متكافئتين**، ونكتب $F \equiv G$، إذا كان لهما قيمة الصدق نفسها في كل إسناد لقيم متغيراتهما. وهذا يعني بالضبط أن $F \leftrightarrow G$ صيغة صالحة.
+</Callout>
+
+بين الصلاحية وقابلية التحقق علاقة بسيطة ومهمة جدًا:
+
+<StepReveal
+  client:visible
+  title="برهان: φ صالحة ⟺ ¬φ غير قابلة للتحقق"
+  problem="أثبت أن الصيغة $\varphi$ صالحة إذا وفقط إذا كانت $\lnot\varphi$ غير قابلة للتحقق."
+  steps={[
+    { show: '$\\varphi$ صالحة $\\iff$ $\\varphi$ صادقة في كل الإسنادات', why: 'هذا تعريف الصلاحية.' },
+    { show: '$\\iff$ $\\lnot\\varphi$ كاذبة في كل الإسنادات', why: 'النفي يقلب القيمة في كل صف.' },
+    { show: '$\\iff$ لا يوجد إسناد يجعل $\\lnot\\varphi$ صادقة', why: 'إعادة صياغة للخطوة السابقة.' },
+    { show: '$\\iff$ $\\lnot\\varphi$ غير قابلة للتحقق', why: 'هذا تعريف عدم قابلية التحقق.' },
+  ]}
+  answer="النتيجة: أي خوارزمية تحدد قابلية التحقق تحدد الصلاحية أيضًا. نطبّقها على $\lnot\varphi$ ونعكس الجواب. هذا أول **اختزال** (reduction) في الرحلة، وستعود الفكرة في الدرس 5.3."
+/>
+
+### حل المشكلة الافتتاحية
+
+نبني جدولًا واحدًا فيه الصيغتان:
+
+<div class="table-scroll">
+<table class="nice tt">
+  <thead><tr><th>A</th><th>B</th><th>¬A ∧ B</th><th>A ∨ (¬A ∧ B)</th><th>A ∨ B</th></tr></thead>
+  <tbody>
+    <tr><td class="T">T</td><td class="T">T</td><td class="F">F</td><td class="T">T</td><td class="T">T</td></tr>
+    <tr><td class="T">T</td><td class="F">F</td><td class="F">F</td><td class="T">T</td><td class="T">T</td></tr>
+    <tr><td class="F">F</td><td class="T">T</td><td class="T">T</td><td class="T">T</td><td class="T">T</td></tr>
+    <tr><td class="F">F</td><td class="F">F</td><td class="F">F</td><td class="F">F</td><td class="F">F</td></tr>
+  </tbody>
+</table>
+</div>
+
+العمودان الأخيران متطابقان، فالصيغتان متكافئتان، واقتراح عمر **صحيح**. الجزء `x <= 0 &&` لا يضيف شيئًا: إذا وصل التنفيذ إلى الطرف الثاني من `||` فقد عرفنا أن `x > 0` كاذبة. وسنثبت التكافؤ نفسه بالجبر في القسم 6.
+
+جرّب أزواجًا أخرى من الصيغ في فاحص التكافؤ. إن لم تكن الصيغتان متكافئتين يظهر أول **مثال مضاد** (counterexample):
+
+<EquivChecker client:visible />
+
+### العكس والمعكوس والعكس النقيض
+
+من الاستلزام $P \rightarrow Q$ نشتق ثلاث صيغ قريبة منه:
+
+<div class="table-scroll">
+<table class="nice">
+  <thead><tr><th>الاسم</th><th>الصيغة</th><th>مكافئة لـ $P \rightarrow Q$؟</th></tr></thead>
+  <tbody>
+    <tr><td>العكس (converse)</td><td>$Q \rightarrow P$</td><td class="F">لا</td></tr>
+    <tr><td>المعكوس (inverse)</td><td>$\lnot P \rightarrow \lnot Q$</td><td class="F">لا (لكنه مكافئ للعكس)</td></tr>
+    <tr><td>العكس النقيض (contrapositive)</td><td>$\lnot Q \rightarrow \lnot P$</td><td class="T">نعم، دائمًا</td></tr>
+  </tbody>
+</table>
+</div>
+
+مثال: «إذا كان الشكل مربعًا فهو مستطيل» صادقة. عكسها «إذا كان الشكل مستطيلًا فهو مربع» كاذبة. أما عكسها النقيض «إذا لم يكن الشكل مستطيلًا فليس مربعًا» فصادقة، كالقضية الأصلية.
+
+تكافؤ الاستلزام وعكسه النقيض هو أساس **البرهان بالعكس النقيض** (proof by contrapositive) الذي ستستخدمه كثيرًا في الدرس 0.3. ومن أكثر الأخطاء شيوعًا في البراهين أن يُبرهن العكس بدل القضية نفسها.
+
+<QuickCheck
+  client:visible
+  id="q4"
+  question="تريد إثبات: «إذا كان $n^2$ فرديًا فإن $n$ فردي». أي العبارات التالية **يكفي** إثباتها بدلًا منها؟"
+  options={['إذا كان $n$ فرديًا فإن $n^2$ فردي.', 'إذا كان $n$ زوجيًا فإن $n^2$ زوجي.', 'إذا كان $n^2$ زوجيًا فإن $n$ زوجي.', 'لا شيء منها.']}
+  answer={1}
+  explain="العكس النقيض لـ $P \rightarrow Q$ هو $\lnot Q \rightarrow \lnot P$: «إذا لم يكن $n$ فرديًا فليس $n^2$ فرديًا»، أي «إذا كان $n$ زوجيًا فإن $n^2$ زوجي». وإثبات هذه سهل: $n = 2k$ يعطي $n^2 = 4k^2$."
+  wrong={{ 0: 'هذا **العكس** $Q \rightarrow P$، وليس مكافئًا للقضية الأصلية.', 2: 'هذا **المعكوس** $\lnot P \rightarrow \lnot Q$، وهو مكافئ للعكس لا للقضية الأصلية.' }}
+/>
+
+## <span class="sec">6</span>جبر القضايا
+
+جدول الصدق يثبت أي تكافؤ، لكنه يتضاعف مع كل متغير جديد. البديل هو التعامل مع الصيغ كما نتعامل مع المعادلات الجبرية: نحوّلها خطوة بخطوة بقوانين ثبتت صحتها مرة واحدة بجدول صدق صغير. استخدم $T$ للصيغة الصادقة دائمًا، و$F$ للكاذبة دائمًا:
+
+<div class="table-scroll">
+<table class="nice">
+  <thead><tr><th>القانون</th><th>بالوصل ∧</th><th>بالفصل ∨</th></tr></thead>
+  <tbody>
+    <tr><td>التبديل</td><td>$P \land Q \equiv Q \land P$</td><td>$P \lor Q \equiv Q \lor P$</td></tr>
+    <tr><td>التجميع</td><td>$(P \land Q) \land R \equiv P \land (Q \land R)$</td><td>$(P \lor Q) \lor R \equiv P \lor (Q \lor R)$</td></tr>
+    <tr><td>التوزيع</td><td>$P \land (Q \lor R) \equiv (P \land Q) \lor (P \land R)$</td><td>$P \lor (Q \land R) \equiv (P \lor Q) \land (P \lor R)$</td></tr>
+    <tr><td>De Morgan</td><td>$\lnot(P \land Q) \equiv \lnot P \lor \lnot Q$</td><td>$\lnot(P \lor Q) \equiv \lnot P \land \lnot Q$</td></tr>
+    <tr><td>العنصر المحايد</td><td>$P \land T \equiv P$</td><td>$P \lor F \equiv P$</td></tr>
+    <tr><td>العنصر الماحي</td><td>$P \land F \equiv F$</td><td>$P \lor T \equiv T$</td></tr>
+    <tr><td>المتمِّم</td><td>$P \land \lnot P \equiv F$</td><td>$P \lor \lnot P \equiv T$</td></tr>
+    <tr><td>الجمود (idempotence)</td><td>$P \land P \equiv P$</td><td>$P \lor P \equiv P$</td></tr>
+    <tr><td>الامتصاص</td><td>$P \land (P \lor Q) \equiv P$</td><td>$P \lor (P \land Q) \equiv P$</td></tr>
+  </tbody>
+</table>
+</div>
+
+ومعها ثلاثة قوانين لا تُذكر في كل كتاب:
+
+$$
+\lnot\lnot P \equiv P \qquad\qquad P \rightarrow Q \equiv \lnot P \lor Q \qquad\qquad P \leftrightarrow Q \equiv (P \rightarrow Q) \land (Q \rightarrow P)
+$$
+
+لاحظ قانون التوزيع الثاني: الفصل يتوزع على الوصل. هذا لا يحدث في الحساب، فالجمع لا يتوزع على الضرب: $a + bc \ne (a+b)(a+c)$.
+
+<StepReveal
+  client:visible
+  title="حل المشكلة الافتتاحية بالجبر"
+  problem="أثبت أن $A \lor (\lnot A \land B) \equiv A \lor B$ دون جدول صدق."
+  steps={[
+    { show: '$A \\lor (\\lnot A \\land B) \\equiv (A \\lor \\lnot A) \\land (A \\lor B)$', why: 'نوزّع $\\lor$ على $\\land$.' },
+    { show: '$\\equiv T \\land (A \\lor B)$', why: 'قانون المتمِّم: $A \\lor \\lnot A \\equiv T$.' },
+    { show: '$\\equiv A \\lor B$', why: 'العنصر المحايد للوصل، بعد التبديل: $T \\land X \\equiv X$.' },
+  ]}
+  answer="ثلاث خطوات تكفي، وهذا البرهان يصلح لأي صيغتين $A$ و$B$ مهما كانتا معقدتين."
+/>
+
+<StepReveal
+  client:visible
+  title="نفي الاستلزام"
+  problem="بسّط $\lnot(P \rightarrow Q)$."
+  steps={[
+    { show: '$\\lnot(P \\rightarrow Q) \\equiv \\lnot(\\lnot P \\lor Q)$', why: 'نكتب الاستلزام كفصل.' },
+    { show: '$\\equiv \\lnot\\lnot P \\land \\lnot Q$', why: 'De Morgan.' },
+    { show: '$\\equiv P \\land \\lnot Q$', why: 'النفي المزدوج.' },
+  ]}
+  answer="نفي «إذا P فإن Q» هو «P **و** ليس Q»، وليس «إذا P فإن ليس Q». تحتاج هذا كلما أردت أن تبرهن بالتناقض أن استلزامًا ما صادق."
+/>
+
+### الصيغ القياسية: كل صيغة تُكتب بـ ¬ و∧ و∨
+
+اقرأ صفوف جدول الصدق التي تكون فيها الصيغة صادقة، واكتب لكل صف منها وصلًا يصفه، ثم اربط هذه الوصلات بالفصل. مثال ذلك الفصل الحصري:
+
+$$
+P \oplus Q \;\equiv\; \underbrace{(P \land \lnot Q)}_{\text{T,F}} \;\lor\; \underbrace{(\lnot P \land Q)}_{\text{F,T}}
+$$
+
+هذه **الصيغة الفصلية القياسية** (DNF): فصل من وصلات. وتنجح الطريقة مع أي صيغة، فنحصل على مبرهنة:
+
+<Callout type="theorem" title="مبرهنة الصيغ القياسية">
+كل صيغة قضوية تكافئ صيغة فصلية قياسية (DNF)، وتكافئ أيضًا صيغة وصلية قياسية (CNF)، أي وصلًا من فصول. نبني الثانية من الصفوف **الكاذبة**: لكل صف كاذب نكتب فصلًا يمنعه.
+
+**النتيجة:** الروابط الثلاثة $\{\lnot, \land, \lor\}$ تكفي للتعبير عن أي دالة صدق. وتسمى مجموعة الروابط التي لها هذه الخاصية **تامة وظيفيًا** (functionally complete).
+</Callout>
+
+صيغة CNF ليست موضوعًا نظريًا فقط. برامج حل SAT تقبل الصيغة على هذا الشكل، وفي الدرس 5.4 سنعرف أن مسألة 3-SAT، وهي SAT على صيغ CNF في كل فصل منها 3 متغيرات، هي أشهر مسائل NP-Complete.
+
+## <span class="sec">7</span>المحاكاة: خوارزمية جدول الصدق
+
+هذه أول خوارزمية في الرحلة. اكتب أي صيغة، ثم شغّل الخوارزمية وراقبها وهي تملأ الجدول خانة بعد خانة. السطر الذي يُنفَّذ الآن مظلل في الـ pseudocode، والخانة التي تُحسب الآن محاطة بالبرتقالي، والخانتان اللتان تعتمد عليهما محاطتان بالأزرق.
+
+<TruthTableLab client:visible initial="(P -> Q) <-> (!Q -> !P)" />
+
+جرّب الصيغة $(P \rightarrow Q) \land (Q \rightarrow R) \rightarrow (P \rightarrow R)$، وهي **قانون التعدّي** (transitivity)، وراقب عداد العمليات. ثم أضف متغيرًا رابعًا لترى كيف يتضاعف الجدول.
+
+## <span class="sec">8</span>الصحة والتحليل
+
+### لماذا تعمل الخوارزمية؟
+
+قيمة الصيغة تعتمد على قيم متغيراتها فقط، وهذا واضح من طريقة تعريفها: كل رابط يحسب قيمته من قيم أجزائه، وأبسط الأجزاء هي المتغيرات. وعدد الإسنادات الممكنة محدود، فهو $2^n$. والخوارزمية تمر على **كل** هذه الإسنادات، فلن يفوتها صف يغيّر الحكم. يمكن صياغة ذلك بدقة أكبر:
+
+<Callout type="theorem" title="ثابت الحلقة (Loop invariant)">
+بعد أن تنتهي الحلقة الخارجية من $k$ صفوف، تكون السجلات المحفوظة هي قيم $\varphi$ عند أول $k$ إسنادات بالضبط.
+
+عند $k = 2^n$ تكون كل القيم أمامنا، فيكون الحكم صحيحًا بالتعريف. سنتعلم في الدرس 1.2 كيف نكتب برهانًا كاملًا بهذه الطريقة لأي حلقة.
+</Callout>
+
+### كم تكلّف الخوارزمية؟
+
+لنفرض أن في الصيغة $n$ متغيرات و$m$ روابط. في كل صف نحسب $m$ صيغة جزئية، وكل حساب منها عملية واحدة بسيطة. والصفوف $2^n$، فالزمن الكلي يتناسب مع:
+
+$$
+m \cdot 2^n
+$$
+
+بلغة الدرس 1.4، هذا $\Theta(m \cdot 2^n)$. الحد $m$ يشبه زمن الخوارزميات العادية. أما الحد $2^n$ فهو المشكلة. لنفرض أن حاسوبك يحسب مليار صف ($10^9$) في الثانية:
+
+<div class="table-scroll">
+<table class="nice center">
+  <thead><tr><th>المتغيرات $n$</th><th>الصفوف $2^n$</th><th>الزمن بمعدل $10^9$ صف/ثانية</th></tr></thead>
+  <tbody>
+    <tr><td>10</td><td>$\approx 10^3$</td><td>جزء من مليون من الثانية</td></tr>
+    <tr><td>30</td><td>$\approx 1.07 \times 10^9$</td><td>نحو ثانية</td></tr>
+    <tr><td>50</td><td>$\approx 1.13 \times 10^{15}$</td><td>نحو 13 يومًا</td></tr>
+    <tr><td>60</td><td>$\approx 1.15 \times 10^{18}$</td><td>نحو 36 سنة</td></tr>
+    <tr><td>100</td><td>$\approx 1.27 \times 10^{30}$</td><td>نحو $4 \times 10^{13}$ سنة، أي آلاف أضعاف عمر الكون</td></tr>
+  </tbody>
+</table>
+</div>
+
+والشروط في الأنظمة الحقيقية كثيرًا ما تحوي مئات المتغيرات، بل آلافها، ومثال ذلك التحقق من تصميم معالج. فإضافة متغير واحد **تضاعف** الزمن، وتضاعف حاسوب أسرع لا يمنحك إلا متغيرًا واحدًا إضافيًا.
+
+<Callout type="tip" title="مسألة SAT ومسألة P مقابل NP">
+السؤال «هل هذه الصيغة قابلة للتحقق؟» يسمى **مسألة SAT**. التحقق من **حل مقترح** سهل وسريع: نعوّض الإسناد المقترح ونحسب، والزمن يتناسب مع $m$. أما **إيجاد** حل فلا يعرف أحد خوارزمية تقوم به في زمن كثير الحدود في أسوأ الحالات. وإن وُجدت هذه الخوارزمية فستنحل معها آلاف المسائل الأخرى، وهذا هو سؤال **P مقابل NP**. يرصد له معهد Clay جائزة قدرها مليون دولار، وفي كتاب MIT قسم كامل عنه (3.5). سنعود إلى المسألة في الدرسين 5.2 و5.4.
+
+ومع ذلك، تحل برامج SAT الحديثة كثيرًا من الصيغ العملية ذات ملايين المتغيرات بحيل ذكية في البحث والتقليم. وسترى فكرة قريبة من هذه الحيل في الدرس 3.12.
+</Callout>
+
+## <span class="sec">9</span>التمارين
+
+**تمارين التطبيق** تتحقق من فهمك المباشر، و**المسائل الجامعية** تشبه مسائل الواجبات في MIT 6.042J وكتاب Book of Proof. حاول في كل مسألة 10 دقائق على الأقل قبل أن تفتح التلميح.
+
+<Exercise id="e1" level="apply" title="الترجمة إلى صيغ" source="Book of Proof، تمارين القسمين 2.2–2.3">
+
+ليكن $P$: «الجو ممطر»، و$Q$: «أحمل مظلة»، و$R$: «أتأخر». اكتب صيغة لكل جملة:
+
+1. إذا كان الجو ممطرًا ولم أحمل مظلة فسأتأخر.
+2. لا أتأخر إلا إذا كان الجو ممطرًا.
+3. أحمل مظلة إذا وفقط إذا كان الجو ممطرًا.
+4. إما أن يكون الجو ممطرًا وإما أن أحمل مظلة، ولا يجتمع الأمران.
+5. حمل المظلة شرط كافٍ لعدم التأخر.
+
+<div slot="hint">في الجملة 2 تذكّر أن «لا P إلا إذا Q» تعني $P \rightarrow Q$. حدّد ما هو P وما هو Q في الجملة.</div>
+<div slot="solution">
+
+1. $(P \land \lnot Q) \rightarrow R$
+2. $R \rightarrow P$. التأخر لا يحدث إلا مع المطر.
+3. $Q \leftrightarrow P$
+4. $P \oplus Q$
+5. $Q \rightarrow \lnot R$
+
+</div>
+</Exercise>
+
+<Exercise id="e2" level="apply" title="تصنيف الصيغ" source="MIT MCS، تمارين القسم 3.3">
+
+صنّف كل صيغة: صالحة، أم قابلة للتحقق دون أن تكون صالحة، أم غير قابلة للتحقق. ثم تحقق من إجابتك في المحاكاة.
+
+1. $(P \rightarrow Q) \lor (Q \rightarrow P)$
+2. $(P \land Q) \rightarrow (P \lor Q)$
+3. $(P \lor Q) \land (\lnot P \lor R) \land \lnot Q \land \lnot R$
+4. $P \rightarrow (Q \rightarrow P)$
+5. $(P \rightarrow Q) \rightarrow (Q \rightarrow P)$
+
+<div slot="hint">ابحث عن صف واحد يجعل الصيغة كاذبة. إن لم يوجد مثل هذا الصف فالصيغة صالحة. في الصيغة 3، ابدأ بما يفرضه $\lnot Q$ و$\lnot R$ على قيمتي $Q$ و$R$.</div>
+<div slot="solution">
+
+1. **صالحة.** لكي تكذب الصيغة يجب أن يكذب الاستلزامان معًا. كذب الأول يعني $P = T, Q = F$، وكذب الثاني يعني $Q = T, P = F$، ولا يمكن أن يتحقق الأمران معًا. النتيجة مفاجئة: لأي قضيتين، إحداهما تستلزم الأخرى!
+2. **صالحة.** إذا صدق المقدَّم فالقضيتان صادقتان، فالفصل صادق.
+3. **غير قابلة للتحقق.** $\lnot Q$ و$\lnot R$ تفرضان $Q = F$ و$R = F$. فيصبح $P \lor Q$ هو $P$، فيجب أن تكون $P = T$. ويصبح $\lnot P \lor R$ هو $\lnot P$، فيجب أن تكون $P = F$. وهذا تناقض.
+4. **صالحة.** إذا صدقت $P$ فالتالي $Q \rightarrow P$ صادق لأن تاليه $P$ صادق.
+5. **قابلة للتحقق، وليست صالحة.** تكذب عند $P = F, Q = T$. هذا هو الخلط بين الاستلزام وعكسه.
+
+</div>
+</Exercise>
+
+<Exercise id="e3" level="apply" title="العكس والعكس النقيض">
+
+للقضية: «إذا كان $n$ عددًا زوجيًا فإن $n^2$ زوجي»:
+
+1. اكتب عكسها، ومعكوسها، وعكسها النقيض.
+2. ما الصادق منها؟ وأيها مكافئ للقضية الأصلية بغض النظر عن معناها؟
+
+<div slot="solution">
+
+1. العكس: «إذا كان $n^2$ زوجيًا فإن $n$ زوجي». المعكوس: «إذا كان $n$ فرديًا فإن $n^2$ فردي». العكس النقيض: «إذا كان $n^2$ فرديًا فإن $n$ فردي».
+2. القضايا الأربع كلها صادقة في هذا المثال بالتحديد. لكن المكافئ للأصل **منطقيًا**، أي في كل مثال، هو العكس النقيض وحده. صدق العكس هنا حقيقة خاصة بالأعداد، تحتاج برهانًا مستقلًا، ولا تأتي من المنطق.
+
+</div>
+</Exercise>
+
+<Exercise id="e4" level="apply" title="تبسيط شرط في الكود" source="MIT MCS، القسم 3.2">
+
+بسّط هذا الشرط إلى أقصر شكل ممكن، واذكر القانون الذي استخدمته في كل خطوة:
+
+```js
+if (!(a && !b) || (a && b)) { ... }
+```
+
+<div slot="hint">اكتبه أولًا بالرموز: $\lnot(a \land \lnot b) \lor (a \land b)$. ابدأ بقانون De Morgan، ثم ابحث عن فرصة لقانون الامتصاص.</div>
+<div slot="solution">
+
+- $\lnot(a \land \lnot b) \lor (a \land b)$
+- $\equiv (\lnot a \lor b) \lor (a \land b)$، بقانون De Morgan والنفي المزدوج.
+- $\equiv \lnot a \lor \big(b \lor (b \land a)\big)$، بالتجميع والتبديل.
+- $\equiv \lnot a \lor b$، بالامتصاص.
+
+النتيجة: `if (!a || b)`، أي $a \rightarrow b$.
+
+</div>
+</Exercise>
+
+<Exercise id="e5" level="prove" title="توزيع الاستلزام" source="Book of Proof، تمارين القسم 2.6">
+
+أثبت **بالجبر** (دون جدول صدق) أن:
+
+$$
+(P \rightarrow Q) \land (P \rightarrow R) \;\equiv\; P \rightarrow (Q \land R)
+$$
+
+ثم بيّن بمثال مضاد أن $(P \rightarrow R) \land (Q \rightarrow R)$ **لا** يكافئ $(P \land Q) \rightarrow R$. وما الذي يكافئه؟
+
+<div slot="solution">
+
+**الجزء الأول:**
+- $(P \rightarrow Q) \land (P \rightarrow R) \equiv (\lnot P \lor Q) \land (\lnot P \lor R)$، بكتابة الاستلزام كفصل.
+- $\equiv \lnot P \lor (Q \land R)$، بالتوزيع (عكس اتجاهه).
+- $\equiv P \rightarrow (Q \land R)$.
+
+**الجزء الثاني:** عند $P = T, Q = F, R = F$ يكون الطرف الأيسر $F \land T = F$، والطرف الأيمن $F \rightarrow F = T$، فهما مختلفان. وبالطريقة نفسها: $(\lnot P \lor R) \land (\lnot Q \lor R) \equiv (\lnot P \land \lnot Q) \lor R \equiv \lnot(P \lor Q) \lor R \equiv (P \lor Q) \rightarrow R$. إذن الصيغة الصحيحة هي **الفصل** في المقدَّم، لا الوصل.
+
+</div>
+</Exercise>
+
+<Exercise id="e6" level="prove" title="التمام الوظيفي و NAND" source="MIT MCS، مسائل الفصل 3">
+
+1. اكتب $P \lor Q$ و$P \rightarrow Q$ و$P \leftrightarrow Q$ باستخدام $\lnot$ و$\land$ فقط. هذا يثبت أن $\{\lnot, \land\}$ تامة وظيفيًا.
+2. الرابط NAND معرَّف هكذا: $P \uparrow Q \equiv \lnot(P \land Q)$. اكتب $\lnot P$ ثم $P \land Q$ باستخدام $\uparrow$ وحده، واستنتج أن NAND وحده تام وظيفيًا.
+3. لماذا تهمّ هذه النتيجة مصمّمي المعالجات؟
+
+<div slot="hint">في الجزء 2: ما قيمة $P \uparrow P$؟</div>
+<div slot="solution">
+
+1. $P \lor Q \equiv \lnot(\lnot P \land \lnot Q)$، بقانون De Morgan. و$P \rightarrow Q \equiv \lnot P \lor Q \equiv \lnot(P \land \lnot Q)$. و$P \leftrightarrow Q \equiv \lnot(P \land \lnot Q) \land \lnot(Q \land \lnot P)$.
+2. $P \uparrow P \equiv \lnot(P \land P) \equiv \lnot P$. و$(P \uparrow Q) \uparrow (P \uparrow Q) \equiv \lnot(P \uparrow Q) \equiv P \land Q$. وبما أن $\{\lnot, \land\}$ تامة وظيفيًا، وكلا الرابطين يُكتب بـ NAND، فإن NAND وحده تام وظيفيًا.
+3. يكفي أن تصنع نوعًا واحدًا من البوابات المنطقية لتبني أي دائرة مهما كانت. ولهذا تُبنى المعالجات وذاكرة الفلاش من بوابات NAND.
+
+</div>
+</Exercise>
+
+<Exercise id="e7" level="prove" title="كم دالة صدق يوجد؟">
+
+**دالة الصدق** بـ $n$ متغيرات تُسند قيمة T أو F لكل صف من الصفوف الـ $2^n$. نعتبر صيغتين متماثلتين إذا كان لهما جدول الصدق نفسه.
+
+1. أثبت أن عدد دوال الصدق المختلفة بـ $n$ متغيرات هو $2^{2^n}$.
+2. كم دالة صدق بمتغيرين؟ وأين الروابط الثنائية التي درستها بينها؟
+3. استنتج من مبرهنة الصيغ القياسية أن عدد الصيغ **غير المتكافئة** بـ $n$ متغيرات محدود، رغم أن عدد الصيغ نفسها غير محدود.
+
+<div slot="solution">
+
+1. دالة الصدق تتحدد كاملة باختيار قيمة لكل صف من الصفوف الـ $2^n$، ولكل صف خياران. فبمبدأ الضرب يكون العدد $2 \cdot 2 \cdots 2$ ($2^n$ مرة)، أي $2^{2^n}$.
+2. $2^{4} = 16$ دالة. منها $\land$ و$\lor$ و$\oplus$ و$\rightarrow$ و$\leftrightarrow$ وNAND وNOR. ومنها دوال «تافهة» مثل الدالة الصادقة دائمًا، والدالة التي تساوي $P$ فقط.
+3. كل صيغة تكافئ إحدى هذه الدوال الـ $2^{2^n}$، ومبرهنة الصيغ القياسية تضمن أن كل دالة منها لها صيغة. فعدد فئات التكافؤ هو $2^{2^n}$ بالضبط. أما عدد الصيغ نفسها فغير محدود، لأننا نستطيع دائمًا أن نكتب $P \land P \land P \land \cdots$ بأي طول.
+
+</div>
+</Exercise>
+
+<Exercise id="e8" level="prove" title="الفرسان والمحتالون" source="لغز كلاسيكي لـ Raymond Smullyan">
+
+في جزيرة نوعان من الناس: **الفرسان** يقولون الصدق دائمًا، و**المحتالون** يكذبون دائمًا. قابلت شخصين، A وB:
+
+- قال A: «B محتال».
+- قال B: «A وأنا من النوع نفسه».
+
+ما نوع كل منهما؟ حوّل اللغز إلى صيغة واحدة، ثم حلّه بجدول صدق. وستحله بالكود في المختبر أيضًا.
+
+<div slot="hint">ليكن $a$: «A فارس»، و$b$: «B فارس». الشخص فارس **إذا وفقط إذا** كان كلامه صادقًا. فقول A يعطي $a \leftrightarrow \lnot b$. اكتب قول B بالطريقة نفسها.</div>
+<div slot="solution">
+
+الصيغة: $(a \leftrightarrow \lnot b) \land \big(b \leftrightarrow (a \leftrightarrow b)\big)$.
+
+نجرّب الصفوف الأربعة:
+- $a = T, b = T$: الجزء الأول $T \leftrightarrow F = F$. ✗
+- $a = T, b = F$: الجزء الأول $T \leftrightarrow T = T$. والجزء الثاني $F \leftrightarrow (T \leftrightarrow F) = F \leftrightarrow F = T$. ✓
+- $a = F, b = T$: الجزء الثاني $T \leftrightarrow (F \leftrightarrow T) = T \leftrightarrow F = F$. ✗
+- $a = F, b = F$: الجزء الأول $F \leftrightarrow T = F$. ✗
+
+الحل وحيد: **A فارس وB محتال**. ملاحظة: الصيغة $b \leftrightarrow (a \leftrightarrow b)$ تكافئ $a$ وحدها. أثبت ذلك بنفسك.
+
+</div>
+</Exercise>
+
+## <span class="sec">10</span>المختبر البرمجي
+
+ستكتب الآن نسختك من خوارزمية جدول الصدق. نمثّل الصيغة بدالة JavaScript تأخذ قيمة كل متغير وتعيد `true` أو `false`. فالصيغة $P \rightarrow Q$ تُكتب `(P, Q) => !P || Q`. وعدد المتغيرات هو عدد معاملات الدالة، ويعطيه `f.length`.
+
+بعد أن تنجح كل الاختبارات يقيس المختبر زمن `isValid` لصيغ فيها 10 متغيرات ثم 12 ثم 14 وهكذا. **توقّع قبل التشغيل**: إذا زاد عدد المتغيرات 2، فبكم يُضرب الزمن؟
+
+<CodeLab
+  client:visible
+  id="0.1-truth-table"
+  title="خوارزمية جدول الصدق ومسألة SAT"
+  exports={['allAssignments', 'isValid', 'findSatisfying', 'equivalent']}
+  starter={lab.starter}
+  tests={[
+    { name: 'allAssignments(0) = [[]]', code: "JSON.stringify(allAssignments(0)) === '[[]]'" },
+    { name: 'allAssignments(2) بالترتيب الصحيح', code: "JSON.stringify(allAssignments(2)) === '[[true,true],[true,false],[false,true],[false,false]]'" },
+    { name: 'allAssignments(3): ثمانية صفوف، أولها كله T وآخرها كله F', code: "(() => { const r = allAssignments(3); return r.length === 8 && r[0].every(x => x === true) && r[7].every(x => x === false) && new Set(r.map(a => a.join())).size === 8; })()" },
+    { name: 'P ∨ ¬P صالحة', code: 'isValid((P) => P || !P) === true' },
+    { name: 'P → Q ليست صالحة', code: 'isValid((P, Q) => !P || Q) === false' },
+    { name: 'قانون التعدّي صالح (3 متغيرات)', code: 'isValid((P, Q, R) => !((!P || Q) && (!Q || R)) || (!P || R)) === true' },
+    { name: 'findSatisfying(P ∧ ¬Q) = [true, false]', code: "JSON.stringify(findSatisfying((P, Q) => P && !Q)) === '[true,false]'" },
+    { name: 'P ∧ ¬P غير قابلة للتحقق', code: 'findSatisfying((P) => P && !P) === null' },
+    { name: 'تمرين 2.3 غير قابل للتحقق', code: 'findSatisfying((P, Q, R) => (P || Q) && (!P || R) && !Q && !R) === null' },
+    { name: 'De Morgan: ¬(P ∧ Q) ≡ ¬P ∨ ¬Q', code: 'equivalent((P, Q) => !(P && Q), (P, Q) => !P || !Q) === true' },
+    { name: 'الاستلزام لا يكافئ عكسه', code: 'equivalent((P, Q) => !P || Q, (P, Q) => !Q || P) === false' },
+    { name: 'لغز الفرسان والمحتالين: A فارس وB محتال', code: "JSON.stringify(findSatisfying((a, b) => (a === !b) && (b === (a === b)))) === '[true,false]'" },
+  ]}
+  bench={{
+    title: 'زمن isValid على صيغة صالحة بـ n متغيرات',
+    fn: 'isValid',
+    make: "new Function(...Array.from({ length: n }, (_, i) => 'x' + i), 'return true')",
+    ns: [10, 12, 14, 16, 18],
+  }}
+  solution={lab.solution}
+/>
+
+<Callout type="tip" title="بعد التشغيل: اقرأ الرسم">
+كل زيادة بمقدار 2 في عدد المتغيرات تضرب الزمن في 4 تقريبًا، لأن $2^{n+2} = 4 \cdot 2^n$. قد تختلف الأرقام الصغيرة بسبب ضجيج القياس، لكن الاتجاه واضح. هذه أول مرة ترى فيها **النمو الأسي** في قياس حقيقي. وفي الدرس 1.4 سنتعلم لغة دقيقة نصف بها هذا النمو.
+
+**تحدٍّ إضافي:** الحل النموذجي يبني **كل** الإسنادات في الذاكرة قبل أن يفحصها. أعد كتابة `findSatisfying` بحيث تتوقف عند أول إسناد يحقق الصيغة، دون أن تبني المصفوفة كلها. استخدم generator أو حلقة على الأعداد من $0$ إلى $2^n - 1$ وبتاتها. كم تصبح الذاكرة المستخدمة؟
+</Callout>
+
+## <span class="sec">11</span>الخلاصة
+
+- **القضية** جملة لها قيمة صدق واحدة: T أو F.
+- للروابط الستة جداول صدق تعرّفها. أكثرها خداعًا **الاستلزام**: لا يكذب $P \rightarrow Q$ إلا إذا كانت $P$ صادقة و$Q$ كاذبة.
+- «P فقط إذا Q» تعني $P \rightarrow Q$. والاستلزام **يكافئ عكسه النقيض**، ولا يكافئ **عكسه**.
+- تكون الصيغة **صالحة** أو **قابلة للتحقق** أو **غير قابلة للتحقق**. والصيغة $\varphi$ صالحة إذا وفقط إذا كانت $\lnot\varphi$ غير قابلة للتحقق.
+- نثبت التكافؤ بجدول الصدق أو بقوانين **جبر القضايا**. والروابط $\{\lnot, \land, \lor\}$، أو NAND وحده، تكفي لكتابة أي دالة صدق.
+- خوارزمية جدول الصدق صحيحة لأنها تفحص كل الإسنادات، وزمنها $\Theta(m \cdot 2^n)$. لا يُعرف حتى اليوم ما إذا كانت مسألة SAT قابلة للحل في زمن كثير الحدود، وهذا هو سؤال **P مقابل NP**.
+
+**الدرس التالي:** في 0.2 نضيف إلى اللغة المتغيرات التي تأخذ قيمًا من مجموعات لا نهائية، والمسوِّرين $\forall$ و$\exists$. عندها لن تكفي جداول الصدق، وسنحتاج إلى البراهين.

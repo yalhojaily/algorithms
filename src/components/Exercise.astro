@@ -1,0 +1,38 @@
+---
+import ExerciseDone from './ExerciseDone.tsx';
+
+interface Props {
+  /** Unique within the lesson, e.g. "e1". */
+  id: string;
+  /** "apply" = تمرين تطبيق, "prove" = مسألة جامعية. */
+  level: 'apply' | 'prove';
+  title: string;
+  /** Where the problem comes from or what it is modelled on. */
+  source?: string;
+}
+const { id, level, title, source } = Astro.props;
+const hasHint = Astro.slots.has('hint');
+const hasSolution = Astro.slots.has('solution');
+---
+<section class={`ex card ex-${level}`} id={`ex-${id}`}>
+  <header class="ex-head">
+    <span class="ex-num">{id.replace(/^e/, '')}</span>
+    <span class={`ex-level ${level}`}>{level === 'apply' ? 'تطبيق' : 'مسألة جامعية'}</span>
+    <span class="ex-title">{title}</span>
+    <ExerciseDone client:visible id={id} />
+  </header>
+  <div class="ex-body"><slot /></div>
+  {source && <div class="ex-source">مبنية على: <span class="ltr">{source}</span></div>}
+  {hasHint && (
+    <details class="ex-hint">
+      <summary>💡 تلميح</summary>
+      <div><slot name="hint" /></div>
+    </details>
+  )}
+  {hasSolution && (
+    <details class="ex-solution">
+      <summary>✓ الحل الكامل</summary>
+      <div><slot name="solution" /></div>
+    </details>
+  )}
+</section>

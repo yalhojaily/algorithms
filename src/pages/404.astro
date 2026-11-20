@@ -1,0 +1,11 @@
+---
+import Base from '../layouts/Base.astro';
+const base = import.meta.env.BASE_URL;
+---
+<Base title="الصفحة غير موجودة · الخوارزميات">
+  <div class="container" style="padding-top: 60px; text-align: center;">
+    <h1>404</h1>
+    <p>هذه الصفحة غير موجودة، أو أن الدرس لم يُكتب بعد.</p>
+    <a class="btn btn-primary" href={base}>العودة إلى خريطة الرحلة</a>
+  </div>
+</Base>
