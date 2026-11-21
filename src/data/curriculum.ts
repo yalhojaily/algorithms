@@ -74,7 +74,7 @@ export const curriculum: Phase[] = [
     [refs.mcs, refs.bop, refs.ocw6042],
     [
       ['0.1', 'المنطق القضوي', 'Propositional Logic', 1, { prereqs: [], lab: true }],
-      ['0.2', 'المُسوِّرات', 'Quantifiers', 1],
+      ['0.2', 'المُسوِّرات', 'Quantifiers', 1, { lab: true }],
       ['0.3', 'أساليب البرهان', 'Proof Techniques', 1],
       ['0.4', 'المجموعات', 'Sets', 1],
       ['0.5', 'العلاقات والدوال', 'Relations and Functions', 2],
