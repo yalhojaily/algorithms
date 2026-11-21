@@ -586,3 +586,84 @@ table.rel-grid { border-collapse: separate; border-spacing: 4px; margin: 0 auto;
 .cx-stat-v { font-family: inherit; }
 .cx-stat-v b { font-family: var(--font-mono); }
 .cx-mark, .cx-mk { pointer-events: none; }
+
+/* ---------- Call stack and call tree (lesson 1.6) ---------- */
+.rt-stack { border: 1px solid var(--line); border-radius: 12px; background: var(--paper); padding: 8px; display: flex; flex-direction: column; gap: 4px; min-height: 120px; }
+.rt-stack-h { font-size: 0.8rem; color: var(--ink-3); margin-bottom: 2px; }
+.rt-empty { font-size: 0.88rem; color: var(--ink-2); padding: 6px; }
+.rt-frame { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 5px 10px; border-radius: 8px; background: var(--card); border: 1px solid var(--line); font-family: var(--font-mono); font-size: 0.85rem; }
+.rt-frame i { font-style: normal; font-size: 0.72rem; color: var(--ink-3); }
+.rt-frame.top { background: var(--brand-soft); border-color: var(--brand); }
+.rt-tree { overflow-x: auto; margin: 12px 0 6px; border: 1px solid var(--line); border-radius: 12px; background: var(--paper); padding: 6px; }
+.rt-tree svg { display: block; margin: 0 auto; }
+.rt-edge { stroke: var(--line); stroke-width: 1.6; }
+.rt-node rect { fill: var(--card); stroke: var(--line); stroke-width: 1.4; }
+.rt-node text { font-family: var(--font-mono); font-size: 11.5px; fill: var(--ink-2); }
+.rt-node.wait rect { stroke: var(--brand); stroke-width: 2; fill: var(--paper); }
+.rt-node.active rect { fill: var(--brand); stroke: var(--brand); }
+.rt-node.active text { fill: var(--paper); }
+.rt-node.done rect { fill: var(--green-soft); stroke: var(--green); }
+.rt-node text.rt-val { fill: var(--green); font-weight: 700; font-size: 10.5px; }
+
+/* ---------- Recursion-tree levels (lesson 1.7) ---------- */
+.rx-pick { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 10px; }
+.rx-pick .tt-preset { direction: ltr; }
+.rx-levels { border: 1px solid var(--line); border-radius: 12px; background: var(--paper); padding: 8px 10px; overflow-x: auto; font-family: var(--font-mono); font-size: 0.8rem; }
+.rx-row { display: grid; grid-template-columns: 34px minmax(150px, 1.4fr) minmax(80px, 1fr) minmax(130px, auto); gap: 10px; align-items: center; padding: 4px 0; border-bottom: 1px dashed var(--line); min-width: 430px; }
+.rx-row:last-child { border-bottom: 0; }
+.rx-head { color: var(--ink-3); font-size: 0.72rem; text-transform: uppercase; letter-spacing: .04em; }
+.rx-d { color: var(--ink-3); text-align: center; }
+.rx-boxes { display: flex; flex-wrap: wrap; gap: 3px; align-items: center; }
+.rx-boxes i { min-width: 18px; height: 18px; padding: 0 3px; border-radius: 4px; background: var(--brand-soft); border: 1px solid var(--brand); font-style: normal; font-size: 0.66rem; display: inline-flex; align-items: center; justify-content: center; color: var(--brand); }
+.rx-boxes em { font-style: normal; color: var(--ink-3); font-size: 0.72rem; margin-left: 4px; }
+.rx-bar { height: 10px; background: var(--card); border-radius: 5px; overflow: hidden; }
+.rx-bar b { display: block; height: 100%; background: var(--amber); border-radius: 5px; }
+.rx-t { text-align: right; color: var(--ink-2); }
+.rx-t b, .rx-sum b { color: var(--ink); }
+.rx-gap { color: var(--ink-3); }
+.rx-sum { border-top: 2px solid var(--line); margin-top: 2px; padding-top: 6px; }
+.rx-check { margin-top: 10px; display: flex; flex-direction: column; gap: 4px; font-size: 0.92rem; }
+
+/* ---------- Master theorem lab (lesson 1.8) ---------- */
+.ml-eq { font-size: 1.25rem; text-align: center; margin: 8px 0 12px; }
+.ml-k { flex-direction: row !important; align-items: center; gap: 8px !important; grid-column: 1 / -1; }
+.ml-line { position: relative; height: 58px; margin: 6px 12px 10px; }
+.ml-track { position: absolute; left: 0; right: 0; top: 34px; height: 3px; background: var(--line); border-radius: 2px; }
+.ml-pin { position: absolute; top: 26px; width: 0; }
+.ml-pin::before { content: ''; position: absolute; left: -8px; top: 0; width: 16px; height: 16px; border-radius: 50%; border: 3px solid var(--paper); }
+.ml-pin.crit::before { background: var(--blue); }
+.ml-pin.d::before { background: var(--brand); }
+.ml-pin span { position: absolute; left: 0; white-space: nowrap; transform: translateX(-50%); font-size: 0.82rem; font-family: var(--font-mono); font-weight: 600; }
+.ml-pin.crit span { top: -24px; color: var(--blue); }
+.ml-pin.d span { top: 18px; color: var(--brand); }
+.ml-cases { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 8px; margin: 18px 0 8px; }
+.ml-case { border: 1px solid var(--line); border-radius: 12px; padding: 8px 10px; background: var(--paper); opacity: 0.55; font-size: 0.88rem; display: flex; flex-direction: column; gap: 4px; }
+.ml-case.on { opacity: 1; border: 2px solid var(--brand); background: var(--brand-soft); }
+.ml-answer { font-size: 1.05rem; font-weight: 600; margin: 8px 0 12px; }
+.ml-levels { margin: 6px 0 12px; }
+.ml-table td, .ml-table th { text-align: center; font-family: var(--font-mono); font-size: 0.82rem; white-space: nowrap; }
+
+/* ---------- Merge sort (lesson 1.9) ---------- */
+.msv-tree { display: flex; flex-direction: column; gap: 3px; margin: 10px 0; }
+.msv-level { display: grid; gap: 3px; }
+.msv-level span { height: 18px; border-radius: 5px; border: 1px solid var(--line); background: var(--paper); font-family: var(--font-mono); font-size: 0.66rem; color: var(--ink-3); display: flex; align-items: center; justify-content: center; }
+.msv-level span.ok { background: var(--green-soft); border-color: var(--green); color: var(--green); }
+.msv-level span.on { background: var(--brand); border-color: var(--brand); color: var(--paper); }
+.msv-bars { display: grid; gap: 4px; height: 150px; align-items: end; padding: 6px; border: 1px solid var(--line); border-radius: 12px; background: var(--paper); }
+.msv-col { height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 2px; min-width: 0; opacity: 0.45; }
+.msv-col.seg { opacity: 1; }
+.msv-col i { width: 100%; background: var(--ink-3); border-radius: 4px 4px 0 0; transition: height .2s; }
+.msv-col.L i { background: var(--blue); }
+.msv-col.R i { background: var(--amber); }
+.msv-col.used i { opacity: 0.25; }
+.msv-col.ptr i { outline: 2px solid var(--brand); outline-offset: 1px; }
+.msv-col span { font-family: var(--font-mono); font-size: 0.68rem; color: var(--ink-2); }
+.msv-out { display: flex; gap: 4px; align-items: center; margin: 8px 0; flex-wrap: wrap; }
+.msv-out-l { font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-3); margin-right: 4px; }
+.msv-out b { min-width: 28px; height: 28px; border-radius: 6px; border: 1px dashed var(--line); display: inline-flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 0.8rem; }
+.msv-out b.full { border-style: solid; background: var(--green-soft); border-color: var(--green); }
+.msv-out b.new.L { border-style: solid; background: var(--blue-soft); border-color: var(--blue); }
+.msv-out b.new.R { border-style: solid; background: var(--amber-soft); border-color: var(--amber); }
+.msv-stats { display: flex; flex-direction: column; gap: 4px; font-size: 0.86rem; }
+.msv-stats div { display: flex; justify-content: space-between; gap: 10px; padding: 5px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--paper); }
+.msv-stats b { font-family: var(--font-mono); }
