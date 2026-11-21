@@ -908,3 +908,31 @@ table.rel-grid { border-collapse: separate; border-spacing: 4px; margin: 0 auto;
 .da-stats > span { padding: 5px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--paper); font-size: 0.84rem; }
 .da-stats > span b { font-variant-numeric: tabular-nums; }
 .ls-cap { font-weight: 700; font-size: 0.8rem; color: var(--ink-2); }
+
+/* ---------- 2.13–2.15 TreeView, BSTLab, AVLLab, UnionFindLab ---------- */
+.tv-wrap { overflow-x: auto; margin: 12px 0 6px; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); padding: 4px 0; }
+.tv { display: block; width: 100%; margin: 0 auto; }
+.tv-empty { text-align: center; color: var(--ink-3); padding: 30px 0; }
+.tv-edge { stroke: var(--ink-3); stroke-width: 1.5; }
+.tv-edge.on { stroke: var(--brand); stroke-width: 3; }
+.tv-edge.new { stroke: var(--green); stroke-width: 3; stroke-dasharray: 5 3; }
+.tv-node circle { fill: var(--card); stroke: var(--ink-2); stroke-width: 1.6; transition: fill .15s; }
+.tv-node text { font-family: var(--font-mono); font-size: 12px; font-weight: 700; fill: var(--ink); }
+.tv-node.path circle { fill: var(--blue-soft); stroke: var(--blue); }
+.tv-node.hl circle { fill: var(--brand); stroke: var(--brand); }
+.tv-node.hl text { fill: var(--paper); }
+.tv-node.mk circle { fill: var(--amber-soft); stroke: var(--amber); stroke-width: 2.5; }
+.tv-node.bad circle { stroke: var(--red); stroke-width: 3; }
+.tv-node.root circle { stroke-width: 2.6; }
+.tv-node text.tv-bal { font-size: 10px; font-weight: 700; fill: var(--ink-3); }
+.tv-node text.tv-bal.zero { fill: var(--green); }
+.tv-node text.tv-bal.bad { fill: var(--red); }
+.bst-out { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; margin: 4px 0 10px; }
+.bst-out span { font-family: var(--font-mono); font-weight: 700; padding: 2px 8px; border-radius: 6px; background: var(--green-soft); border: 1px solid var(--green); }
+.bst .btn:disabled, .avl .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.uf-chk { display: inline-flex; align-items: center; gap: 6px; font-size: 0.9rem; cursor: pointer; }
+.uf select { font-family: var(--font-mono); padding: 3px 6px; border: 1px solid var(--line); border-radius: 6px; background: var(--card); color: var(--ink); }
+.uf-arr { display: flex; flex-direction: column; gap: 4px; margin: 6px 0 12px; overflow-x: auto; }
+.uf-arr .ls-name { width: 58px; font-family: var(--font-mono); }
+.uf-arr .ls-cell { height: 28px; }
+.uf-arr .ls-cell.idx { background: none; border: none; color: var(--ink-3); font-weight: 400; }
