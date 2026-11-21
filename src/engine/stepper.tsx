@@ -66,7 +66,7 @@ export function useStepper<S>(frames: S[], initialSpeed = 2): Stepper<S> {
   }), [frames, i, last, playing, speed, go, next, prev, toggle]);
 }
 
-const SPEEDS = [0.5, 1, 2, 4, 8];
+const SPEEDS = [0.5, 1, 2, 3, 4, 6, 8, 12];
 
 /** The shared control bar. Keyboard: ← next, → back (RTL), space play/pause. */
 export function Player<S>({ s, label }: { s: Stepper<S>; label?: string }) {

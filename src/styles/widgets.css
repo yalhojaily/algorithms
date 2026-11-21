@@ -463,3 +463,20 @@ table.rel-grid { border-collapse: separate; border-spacing: 4px; margin: 0 auto;
 .gl-node.sel circle { stroke: var(--brand); stroke-width: 5; }
 .gl-node.cur circle { fill: var(--amber); stroke: var(--amber); }
 .gl-deg { font-family: var(--font-mono) !important; font-size: 11px !important; fill: var(--ink-3) !important; font-weight: 400 !important; }
+
+/* ---------- RAM machine (lesson 1.1) ---------- */
+.ram-mem { display: flex; gap: 10px; align-items: flex-start; margin: 10px 0; }
+.ram-label { font-family: var(--font-num); font-weight: 700; font-size: 1.3rem; color: var(--brand); min-width: 22px; padding-top: 8px; }
+.ram-cells { display: flex; flex-wrap: wrap; gap: 4px; }
+.ram-cell { width: 44px; height: 50px; border-radius: 8px; border: 1.5px solid var(--line); background: var(--card); display: flex; flex-direction: column; align-items: center; justify-content: center; transition: all 0.15s; position: relative; }
+.ram-cells.small .ram-cell { width: 30px; height: 40px; }
+.ram-v { font-family: var(--font-mono); font-weight: 700; font-size: 1rem; }
+.ram-cells.small .ram-v { font-size: 0.82rem; }
+.ram-addr { font-family: var(--font-mono); font-size: 0.62rem; color: var(--ink-3); }
+.ram-cell.pi { border-color: var(--blue); }
+.ram-cell.pj { border-color: var(--violet); }
+.ram-cell.read { background: var(--amber-soft); border-color: var(--amber); box-shadow: 0 0 0 2px var(--amber); }
+.ram-cell.set { background: var(--blue-soft); border-color: var(--blue); }
+.ram-cell.write { background: var(--green-soft); border-color: var(--green); box-shadow: 0 0 0 2px var(--green); }
+.ram-vars { display: flex; flex-wrap: wrap; gap: 6px 14px; font-family: var(--font-mono); font-size: 0.9rem; min-height: 1.5em; }
+.ram-vars i { color: var(--ink-3); font-style: normal; }
