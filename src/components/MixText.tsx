@@ -5,7 +5,7 @@ export default function MixText({ text }: { text: string }) {
     <>
       {parts.map((p, i) => {
         if (!p) return null;
-        if (/[؀-ۿ]/.test(p) || !/[0-9=×+−^·δ]/.test(p)) return <span key={i}>{p}</span>;
+        if (/[؀-ۿ]/.test(p) || !/[0-9=×+−^·δ|←]/.test(p)) return <span key={i}>{p}</span>;
         const lead = p.match(/^\s*/)![0], trail = p.match(/\s*[،.]?\s*$/)![0];
         const core = p.slice(lead.length, p.length - trail.length);
         return <span key={i}>{lead}<bdi dir="ltr">{core}</bdi>{trail}</span>;

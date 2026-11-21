@@ -37,6 +37,18 @@ export const BOOK = {
 
 export const chapters: BookChapter[] = [
   {
+    num: 0, slug: '00-introduction', en: 'Introduction', ar: 'مقدمة', pages: [1, 20], exercisesPage: 17,
+    blurb: 'ما الخوارزمية، ومن أين جاءت الكلمة. ثلاث طرق قديمة للضرب، وخوارزمية توزع مقاعد الكونغرس، ومثال على ما ليس خوارزمية. ثم ما يطلبه الكتاب في كل وصف: ماذا، وكيف، ولماذا، وبأي سرعة.',
+    sections: [
+      sec('0.1', 'What is an algorithm?', 'ما الخوارزمية؟', 1),
+      sec('0.2', 'Multiplication', 'الضرب', 3),
+      sec('0.3', 'Congressional Apportionment', 'توزيع مقاعد الكونغرس', 8, [4]),
+      sec('0.4', 'A Bad Example', 'مثال سيئ', 10),
+      sec('0.5', 'Describing Algorithms', 'وصف الخوارزميات', 11, [0]),
+      sec('0.6', 'Analyzing Algorithms', 'تحليل الخوارزميات', 14, [1, 2, 3]),
+    ],
+  },
+  {
     num: 1, slug: '01-recursion', en: 'Recursion', ar: 'الاستدعاء الذاتي', pages: [21, 70], exercisesPage: 44,
     blurb: 'الاختزال إلى صندوق أسود، و«جنية الاستدعاء»، ثم فرّق تسد: أبراج هانوي، والترتيب بالدمج والسريع، وأشجار الاستدعاء، والاختيار في زمن خطي، والضرب السريع، والأس.',
     sections: [

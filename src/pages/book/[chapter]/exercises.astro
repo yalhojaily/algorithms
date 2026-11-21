@@ -25,7 +25,7 @@ const groups = [...new Set(chapterPages(ch.num).exercises.map((e) => e.group))];
         {groups.map((g) => {
           const ns = chapterPages(ch.num).exercises.filter((e) => e.group === g).map((e) => e.num);
           const ss = [...new Set(ns.map(secOf).filter(Boolean))];
-          return <li><span class="ltr">{g}</span>: التمارين <span class="ltr">{ns[0]}–{ns[ns.length - 1]}</span>{ss.length > 0 && <> · {ss.map((s, i) => <>{i ? '، ' : ''}<a href={bookHref(base, ch, s!)}>القسم <span class="ltr">{s!.id}</span></a></>)}</>}</li>;
+          return <li>{g ? <span class="ltr">{g}</span> : 'كل التمارين'}: التمارين <span class="ltr">{ns[0]}–{ns[ns.length - 1]}</span>{ss.length > 0 && <> · {ss.map((s, i) => <>{i ? '، ' : ''}<a href={bookHref(base, ch, s!)}>القسم <span class="ltr">{s!.id}</span></a></>)}</>}</li>;
         })}
       </ul>
     </div>

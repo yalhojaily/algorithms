@@ -27,6 +27,10 @@ GAP = 8              # pt above a heading where a cut is made
 
 # chapter -> first and last book page of the chapter, the book page where "Exercises" starts, section titles
 CHAPTERS = {
+    0: dict(first=1, last=20, exercises=17, sections=[
+        ("0.1", "What is an algorithm?"), ("0.2", "Multiplication"), ("0.3", "Congressional Apportionment"),
+        ("0.4", "A Bad Example"), ("0.5", "Describing Algorithms"), ("0.6", "Analyzing Algorithms"),
+    ]),
     1: dict(first=21, last=70, exercises=44, sections=[
         ("1.1", "Reductions"), ("1.2", "Simplify and Delegate"), ("1.3", "Tower of Hanoi"),
         ("1.4", "Mergesort"), ("1.5", "Quicksort"), ("1.6", "The Pattern"), ("1.7", "Recursion Trees"),

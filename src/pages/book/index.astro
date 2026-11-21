@@ -13,7 +13,7 @@ const ready = new Set((await getCollection('book')).map((e) => e.data.section));
       <h1><span class="ltr">Algorithms</span> <span class="by">لـ Jeff Erickson</span></h1>
       <p class="lead">نقرأ الكتاب نفسه، قسمًا قسمًا. في كل قسم تجد صفحات الكتاب الأصلية أولًا مع دليل يوجه قراءتك، ثم شرحًا عربيًا موسّعًا بالمصطلحات الإنجليزية، ومحاكاة تفاعلية، وأسئلة سريعة، ثم تمارين الكتاب نفسه مع تمارين محلولة إضافية.</p>
       <div class="bh-actions">
-        <a class="btn btn-primary" href={bookHref(base, chapters[0], chapters[0].sections[0])}>ابدأ الفصل 1 ←</a>
+        <a class="btn btn-primary" href={bookHref(base, chapters[0], chapters[0].sections[0])}>ابدأ من الفصل {chapters[0].num} ←</a>
         <a class="btn" href={pdfHref(base, 1)} target="_blank" rel="noopener">الكتاب كاملًا (PDF) ↗</a>
       </div>
     </header>
