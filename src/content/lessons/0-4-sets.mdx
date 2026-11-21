@@ -1,0 +1,457 @@
+---
+id: "0.4"
+title: المجموعات
+summary: المجموعة هي اللغة التي تُكتب بها تعريفات المسائل وهياكل البيانات. وكل عملية عليها ترجمة مباشرة لرابط منطقي من الدرس 0.1، وكل هوية فيها تكافؤ منطقي.
+minutes: 160
+objectives:
+  - تكتب المجموعات بطريقة السرد وبطريقة الصفة المميزة، وتميّز ∈ من ⊆، و∅ من {∅}.
+  - تحسب الاتحاد والتقاطع والفرق والمتممة والفرق التماثلي، وتربط كل عملية برابطها المنطقي.
+  - تثبت تساوي مجموعتين بطريقة تتبّع العنصر، وبجدول الانتماء.
+  - تحسب المجموعة الأسية وحاصل الضرب الديكارتي وعدد عناصر كل منهما، وتشرح لماذا $|\mathcal{P}(A)| = 2^n$.
+  - تقارن طرق تمثيل المجموعات في البرامج من حيث زمن كل عملية.
+readings:
+  - source: "Mathematics for Computer Science (MIT)"
+    part: "الفصل 4: Mathematical Data Types، القسمان 4.1 (Sets) و4.2 (Sequences)"
+    url: "https://courses.csail.mit.edu/6.042/spring18/mcs.pdf"
+  - source: "Book of Proof (Hammack)"
+    part: "الفصل 1: Sets، الأقسام 1.1–1.8 و1.10، والفصل 8: Proofs Involving Sets"
+    url: "https://richardhammack.github.io/BookOfProof/"
+---
+
+import Callout from '../../components/Callout.astro';
+import Exercise from '../../components/Exercise.astro';
+import StepReveal from '../../components/StepReveal.tsx';
+import QuickCheck from '../../components/QuickCheck.tsx';
+import VennLab from '../../components/VennLab.tsx';
+import PowerSetStepper from '../../components/PowerSetStepper.tsx';
+import CodeLab from '../../components/CodeLab.tsx';
+import * as lab from '../../labs/0-4-sets.ts';
+
+## <span class="sec">1</span>المشكلة: تكوين فريق
+
+<Callout type="problem" title="فريق يغطي كل المهارات">
+تحتاج شركة إلى مشروع فيه أربع مهارات: **تصميم**، و**خوادم**، و**بيانات**، و**أمن**. وعندها خمسة مرشحين:
+
+<div class="table-scroll">
+<table class="nice">
+  <thead><tr><th>المرشح</th><th>مهاراته</th></tr></thead>
+  <tbody>
+    <tr><td>سارة</td><td>\{تصميم، بيانات\}</td></tr>
+    <tr><td>عمر</td><td>\{خوادم\}</td></tr>
+    <tr><td>ليلى</td><td>\{خوادم، أمن\}</td></tr>
+    <tr><td>خالد</td><td>\{بيانات، أمن\}</td></tr>
+    <tr><td>نورة</td><td>\{تصميم\}</td></tr>
+  </tbody>
+</table>
+</div>
+
+ما أصغر فريق يغطي المهارات الأربع؟
+</Callout>
+
+في هذه المسألة كلها مجموعات. مهارات كل مرشح مجموعة. والفريق مجموعة من المرشحين. والسؤال «هل يغطي الفريق كل المهارات؟» سؤال عن **اتحاد** مجموعاتهم: هل يساوي مجموعة المهارات المطلوبة؟ والفرق الممكنة كلها هي **المجموعة الأسية** لمجموعة المرشحين. ومع 5 مرشحين يوجد $2^5 = 32$ فريقًا ممكنًا، فنستطيع أن نجرّبها كلها.
+
+والجواب فريق من اثنين: \{سارة، ليلى\}، فاتحاد مهاراتهما يعطي المهارات الأربع. لكن مع 60 مرشحًا يصبح عدد الفرق $2^{60}$، وهو العدد نفسه الذي رأيته في جدول الدرس 0.1. هذه المسألة اسمها **غطاء المجموعة** (Set Cover)، وهي من مسائل NP-Complete. ستقابلها في الدرس 5.5، ومعها خوارزمية تقريب جشعة. أما اليوم فنتعلم اللغة التي كُتبت بها.
+
+## <span class="sec">2</span>المجموعة والانتماء
+
+<Callout type="definition" title="المجموعة (Set)">
+**المجموعة** تجمّع من أشياء مختلفة، تسمى **عناصرها**. نكتب $x \in A$ إذا كان $x$ عنصرًا في $A$، و$x \notin A$ إذا لم يكن.
+
+ويُعرف كل شيء عن المجموعة من عناصرها وحدها. فتتساوى مجموعتان إذا كان لهما العناصر نفسها بالضبط. هذا يعني أن **الترتيب لا يهم**، وأن **التكرار لا يهم**: $\{1, 2, 3\} = \{3, 1, 2\} = \{1, 1, 2, 3\}$.
+</Callout>
+
+نكتب المجموعة بطريقتين:
+
+- **السرد:** $A = \{2, 3, 5, 7\}$، أو مع نقاط حين يكون النمط واضحًا: $\{0, 2, 4, \ldots\}$.
+- **الصفة المميزة** (set-builder): $A = \{\, x \in \mathbb{N} \mid x \text{ أولي و } x < 10 \,\}$. وتُقرأ: مجموعة كل $x$ في $\mathbb{N}$ بحيث… وهذه هي **مجموعة الصدق** للدالة القضوية التي عرفتها في الدرس 0.2.
+
+<Callout type="definition" title="مجموعات مهمة">
+- $\varnothing = \{\}$: **المجموعة الخالية**، وليس فيها أي عنصر.
+- $\mathbb{N} = \{0, 1, 2, \ldots\}$، و$\mathbb{Z}$، و$\mathbb{Q}$، و$\mathbb{R}$: الأعداد الطبيعية والصحيحة والنسبية والحقيقية. نتبع اصطلاح كتاب MIT في أن $0 \in \mathbb{N}$.
+- $|A|$: **عدد عناصر** $A$ (cardinality) إذا كانت محدودة. مثلًا $|\{a, b, c\}| = 3$، و$|\varnothing| = 0$.
+</Callout>
+
+**المجموعة نفسها يمكن أن تكون عنصرًا في مجموعة أخرى.** فالمجموعة $\{1, \{2, 3\}\}$ فيها عنصران فقط: العدد $1$، والمجموعة $\{2, 3\}$. ولاحظ أن $2 \notin \{1, \{2, 3\}\}$، لأن 2 عنصر في عنصرها، لا عنصر فيها هي. والمجموعة $\{\varnothing\}$ **ليست** خالية، ففيها عنصر واحد هو $\varnothing$. فكّر في المجموعة كصندوق: الصندوق الذي فيه صندوق فارغ ليس صندوقًا فارغًا.
+
+<QuickCheck
+  client:visible
+  id="q1"
+  question="كم عنصرًا في المجموعة $\{\varnothing, \{\varnothing\}, \{1, 2\}, \{2, 1\}\}$؟"
+  options={['2', '3', '4', '5']}
+  answer={1}
+  explain="$\{1, 2\}$ و$\{2, 1\}$ هما المجموعة نفسها، فتُحسب مرة واحدة. والعناصر الباقية هي $\varnothing$، و$\{\varnothing\}$، و$\{1, 2\}$. والمجموعتان $\varnothing$ و$\{\varnothing\}$ مختلفتان: الأولى خالية، والثانية فيها عنصر واحد."
+  wrong={{ 2: 'تذكّر أن الترتيب لا يهم: $\\{1, 2\\} = \\{2, 1\\}$.', 0: 'المجموعتان $\\varnothing$ و$\\{\\varnothing\\}$ مختلفتان.' }}
+/>
+
+## <span class="sec">3</span>المجموعات الجزئية
+
+<Callout type="definition" title="المجموعة الجزئية (Subset)">
+$A \subseteq B$ إذا كان كل عنصر في $A$ عنصرًا في $B$:
+
+$$
+A \subseteq B \quad\text{تعني}\quad \forall x\,\big(x \in A \rightarrow x \in B\big)
+$$
+
+ونكتب $A \subsetneq B$، أي **مجموعة جزئية فعلية** (proper subset)، إذا كان $A \subseteq B$ و$A \ne B$.
+</Callout>
+
+ومن التعريف نتيجتان:
+
+- **$\varnothing \subseteq B$ لكل مجموعة $B$**، لأن $x \in \varnothing$ كاذبة دائمًا، فالاستلزام صادق بانتفاء الشرط.
+- **$A = B$ إذا وفقط إذا $A \subseteq B$ و$B \subseteq A$.** وهذه أهم طريقة لإثبات تساوي مجموعتين، وتسمى **الاحتواء المزدوج** (double inclusion).
+
+<Callout type="warning" title="∈ ليست ⊆">
+$\in$ علاقة بين **عنصر** ومجموعة. أما $\subseteq$ فعلاقة بين **مجموعتين**. مثلًا: $1 \in \{1, 2\}$ و$\{1\} \subseteq \{1, 2\}$ صادقتان. لكن $\{1\} \in \{1, 2\}$ كاذبة، و$1 \subseteq \{1, 2\}$ لا معنى لها. وقد تصدق العلاقتان معًا: إذا كانت $A = \{1, \{1\}\}$ فإن $\{1\} \in A$ و$\{1\} \subseteq A$.
+</Callout>
+
+## <span class="sec">4</span>العمليات على المجموعات
+
+كل عملية على المجموعات تُعرَّف بالرابط المنطقي الذي يقابلها. لتكن $U$ **المجموعة الشاملة** (universe)، وهي التي نأخذ منها كل العناصر:
+
+<div class="table-scroll">
+<table class="nice">
+  <thead><tr><th>العملية</th><th>الرمز</th><th>$x$ عنصر فيها إذا وفقط إذا</th><th>الرابط</th></tr></thead>
+  <tbody>
+    <tr><td>الاتحاد</td><td>$A \cup B$</td><td>$x \in A \lor x \in B$</td><td>$\lor$</td></tr>
+    <tr><td>التقاطع</td><td>$A \cap B$</td><td>$x \in A \land x \in B$</td><td>$\land$</td></tr>
+    <tr><td>الفرق</td><td>$A - B$</td><td>$x \in A \land x \notin B$</td><td>$\land\,\lnot$</td></tr>
+    <tr><td>المتممة</td><td>$\overline{A}$ أو $A^c$</td><td>$x \in U \land x \notin A$</td><td>$\lnot$</td></tr>
+    <tr><td>الفرق التماثلي</td><td>$A \,\triangle\, B$</td><td>$x \in A \oplus x \in B$</td><td>$\oplus$</td></tr>
+  </tbody>
+</table>
+</div>
+
+وتسمى $A$ و$B$ **منفصلتين** (disjoint) إذا كان $A \cap B = \varnothing$.
+
+ابنِ مجموعاتك في المختبر التالي، ثم اكتب أي تعبير. ستظلّل المناطق التي تنتمي إلى نتيجة التعبير، وتُلوَّن عناصر النتيجة بالأحمر. ثم فعّل «قارن بتعبير ثانٍ» لتختبر هل التعبيران **هوية**:
+
+<VennLab client:visible />
+
+جرّب: اكتب $(A \cup B)^c$، ثم قارنه بـ $A^c \cap B^c$. ثم قارن $A - (B - C)$ بـ $(A - B) - C$. وجرّب أيضًا الإعداد «B ⊆ A» مع التعبيرين $A \cup B$ و$A$: ستجدهما متساويين لهذه المجموعات، لكنهما ليسا هوية.
+
+### هويات المجموعات تكافؤات منطقية
+
+لأن كل عملية تقابل رابطًا منطقيًا، فإن كل تكافؤ من الدرس 0.1 يعطي هوية في المجموعات:
+
+<div class="table-scroll">
+<table class="nice">
+  <thead><tr><th>القانون</th><th>في المجموعات</th><th>في المنطق</th></tr></thead>
+  <tbody>
+    <tr><td>De Morgan</td><td>$\overline{A \cup B} = \overline{A} \cap \overline{B}$</td><td>$\lnot(P \lor Q) \equiv \lnot P \land \lnot Q$</td></tr>
+    <tr><td>De Morgan</td><td>$\overline{A \cap B} = \overline{A} \cup \overline{B}$</td><td>$\lnot(P \land Q) \equiv \lnot P \lor \lnot Q$</td></tr>
+    <tr><td>التوزيع</td><td>$A \cap (B \cup C) = (A \cap B) \cup (A \cap C)$</td><td>$P \land (Q \lor R) \equiv \ldots$</td></tr>
+    <tr><td>التوزيع</td><td>$A \cup (B \cap C) = (A \cup B) \cap (A \cup C)$</td><td>$P \lor (Q \land R) \equiv \ldots$</td></tr>
+    <tr><td>الامتصاص</td><td>$A \cup (A \cap B) = A$</td><td>$P \lor (P \land Q) \equiv P$</td></tr>
+    <tr><td>الفرق</td><td>$A - B = A \cap \overline{B}$</td><td>تعريف</td></tr>
+  </tbody>
+</table>
+</div>
+
+ولإثبات هوية في المجموعات طريقتان:
+
+1. **جدول الانتماء:** صف لكل منطقة من مناطق مخطط Venn، أي لكل احتمال لانتماء العنصر أو عدمه إلى كل مجموعة. هذا جدول الصدق نفسه، وهو ما يعرضه المختبر حين تقارن تعبيرين.
+2. **تتبّع العنصر** (element chasing): نأخذ عنصرًا اختياريًا من الطرف الأيسر ونثبت أنه في الطرف الأيمن، ثم نفعل العكس. هذا هو الأسلوب الذي ستستعمله في البراهين التي لا تكفيها الجداول، مثل براهين حاصل الضرب الديكارتي والمجموعة الأسية.
+
+<StepReveal
+  client:visible
+  title="تتبّع العنصر: قانون De Morgan للمجموعات"
+  problem="أثبت أن $\overline{A \cup B} = \overline{A} \cap \overline{B}$."
+  steps={[
+    { show: 'نثبت أن لهما العناصر نفسها: لكل $x \\in U$، $x \\in \\overline{A \\cup B} \\iff x \\in \\overline{A} \\cap \\overline{B}$.', why: 'هذا تعريف تساوي المجموعات. ونستطيع أن نثبت الاتجاهين معًا بسلسلة من «إذا وفقط إذا».' },
+    { show: '$x \\in \\overline{A \\cup B} \\iff \\lnot(x \\in A \\cup B)$', why: 'تعريف المتممة.' },
+    { show: '$\\iff \\lnot(x \\in A \\lor x \\in B)$', why: 'تعريف الاتحاد.' },
+    { show: '$\\iff x \\notin A \\land x \\notin B$', why: 'قانون De Morgan **المنطقي**.' },
+    { show: '$\\iff x \\in \\overline{A} \\land x \\in \\overline{B} \\iff x \\in \\overline{A} \\cap \\overline{B}$ ∎', why: 'تعريف المتممة ثم تعريف التقاطع.' },
+  ]}
+  answer="البرهان كله ترجمة: من لغة المجموعات إلى لغة المنطق، ثم تكافؤ منطقي، ثم عودة إلى لغة المجموعات. وهذا هو أسلوب الفصل 8 من Book of Proof."
+/>
+
+<QuickCheck
+  client:visible
+  id="q2"
+  question="أي هذه العبارات صحيحة لكل المجموعات $A$ و$B$ و$C$؟"
+  options={['$A - (B - C) = (A - B) - C$', '$A - (B \\cup C) = (A - B) \\cap (A - C)$', '$A \\cup (B \\cap C) = (A \\cup B) \\cap C$', '$(A - B) \\cup B = A$']}
+  answer={1}
+  explain="العنصر في $A - (B \cup C)$ عنصر في $A$ وليس في $B$ ولا في $C$. وهذا بالضبط معنى أن يكون في $A - B$ وفي $A - C$. إنه قانون De Morgan مرة أخرى."
+  wrong={{ 0: 'الفرق ليس تجميعيًا. عنصر في $A \\cap B \\cap C$ ينتمي إلى الطرف الأيسر ولا ينتمي إلى الأيمن. جرّب المقارنة في المختبر.', 2: 'الطرف الأيمن مختلف عن قانون التوزيع: عنصر في $A$ وحدها ينتمي إلى الطرف الأيسر ولا ينتمي إلى الأيمن.', 3: 'الطرف الأيسر يساوي $A \\cup B$، وهو أكبر من $A$ إذا كانت $B$ فيها عناصر ليست في $A$.' }}
+/>
+
+## <span class="sec">5</span>المجموعة الأسية
+
+<Callout type="definition" title="المجموعة الأسية (Power set)">
+$\mathcal{P}(A)$ هي مجموعة **كل** المجموعات الجزئية من $A$:
+$$
+\mathcal{P}(\{a, b\}) = \big\{\, \varnothing,\; \{a\},\; \{b\},\; \{a, b\} \,\big\}
+$$
+</Callout>
+
+<Callout type="theorem" title="عدد عناصر المجموعة الأسية">
+إذا كان $|A| = n$ فإن $|\mathcal{P}(A)| = 2^n$.
+
+**فكرة البرهان:** رقّم عناصر $A$ من $a_0$ إلى $a_{n-1}$. كل مجموعة جزئية $T$ تحدد سلسلة من $n$ بتات: البت $j$ يساوي 1 إذا كان $a_j \in T$. وكل سلسلة بتات تحدد مجموعة جزئية واحدة بالطريقة نفسها. فهذه **مطابقة واحد لواحد** بين المجموعات الجزئية وسلاسل البتات. وعدد سلاسل البتات بطول $n$ هو $2^n$، بمبدأ الضرب. (سنعرّف هذه المطابقة بدقة في الدرس 0.5، ونسميها **تقابلًا**، وسنبرهن المبرهنة نفسها بالاستقراء في الدرس 0.6.)
+</Callout>
+
+هذه المطابقة خوارزمية أيضًا: إذا عددنا من $0$ إلى $2^n - 1$ بالنظام الثنائي، مررنا على كل مجموعة جزئية مرة واحدة بالضبط.
+
+<PowerSetStepper client:visible />
+
+إنها الفكرة نفسها التي ولّدت صفوف جدول الصدق في الدرس 0.1: كل إسناد لقيم $n$ متغيرات هو مجموعة جزئية من المتغيرات، هي المتغيرات الصادقة. ولهذا كان عدد الصفوف $2^n$.
+
+## <span class="sec">6</span>حاصل الضرب الديكارتي
+
+في المجموعة لا يهم الترتيب. لكننا نحتاج أحيانًا إلى الترتيب: النقطة $(2, 3)$ ليست النقطة $(3, 2)$. الثنائي **المرتّب** $(a, b)$ يتساوى مع $(c, d)$ إذا وفقط إذا كان $a = c$ و$b = d$.
+
+<Callout type="definition" title="حاصل الضرب الديكارتي (Cartesian product)">
+$$
+A \times B = \{\, (a, b) \mid a \in A \text{ و } b \in B \,\}
+$$
+وإذا كانت $A$ و$B$ محدودتين فإن $|A \times B| = |A| \cdot |B|$. ونكتب $A^n$ لمجموعة كل المتتاليات $(a_1, \ldots, a_n)$ التي عناصرها من $A$.
+</Callout>
+
+أمثلة:
+
+- $\{1, 2\} \times \{x, y, z\} = \{(1,x), (1,y), (1,z), (2,x), (2,y), (2,z)\}$، وفيها $2 \times 3 = 6$ عناصر.
+- مربعات رقعة الشطرنج هي $\{a, \ldots, h\} \times \{1, \ldots, 8\}$، وعددها $8 \times 8 = 64$.
+- سلاسل البتات بطول $n$ هي $\{0, 1\}^n$، وعددها $2^n$. وهذه هي سلاسل البتات التي طابقناها مع المجموعات الجزئية في القسم 5.
+- حلقتان متداخلتان في برنامج، `for a in A: for b in B`، تمران على $A \times B$. لهذا كان زمن المسوِّرين المتداخلين في الدرس 0.2 هو $n^2 = |D \times D|$.
+
+والعلاقات، وهي موضوع الدرس 0.5، ليست إلا **مجموعات جزئية** من $A \times B$.
+
+## <span class="sec">7</span>مفارقة Russell: ليست كل «مجموعة» مجموعة
+
+ماذا لو سمحنا لأي صفة مميزة أن تعرّف مجموعة؟ عرّف Bertrand Russell سنة 1901:
+
+$$
+R = \{\, x \mid x \notin x \,\}
+$$
+
+أي مجموعة كل المجموعات التي ليست عنصرًا في نفسها. والسؤال: هل $R \in R$؟ إذا كانت $R \in R$ فهي تحقق شرط $R$، أي $R \notin R$. وإذا كانت $R \notin R$ فهي تحقق الشرط، فـ $R \in R$. كلا الاحتمالين يؤدي إلى نقيضه.
+
+المخرج في نظرية المجموعات الحديثة أن الصفة المميزة يجب أن تختار عناصرها من **مجموعة موجودة**: $\{x \in A \mid \ldots\}$. ولهذا نكتب المجال دائمًا.
+
+ولهذه الحجة، أي أن يُسأل الشيء عن نفسه ثم يُعكس الجواب، نسخة في علوم الحاسوب: برهان Turing أنه **لا يمكن** كتابة برنامج يقرر لأي برنامج آخر هل سيتوقف أم لا (مسألة التوقف). ستقابل هذه الفكرة في الدرس 5.2.
+
+## <span class="sec">8</span>الصحة والتحليل: المجموعات داخل الحاسوب
+
+المجموعة الرياضية فكرة مجردة، والبرنامج يحتاج إلى **تمثيل** لها. ويحدد التمثيل كلفة كل عملية. لتكن $|A| = n$ و$|B| = m$:
+
+<div class="table-scroll">
+<table class="nice">
+  <thead><tr><th>التمثيل</th><th>$x \in A$؟</th><th>$A \cap B$</th><th>متى يناسب؟</th></tr></thead>
+  <tbody>
+    <tr><td>مصفوفة غير مرتبة</td><td>$n$ مقارنة</td><td>$n \cdot m$ (حلقتان متداخلتان)</td><td>مجموعات صغيرة جدًا</td></tr>
+    <tr><td>مصفوفة مرتبة</td><td>$\log_2 n$ (بحث ثنائي)</td><td>$n + m$ (دمج)</td><td>مجموعات ثابتة نبحث فيها كثيرًا</td></tr>
+    <tr><td>جدول تجزئة (`Set`)</td><td>نحو 1 في المتوسط</td><td>نحو $n$</td><td>الاختيار العام في البرامج</td></tr>
+    <tr><td>سلسلة بتات (bitmask)</td><td>1</td><td>عملية `&` واحدة لكل 64 عنصرًا</td><td>المجموعة الشاملة صغيرة ومرقّمة</td></tr>
+  </tbody>
+</table>
+</div>
+
+في **سلسلة البتات** تصبح عمليات المجموعات عمليات منطقية على البتات حرفيًا: الاتحاد `A | B`، والتقاطع `A & B`، والفرق `A & ~B`، والفرق التماثلي `A ^ B`. وهذا تطبيق مباشر للجدول في القسم 4: كل بت متغير منطقي.
+
+<Callout type="algo" title="تقاطع مصفوفتين مرتبتين في زمن n + m">
+```
+INTERSECT(A[0..n-1], B[0..m-1]):   // both sorted, no repeats
+  i ← 0; j ← 0; out ← [ ]
+  while i < n and j < m:
+    if A[i] = B[j]: append A[i]; i ← i + 1; j ← j + 1
+    else if A[i] < B[j]: i ← i + 1
+    else: j ← j + 1
+  return out
+```
+**ثابت الحلقة:** كل عنصر مشترك أصغر من $\min(A[i], B[j])$ موجود في `out`. لماذا يصح هذا؟ حين نتقدم في $A$ بسبب $A[i] < B[j]$، لا يمكن أن يكون $A[i]$ في $B$، لأن كل عناصر $B$ الباقية أكبر من $B[j]$ أو تساويه. **الزمن:** كل دورة تزيد $i$ أو $j$ أو كليهما، فعدد الدورات $n + m$ على الأكثر. سترى هذه الفكرة نفسها في خطوة الدمج في Merge Sort، في الدرس 1.9.
+</Callout>
+
+**المجموعة الأسية:** عدد عناصرها $2^n$، ومتوسط حجم كل مجموعة جزئية $n/2$، فإنتاجها كاملة يكلّف نحو $n \cdot 2^n$. لا يمكن أن تكون أسرع من ذلك، لأن حجم المخرج نفسه بهذا القدر. وهذا ما ستقيسه في المختبر.
+
+## <span class="sec">9</span>التمارين
+
+<Exercise id="e1" level="apply" title="حساب العمليات" source="Book of Proof، تمارين القسمين 1.5–1.6">
+
+لتكن $U = \{1, 2, 3, 4, 5, 6\}$، و$A = \{1, 2, 3, 4\}$، و$B = \{3, 4, 5\}$. احسب:
+
+$A \cup B$، و$A \cap B$، و$A - B$، و$B - A$، و$A \,\triangle\, B$، و$\overline{A}$، و$\overline{A \cup B}$، و$A \times (A \cap B)$.
+
+<div slot="solution">
+
+- $A \cup B = \{1, 2, 3, 4, 5\}$
+- $A \cap B = \{3, 4\}$
+- $A - B = \{1, 2\}$
+- $B - A = \{5\}$
+- $A \,\triangle\, B = \{1, 2, 5\}$
+- $\overline{A} = \{5, 6\}$
+- $\overline{A \cup B} = \{6\}$
+- $A \times \{3, 4\}$ فيها $4 \times 2 = 8$ ثنائيات: $(1,3), (1,4), (2,3), (2,4), (3,3), (3,4), (4,3), (4,4)$.
+
+</div>
+</Exercise>
+
+<Exercise id="e2" level="apply" title="صادقة أم كاذبة؟">
+
+1. $\{1\} \in \{1, 2\}$
+2. $\{1\} \subseteq \{1, 2\}$
+3. $\varnothing \in \varnothing$
+4. $\varnothing \subseteq \varnothing$
+5. $\varnothing \in \{\varnothing\}$
+6. $\{\varnothing\} \subseteq \{\varnothing, \{\varnothing\}\}$
+7. $(1, 2) = (2, 1)$
+8. $|\mathcal{P}(\mathcal{P}(\varnothing))| = 2$
+
+<div slot="solution">
+
+1. كاذبة، فعنصرا المجموعة هما 1 و2، وليس $\{1\}$ أحدهما.
+2. صادقة.
+3. كاذبة، فـ $\varnothing$ لا عناصر فيها.
+4. صادقة، لأن الخالية جزئية من كل مجموعة.
+5. صادقة.
+6. صادقة، لأن العنصر الوحيد في الطرف الأيسر، وهو $\varnothing$، عنصر في الطرف الأيمن.
+7. كاذبة، فهذان ثنائيان مرتّبان.
+8. صادقة: $\mathcal{P}(\varnothing) = \{\varnothing\}$، فيها عنصر واحد، فمجموعتها الأسية فيها $2^1 = 2$ عنصرين: $\{\varnothing, \{\varnothing\}\}$.
+
+</div>
+</Exercise>
+
+<Exercise id="e3" level="apply" title="من الوصف إلى التعبير">
+
+اكتب تعبيرًا بـ $A$ و$B$ و$C$ لكل وصف، ثم تحقق منه في مختبر Venn:
+
+1. العناصر التي في واحدة **بالضبط** من $A$ و$B$.
+2. العناصر التي في **اثنتين على الأقل** من $A$ و$B$ و$C$.
+3. العناصر التي في $A$ فقط، أي ليست في $B$ ولا في $C$.
+4. العناصر التي ليست في أي منها.
+
+<div slot="solution">
+
+1. $A \,\triangle\, B$، أو $(A - B) \cup (B - A)$.
+2. $(A \cap B) \cup (A \cap C) \cup (B \cap C)$.
+3. $A - (B \cup C)$، أو $A \cap \overline{B} \cap \overline{C}$.
+4. $\overline{A \cup B \cup C}$.
+
+</div>
+</Exercise>
+
+<Exercise id="e4" level="apply" title="حل المشكلة الافتتاحية بالرموز">
+
+لتكن $S_p$ مجموعة مهارات المرشح $p$، و$M$ مجموعة المهارات المطلوبة، و$C$ مجموعة المرشحين.
+
+1. اكتب بالرموز: «الفريق $T \subseteq C$ يغطي كل المهارات».
+2. اكتب بالرموز مسألة إيجاد أصغر فريق.
+3. كم فريقًا ستفحص الخوارزمية التي تجرّب كل الفرق، إذا كان عدد المرشحين 30؟
+
+<div slot="solution">
+
+1. $\bigcup_{p \in T} S_p = M$. ويكفي أن نكتب $M \subseteq \bigcup_{p \in T} S_p$.
+2. جد $T \in \mathcal{P}(C)$ تحقق الشرط في الجزء 1، بحيث تكون $|T|$ أصغر ما يمكن.
+3. $|\mathcal{P}(C)| = 2^{30} \approx 10^9$ فريق.
+
+</div>
+</Exercise>
+
+<Exercise id="e5" level="prove" title="ثلاث صيغ للاحتواء" source="Book of Proof، تمارين الفصل 8">
+
+أثبت أن العبارات الثلاث متكافئة: (أ) $A \subseteq B$، و(ب) $A \cap B = A$، و(ج) $A \cup B = B$. يكفي أن تثبت (أ) ← (ب) ← (ج) ← (أ).
+
+<div slot="solution">
+
+**(أ) ← (ب):** دائمًا $A \cap B \subseteq A$. وفي الاتجاه الآخر: إذا كان $x \in A$ فإن $x \in B$ بالفرض، فـ $x \in A \cap B$. إذن $A \cap B = A$.
+
+**(ب) ← (ج):** دائمًا $B \subseteq A \cup B$. وفي الاتجاه الآخر: إذا كان $x \in A \cup B$، فإما $x \in B$ وانتهى، وإما $x \in A = A \cap B$ فـ $x \in B$. إذن $A \cup B = B$.
+
+**(ج) ← (أ):** إذا كان $x \in A$ فإن $x \in A \cup B = B$.
+
+</div>
+</Exercise>
+
+<Exercise id="e6" level="prove" title="هويتان">
+
+أثبت بتتبّع العنصر:
+
+1. $A - (B \cup C) = (A - B) \cap (A - C)$
+2. $A \times (B \cap C) = (A \times B) \cap (A \times C)$
+
+<div slot="hint">في الجزء 2 العناصر ثنائيات. ابدأ بـ «ليكن $(x, y) \in A \times (B \cap C)$».</div>
+<div slot="solution">
+
+1. $x \in A - (B \cup C) \iff x \in A \land \lnot(x \in B \lor x \in C) \iff x \in A \land x \notin B \land x \notin C \iff (x \in A \land x \notin B) \land (x \in A \land x \notin C) \iff x \in (A - B) \cap (A - C)$.
+2. $(x, y) \in A \times (B \cap C) \iff x \in A \land y \in B \land y \in C \iff (x \in A \land y \in B) \land (x \in A \land y \in C) \iff (x, y) \in (A \times B) \cap (A \times C)$.
+
+</div>
+</Exercise>
+
+<Exercise id="e7" level="prove" title="المجموعة الأسية والعمليات">
+
+1. أثبت أن $\mathcal{P}(A) \cap \mathcal{P}(B) = \mathcal{P}(A \cap B)$.
+2. أثبت أن $\mathcal{P}(A) \cup \mathcal{P}(B) \subseteq \mathcal{P}(A \cup B)$، وبيّن بمثال مضاد أن التساوي لا يتحقق دائمًا.
+
+<div slot="solution">
+
+1. $X \in \mathcal{P}(A) \cap \mathcal{P}(B) \iff X \subseteq A \land X \subseteq B \iff X \subseteq A \cap B \iff X \in \mathcal{P}(A \cap B)$. الخطوة الوسطى تحتاج إلى برهان قصير: كل عنصر في $X$ عنصر في $A$ وفي $B$، أي في $A \cap B$. والعكس كذلك.
+2. إذا كان $X \subseteq A$ فإن $X \subseteq A \cup B$، وكذلك إذا كان $X \subseteq B$. **المثال المضاد:** $A = \{1\}$ و$B = \{2\}$. فـ $\{1, 2\} \in \mathcal{P}(A \cup B)$، لكنها ليست جزئية من $A$ ولا من $B$.
+
+</div>
+</Exercise>
+
+<Exercise id="e8" level="prove" title="الفرق التماثلي يقبل الاختصار">
+
+أثبت أنه إذا كان $A \,\triangle\, B = A \,\triangle\, C$ فإن $B = C$. استعمل جدول الانتماء، أو العلاقة $x \in A \,\triangle\, B \iff (x \in A) \oplus (x \in B)$.
+
+<div slot="hint">في المنطق: إذا كان $P \oplus Q \equiv P \oplus R$، فماذا تحصل إذا أخذت $\oplus P$ للطرفين؟ تذكّر أن $P \oplus P \equiv F$ وأن $F \oplus Q \equiv Q$.</div>
+<div slot="solution">
+
+لكل $x$، لتكن $a$ و$b$ و$c$ القضايا $x \in A$ و$x \in B$ و$x \in C$. الفرض يعطي $a \oplus b = a \oplus c$. نأخذ $\oplus\, a$ للطرفين: $a \oplus a \oplus b = a \oplus a \oplus c$، فـ $b = c$، لأن $\oplus$ تجميعي، و$a \oplus a = F$، و$F \oplus b = b$. إذن $x \in B \iff x \in C$ لكل $x$، أي $B = C$.
+
+وهذه الخاصية هي ما يجعل `x ^ k ^ k === x` صحيحة في البرمجة، وعليها يقوم أبسط أنواع التشفير.
+
+</div>
+</Exercise>
+
+## <span class="sec">10</span>المختبر البرمجي
+
+ستكتب عمليات المجموعات على مصفوفات، ثم المجموعة الأسية بالعدّ الثنائي، ثم حاصل الضرب الديكارتي.
+
+**تجربة القياس:** تقيس زمن `powerSet` لمجموعات من 12 عنصرًا ثم 14 ثم 16 ثم 18. **توقّع قبل التشغيل:** كل زيادة بمقدار 2 في عدد العناصر تضرب عدد المجموعات الجزئية في 4. فهل يُضرب الزمن في 4 أيضًا، أم في أكثر قليلًا؟ ولماذا؟
+
+<CodeLab
+  client:visible
+  id="0.4-sets"
+  title="عمليات المجموعات، والمجموعة الأسية، وحاصل الضرب"
+  exports={['union', 'intersection', 'difference', 'isSubset', 'powerSet', 'cartesian']}
+  starter={lab.starter}
+  tests={[
+    { name: 'union', code: "JSON.stringify(union([3, 1, 2], [3, 4])) === '[1,2,3,4]'" },
+    { name: 'intersection', code: "JSON.stringify(intersection([1, 2, 3, 4], [6, 4, 2])) === '[2,4]'" },
+    { name: 'difference', code: "JSON.stringify(difference([4, 3, 2, 1], [2, 4, 6])) === '[1,3]'" },
+    { name: 'الخالية جزئية من كل مجموعة', code: 'isSubset([], [1]) === true && isSubset([], []) === true' },
+    { name: 'isSubset', code: 'isSubset([2, 3], [1, 2, 3]) === true && isSubset([1, 5], [1, 2, 3]) === false' },
+    { name: 'De Morgan على U = {1..10}', code: "(() => { const U = [1,2,3,4,5,6,7,8,9,10], A = [1,2,3,4], B = [3,6,9]; return JSON.stringify(difference(U, union(A, B))) === JSON.stringify(intersection(difference(U, A), difference(U, B))); })()" },
+    { name: 'powerSet([]) = [[]]', code: "JSON.stringify(powerSet([])) === '[[]]'" },
+    { name: 'powerSet([1,2,3]): 8 مجموعات مختلفة', code: "(() => { const P = powerSet([1, 2, 3]); const keys = new Set(P.map((T) => [...T].sort().join(','))); return P.length === 8 && keys.size === 8 && keys.has('') && keys.has('1,2,3'); })()" },
+    { name: 'كل عنصر في powerSet مجموعة جزئية', code: '(() => { const S = [5, 7, 9, 11]; return powerSet(S).every((T) => isSubset(T, S)); })()' },
+    { name: 'cartesian بالترتيب الصحيح', code: `JSON.stringify(cartesian([1, 2], ['x', 'y'])) === '[[1,"x"],[1,"y"],[2,"x"],[2,"y"]]'` },
+    { name: '|A × B| = |A| · |B|', code: 'cartesian([1, 2, 3], [4, 5, 6, 7]).length === 12 && cartesian([], [1, 2]).length === 0' },
+  ]}
+  bench={{
+    title: 'زمن powerSet لمجموعة من n عنصرًا',
+    fn: 'powerSet',
+    make: 'Array.from({ length: n }, (_, i) => i)',
+    ns: [12, 14, 16, 18],
+  }}
+  solution={lab.solution}
+/>
+
+<Callout type="tip" title="بعد التشغيل">
+عدد المجموعات الجزئية يُضرب في 4 مع كل زيادة بمقدار 2، والزمن يُضرب في أكثر من 4 قليلًا. السبب أن كل مجموعة جزئية تحتاج إلى عمل يتناسب مع حجمها، والحجم أيضًا يكبر. فالزمن يتناسب مع $n \cdot 2^n$، كما حللنا في القسم 8.
+
+**تحدٍّ إضافي:** اكتب `bestTeam(skillsOf, required)` لحل المشكلة الافتتاحية بتجربة كل الفرق. ثم حسّنها: جرّب الفرق **حسب حجمها**، من الأصغر إلى الأكبر، وتوقف عند أول فريق يغطي المهارات. كم فريقًا تفحص الآن في مثال القسم 1؟
+</Callout>
+
+## <span class="sec">11</span>الخلاصة
+
+- المجموعة تُعرف بعناصرها فقط، فلا يهم الترتيب ولا التكرار. و$\varnothing \ne \{\varnothing\}$، و$\in$ ليست $\subseteq$.
+- $A \subseteq B$ هي $\forall x\,(x \in A \rightarrow x \in B)$. ونثبت التساوي بالاحتواء المزدوج.
+- الاتحاد والتقاطع والفرق والمتممة والفرق التماثلي تقابل $\lor$ و$\land$ و$\land\lnot$ و$\lnot$ و$\oplus$. فكل هوية في المجموعات تكافؤ منطقي، ونثبتها بجدول الانتماء أو بتتبّع العنصر.
+- $|\mathcal{P}(A)| = 2^{|A|}$، لأن كل مجموعة جزئية تقابلها سلسلة بتات واحدة. و$|A \times B| = |A| \cdot |B|$.
+- الصفة المميزة يجب أن تختار عناصرها من مجموعة موجودة، وإلا ظهرت مفارقة Russell.
+- تمثيل المجموعة يحدد زمن عملياتها: المصفوفة غير المرتبة، والمصفوفة المرتبة مع الدمج، وجدول التجزئة، وسلسلة البتات.
+
+**الدرس التالي:** في 0.5 نبني على حاصل الضرب الديكارتي: **العلاقة** مجموعة جزئية من $A \times B$، و**الدالة** علاقة لها شرط إضافي. ومنهما نصل إلى المطابقة الدقيقة بين المجموعات التي استعملناها هنا دون تعريف.

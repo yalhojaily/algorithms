@@ -75,9 +75,9 @@ export const curriculum: Phase[] = [
     [
       ['0.1', 'المنطق القضوي', 'Propositional Logic', 1, { prereqs: [], lab: true }],
       ['0.2', 'المُسوِّرات', 'Quantifiers', 1, { lab: true }],
-      ['0.3', 'أساليب البرهان', 'Proof Techniques', 1],
-      ['0.4', 'المجموعات', 'Sets', 1],
-      ['0.5', 'العلاقات والدوال', 'Relations and Functions', 2],
+      ['0.3', 'أساليب البرهان', 'Proof Techniques', 1, { lab: true }],
+      ['0.4', 'المجموعات', 'Sets', 1, { lab: true }],
+      ['0.5', 'العلاقات والدوال', 'Relations and Functions', 2, { lab: true }],
       ['0.6', 'الاستقراء الرياضي والاستقراء القوي', 'Induction and Strong Induction', 2, { prereqs: ['0.3'] }],
       ['0.7', 'التباديل والتوافيق', 'Permutations and Combinations', 2, { prereqs: ['0.4'] }],
       ['0.8', 'المتتاليات والمجاميع', 'Sequences and Sums', 2, { prereqs: ['0.6'] }],

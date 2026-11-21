@@ -14,6 +14,8 @@ interface Bench {
   /** A JavaScript expression using `n` that builds the argument for one call. */
   make: string;
   ns: number[];
+  /** If true, make returns an array of arguments, spread into the call. */
+  spread?: boolean;
 }
 
 interface Props {
@@ -55,7 +57,7 @@ self.onmessage = (e) => {
     for (const n of bench.ns) {
       const arg = new Function('n', 'return (' + bench.make + ');')(n);
       const t0 = performance.now();
-      mod[bench.fn](arg);
+      bench.spread ? mod[bench.fn](...arg) : mod[bench.fn](arg);
       timing.push({ n, ms: performance.now() - t0 });
     }
   }
