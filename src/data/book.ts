@@ -1,0 +1,82 @@
+// The book track: Jeff Erickson, "Algorithms" (1st edition, 2019), CC BY 4.0.
+// Chapters and sections in the book's order, with book page numbers and the end-of-chapter exercises
+// that belong to each section.
+
+export interface BookSection {
+  id: string;          // "1.3"
+  slug: string;        // "1-3"
+  en: string;
+  ar: string;
+  page: number;        // first book page
+  exercises: number[]; // end-of-chapter exercises that practise this section
+}
+export interface BookChapter {
+  num: number;
+  slug: string;        // "01-recursion"
+  en: string;
+  ar: string;
+  pages: [number, number];
+  exercisesPage: number;
+  blurb: string;
+  sections: BookSection[];
+}
+
+const range = (a: number, b: number) => Array.from({ length: b - a + 1 }, (_, i) => a + i);
+const sec = (id: string, en: string, ar: string, page: number, exercises: number[] = []): BookSection =>
+  ({ id, slug: id.replace('.', '-'), en, ar, page, exercises });
+
+export const BOOK = {
+  title: 'Algorithms',
+  author: 'Jeff Erickson',
+  edition: 'الطبعة الأولى، 2019',
+  license: 'CC BY 4.0',
+  pdf: 'book/erickson-algorithms.pdf',
+  offset: 18, // pdf page = book page + offset
+  home: 'https://jeffe.cs.illinois.edu/teaching/algorithms/',
+};
+
+export const chapters: BookChapter[] = [
+  {
+    num: 1, slug: '01-recursion', en: 'Recursion', ar: 'الاستدعاء الذاتي', pages: [21, 70], exercisesPage: 44,
+    blurb: 'الاختزال إلى صندوق أسود، و«جنية الاستدعاء»، ثم فرّق تسد: أبراج هانوي، والترتيب بالدمج والسريع، وأشجار الاستدعاء، والاختيار في زمن خطي، والضرب السريع، والأس.',
+    sections: [
+      sec('1.1', 'Reductions', 'الاختزال', 21),
+      sec('1.2', 'Simplify and Delegate', 'بسّط وفوّض', 22),
+      sec('1.3', 'Tower of Hanoi', 'أبراج هانوي', 24, range(1, 5)),
+      sec('1.4', 'Mergesort', 'الترتيب بالدمج', 26, [13, 14, 15]),
+      sec('1.5', 'Quicksort', 'الترتيب السريع', 29, [9, 10]),
+      sec('1.6', 'The Pattern', 'النمط العام', 31, range(26, 42)),
+      sec('1.7', 'Recursion Trees', 'أشجار الاستدعاء', 31, [6, 7, 8, 11, 12]),
+      sec('1.8', 'Linear-Time Selection', 'الاختيار في زمن خطي', 35, range(16, 21)),
+      sec('1.9', 'Fast Multiplication', 'الضرب السريع', 40, [22, 23]),
+      sec('1.10', 'Exponentiation', 'الرفع إلى أس', 42, [24, 25]),
+    ],
+  },
+];
+
+/** The whole book, for the table of contents (chapters not yet on the site are shown as coming). */
+export const TOC: { num: number; en: string; ar: string; page: number }[] = [
+  { num: 0, en: 'Introduction', ar: 'مقدمة', page: 1 },
+  { num: 1, en: 'Recursion', ar: 'الاستدعاء الذاتي', page: 21 },
+  { num: 2, en: 'Backtracking', ar: 'التراجع', page: 71 },
+  { num: 3, en: 'Dynamic Programming', ar: 'البرمجة الديناميكية', page: 97 },
+  { num: 4, en: 'Greedy Algorithms', ar: 'الخوارزميات الجشعة', page: 159 },
+  { num: 5, en: 'Basic Graph Algorithms', ar: 'خوارزميات الرسوم الأساسية', page: 187 },
+  { num: 6, en: 'Depth-First Search', ar: 'البحث بالعمق', page: 225 },
+  { num: 7, en: 'Minimum Spanning Trees', ar: 'أشجار التغطية الصغرى', page: 257 },
+  { num: 8, en: 'Shortest Paths', ar: 'أقصر المسارات', page: 273 },
+  { num: 9, en: 'All-Pairs Shortest Paths', ar: 'أقصر المسارات بين كل الأزواج', page: 309 },
+  { num: 10, en: 'Maximum Flows & Minimum Cuts', ar: 'التدفق الأعظم والقطع الأصغر', page: 327 },
+  { num: 11, en: 'Applications of Flows and Cuts', ar: 'تطبيقات التدفق والقطع', page: 353 },
+  { num: 12, en: 'NP-Hardness', ar: 'صعوبة NP', page: 379 },
+];
+
+export const chapterBySlug = (slug: string) => chapters.find((c) => c.slug === slug);
+export const sectionOf = (id: string) => {
+  for (const c of chapters) { const s = c.sections.find((x) => x.id === id); if (s) return { chapter: c, section: s }; }
+  return undefined;
+};
+export const bookHref = (base: string, ch: BookChapter, s?: BookSection) =>
+  `${base.replace(/\/$/, '')}/book/${ch.slug}/${s ? `${s.slug}/` : ''}`;
+export const pdfHref = (base: string, bookPage: number) =>
+  `${base.replace(/\/$/, '')}/${BOOK.pdf}#page=${bookPage + BOOK.offset}`;

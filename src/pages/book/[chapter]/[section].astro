@@ -1,0 +1,200 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../../layouts/Base.astro';
+import LessonStatus from '../../../components/LessonStatus.tsx';
+import BookExProgress from '../../../components/book/BookExProgress.tsx';
+import { BOOK, bookHref, pdfHref, sectionOf } from '../../../data/book';
+import { readingStrips } from '../../../components/book/pages';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('book');
+  return entries.map((entry) => {
+    const hit = sectionOf(entry.data.section);
+    if (!hit) throw new Error(`Book section ${entry.data.section} is not in src/data/book.ts`);
+    return { params: { chapter: hit.chapter.slug, section: hit.section.slug }, props: { entry } };
+  });
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const base = import.meta.env.BASE_URL;
+const { chapter: ch, section: sec } = sectionOf(entry.data.section)!;
+const ready = new Set((await getCollection('book')).map((e) => e.data.section));
+const idx = ch.sections.findIndex((s) => s.id === sec.id);
+const prev = ch.sections.slice(0, idx).reverse().find((s) => ready.has(s.id));
+const next = ch.sections.slice(idx + 1).find((s) => ready.has(s.id));
+const stages = [...(entry.body ?? '').matchAll(/<Stage\s+n=\{(\d+)\}\s+id="([^"]+)"\s+title="([^"]+)"/g)].map((m) => ({ n: m[1], id: m[2], title: m[3] }));
+const exercises = (entry.body?.match(/<Exercise\b/g) ?? []).length;
+const lessonKey = `book-${sec.id}`;
+const strips = readingStrips(sec.id);
+const p0 = strips.length ? strips[0].page : sec.page, p1 = strips.length ? strips[strips.length - 1].page : sec.page;
+---
+<Base title={`${sec.id} ${sec.ar} · كتاب Erickson`} description={entry.data.summary}>
+  <div class="container book-grid">
+    <aside class="chap-nav">
+      <details class="chap-nav-inner" open>
+        <summary>
+          <span class="cn-num">{ch.num}</span>
+          <span><small>الفصل {ch.num} · <span class="ltr">{ch.en}</span></small>{ch.ar}</span>
+        </summary>
+        <ol>
+          {ch.sections.map((s) => (
+            <li>
+              {ready.has(s.id)
+                ? <a href={bookHref(base, ch, s)} class:list={{ here: s.id === sec.id }}><span class="id ltr">{s.id}</span><span class="t">{s.ar}</span></a>
+                : <span class="dis"><span class="id ltr">{s.id}</span><span class="t">{s.ar}</span></span>}
+            </li>
+          ))}
+          <li><a href={`${bookHref(base, ch)}exercises/`}><span class="id">✎</span><span class="t">كل تمارين الفصل</span></a></li>
+        </ol>
+        <a class="back" href={bookHref(base, ch)}>صفحة الفصل ‹</a>
+      </details>
+    </aside>
+
+    <main class="book-main" data-lesson={lessonKey}>
+      <nav class="crumbs"><a href={`${base}book/`}>الكتاب</a><span>‹</span><a href={bookHref(base, ch)}>الفصل {ch.num}: {ch.ar}</a></nav>
+      <header class="sec-head">
+        <span class="sec-id ltr">{sec.id}</span>
+        <h1>{sec.ar} <span class="en">{sec.en}</span></h1>
+        <p class="sec-summary">{entry.data.summary}</p>
+        <div class="sec-meta">
+          <LessonStatus client:load lesson={lessonKey} />
+          <span class="tag">≈ {entry.data.minutes} دقيقة</span>
+          {sec.exercises.length > 0 && <span class="tag"><BookExProgress client:load chapter={ch.num} nums={sec.exercises} label="تمارين الكتاب: حللت" /></span>}
+        </div>
+      </header>
+
+      {stages.length > 0 && (
+        <nav class="path-bar" aria-label="مسار القسم">
+          {stages.map((st) => <a href={`#${st.id}`} data-stage-link={st.id}><span class="pb-n">{st.n}</span>{st.title}</a>)}
+        </nav>
+      )}
+
+      <article class="prose"><Content /></article>
+
+      <LessonStatus client:visible lesson={lessonKey} exercises={exercises} variant="finish" />
+
+      <nav class="pager">
+        {prev ? <a class="pager-link" href={bookHref(base, ch, prev)}><span>→ القسم السابق</span><span class="ltr pid">{prev.id}</span> {prev.ar}</a> : <span />}
+        {next
+          ? <a class="pager-link next" href={bookHref(base, ch, next)}><span>القسم التالي ←</span><span class="ltr pid">{next.id}</span> {next.ar}</a>
+          : <a class="pager-link next" href={`${bookHref(base, ch)}exercises/`}><span>التالي ←</span>تمارين الفصل كلها</a>}
+      </nav>
+    </main>
+
+    <aside class="side">
+      {stages.length > 0 && (
+        <div class="side-card path">
+          <h3>مسار القسم</h3>
+          <ol>{stages.map((st) => <li><a href={`#${st.id}`} data-stage-link={st.id}><span class="pn-n">{st.n}</span>{st.title}</a></li>)}</ol>
+        </div>
+      )}
+      <div class="side-card">
+        <h3>في الكتاب</h3>
+        <p class="pg">{p0 === p1 ? <>صفحة <b class="ltr">{p0}</b></> : <>الصفحات <b class="ltr">{p0}–{p1}</b></>}</p>
+        <p class="muted small"><span class="ltr">{BOOK.author}, {BOOK.title}</span></p>
+        <a class="pdf-link" href={pdfHref(base, sec.page)} target="_blank" rel="noopener">افتح الكتاب على هذه الصفحة ↗</a>
+      </div>
+      {entry.data.goals.length > 0 && (
+        <div class="side-card">
+          <h3>بعد هذا القسم ستستطيع</h3>
+          <ul>{entry.data.goals.map((g) => <li>{g}</li>)}</ul>
+        </div>
+      )}
+      {entry.data.terms.length > 0 && (
+        <div class="side-card">
+          <h3>المصطلحات</h3>
+          <dl class="terms">{entry.data.terms.map((t) => <div><dt class="ltr">{t.en}</dt><dd>{t.ar}</dd></div>)}</dl>
+        </div>
+      )}
+    </aside>
+  </div>
+  <script>
+    if (window.matchMedia('(max-width: 900px)').matches) document.querySelector('.chap-nav-inner')?.removeAttribute('open');
+    const stageEls = [...document.querySelectorAll<HTMLElement>('section.stage')];
+    const links = [...document.querySelectorAll<HTMLAnchorElement>('[data-stage-link]')];
+    const setActive = (id: string) => {
+      links.forEach((a) => a.classList.toggle('active', a.dataset.stageLink === id));
+      (document.querySelector('.path-bar a.active') as HTMLElement | null)?.scrollIntoView({ block: 'nearest', inline: 'center' });
+    };
+    if (stageEls.length) {
+      const io = new IntersectionObserver((es) => {
+        const vis = es.filter((e) => e.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+        if (vis[0]) setActive((vis[0].target as HTMLElement).id);
+      }, { rootMargin: '-110px 0px -65% 0px' });
+      stageEls.forEach((el) => io.observe(el));
+    }
+  </script>
+</Base>
+
+<style>
+  .book-grid { display: grid; grid-template-columns: 240px minmax(0, 1fr) 250px; gap: 36px; align-items: start; padding-top: 8px; }
+  @media (max-width: 1200px) { .book-grid { grid-template-columns: 230px minmax(0, 1fr); } .side { grid-column: 2; grid-row: 2; } }
+  @media (max-width: 900px) { .book-grid { grid-template-columns: minmax(0, 1fr); gap: 0; } .side { grid-column: 1; grid-row: auto; } }
+
+  .chap-nav { position: sticky; top: 80px; padding-top: 22px; }
+  .chap-nav-inner summary { list-style: none; display: flex; gap: 12px; align-items: center; cursor: pointer; padding: 6px 4px 12px; border-bottom: 1px solid var(--line); margin-bottom: 8px; font-family: var(--font-head); font-weight: 700; }
+  .chap-nav-inner summary::-webkit-details-marker { display: none; }
+  .chap-nav-inner summary small { display: block; font-family: var(--font-sans); font-weight: 500; color: var(--ink-3); font-size: 0.75rem; }
+  .cn-num { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; background: var(--brand-soft); color: var(--brand); font: 700 1.25rem/1 var(--font-num); }
+  .chap-nav ol { list-style: none; margin: 0; padding: 0; }
+  .chap-nav li a, .chap-nav li .dis { display: flex; gap: 10px; padding: 6px 10px; border-radius: 10px; text-decoration: none; font-size: 0.9rem; line-height: 1.45; color: var(--ink-2); }
+  .chap-nav li a:hover { background: var(--paper-2); color: var(--ink); }
+  .chap-nav li a.here { background: var(--card); color: var(--ink); font-weight: 700; box-shadow: var(--shadow); }
+  .chap-nav .id { flex: none; font-family: var(--font-mono); font-size: 0.78rem; font-weight: 700; color: var(--brand); min-width: 30px; padding-top: 2px; }
+  .chap-nav .dis { opacity: 0.45; }
+  .back { display: inline-block; margin-top: 12px; font-size: 0.86rem; color: var(--ink-3); text-decoration: none; padding: 0 10px; }
+  @media (max-width: 900px) {
+    .chap-nav { position: static; padding-top: 12px; }
+    .chap-nav-inner { border: 1px solid var(--line); border-radius: var(--radius); background: var(--card); padding: 6px 10px; }
+    .chap-nav-inner:not([open]) summary { border-bottom: 0; margin-bottom: 0; padding-bottom: 6px; }
+  }
+
+  .book-main { min-width: 0; overflow-x: clip; }
+  .crumbs { display: flex; gap: 8px; flex-wrap: wrap; font-size: 0.86rem; color: var(--ink-3); padding: 22px 0 4px; }
+  .crumbs a { color: var(--ink-2); text-decoration: none; }
+  .sec-head { padding: 8px 0 16px; border-bottom: 1px solid var(--line); }
+  .sec-id { display: inline-block; font: 700 1.1rem/1.4 var(--font-num); color: var(--brand); background: var(--olive-soft); border-radius: 10px; padding: 2px 12px; }
+  .sec-head h1 { margin: 10px 0 6px; }
+  .sec-head h1 .en { font-size: 0.45em; margin-inline-start: 6px; }
+  .sec-summary { font-size: 1.1rem; color: var(--ink-2); margin: 0 0 12px; }
+  .sec-meta { display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: center; font-size: 0.86rem; }
+
+  .prose :global(h3) { scroll-margin-top: 120px; }
+  .prose :global(ul), .prose :global(ol) { padding-inline-start: 1.4em; }
+  .prose :global(li) { margin: 0.25em 0; }
+
+  .pager { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 36px; }
+  .pager-link { display: flex; flex-direction: column; padding: 14px 18px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--card); text-decoration: none; color: var(--ink); font-weight: 650; }
+  .pager-link span:first-child { font-size: 0.78rem; color: var(--ink-3); }
+  .pager-link .pid { display: inline; font-family: var(--font-mono); color: var(--brand); font-size: 0.85rem; }
+  .pager-link.next { text-align: left; grid-column: 2; }
+  a.pager-link:hover { border-color: var(--brand); }
+
+  .side { position: sticky; top: 80px; padding-top: 22px; display: flex; flex-direction: column; gap: 14px; }
+  .side-card { padding: 14px 16px; font-size: 0.9rem; border: 1px solid var(--line); border-radius: var(--radius); background: var(--card); }
+  .side-card h3 { font-size: 0.85rem; color: var(--ink-3); margin: 0 0 6px; font-family: var(--font-sans); }
+  .side-card ul { margin: 0; padding-inline-start: 1.1em; line-height: 1.7; }
+  .pg { margin: 0; font-size: 1rem; }
+  .pg b { color: var(--brand); font-family: var(--font-num); font-size: 1.25rem; }
+  .small { font-size: 0.8rem; margin: 2px 0; color: var(--ink-3); }
+  .pdf-link { display: inline-block; margin-top: 6px; font-size: 0.84rem; color: var(--brand); text-decoration: none; }
+  .terms { margin: 0; }
+  .terms div { display: flex; justify-content: space-between; gap: 10px; padding: 4px 0; border-bottom: 1px dashed var(--line); }
+  .terms div:last-child { border: 0; }
+  .terms dt { font-weight: 650; font-size: 0.86rem; }
+  .terms dd { margin: 0; font-size: 0.84rem; color: var(--ink-2); }
+  .path ol { list-style: none; margin: 0; padding: 0; }
+  .path a { display: flex; align-items: center; gap: 9px; padding: 4px 6px; border-radius: 9px; text-decoration: none; color: var(--ink-2); }
+  .path a:hover { background: var(--paper-2); }
+  .path a.active { background: var(--brand-soft); color: var(--ink); font-weight: 650; }
+  .pn-n { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--brand); color: var(--brand); font-size: 0.75rem; font-weight: 700; flex: none; }
+  .path a.active .pn-n { background: var(--brand); color: #fff; }
+  .path-bar { display: none; position: sticky; top: 62px; z-index: 10; margin: 0 -16px; padding: 8px 16px; gap: 6px; overflow-x: auto; scrollbar-width: none;
+    background: color-mix(in srgb, var(--paper) 96%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+  .path-bar::-webkit-scrollbar { display: none; }
+  .path-bar a { flex: none; display: flex; align-items: center; gap: 6px; padding: 4px 11px; border-radius: 999px; border: 1px solid var(--line); background: var(--card); text-decoration: none; font-size: 0.84rem; color: var(--ink-2); white-space: nowrap; }
+  .path-bar a.active { border-color: var(--brand); color: var(--ink); background: var(--brand-soft); }
+  .pb-n { font-weight: 700; color: var(--brand); }
+  @media (max-width: 1200px) { .side { position: static; padding-top: 30px; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); } .path { display: none; } .path-bar { display: flex; } }
+</style>

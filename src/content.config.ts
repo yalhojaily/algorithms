@@ -15,4 +15,16 @@ const lessons = defineCollection({
   }),
 });
 
-export const collections = { lessons };
+/** The book track: one MDX file per section of Erickson's "Algorithms". */
+const book = defineCollection({
+  loader: glob({ pattern: '**/*.mdx', base: './src/content/book' }),
+  schema: z.object({
+    section: z.string(), // "1.3" — must match src/data/book.ts
+    summary: z.string(),
+    minutes: z.number(),
+    goals: z.array(z.string()).default([]),
+    terms: z.array(z.object({ en: z.string(), ar: z.string() })).default([]),
+  }),
+});
+
+export const collections = { lessons, book };

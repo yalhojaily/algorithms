@@ -1,0 +1,43 @@
+---
+import Base from '../../../layouts/Base.astro';
+import BookExercises from '../../../components/book/BookExercises.astro';
+import BookExProgress from '../../../components/book/BookExProgress.tsx';
+import { chapters, bookHref } from '../../../data/book';
+import { chapterPages } from '../../../components/book/pages';
+
+export function getStaticPaths() {
+  return chapters.map((ch) => ({ params: { chapter: ch.slug }, props: { ch } }));
+}
+const { ch } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const nums = chapterPages(ch.num).exercises.map((e) => e.num);
+const secOf = (n: number) => ch.sections.find((s) => s.exercises.includes(n));
+const groups = [...new Set(chapterPages(ch.num).exercises.map((e) => e.group))];
+---
+<Base title={`تمارين الفصل ${ch.num} · كتاب Erickson`}>
+  <div class="container exp">
+    <nav class="crumbs"><a href={`${base}book/`}>الكتاب</a><span>‹</span><a href={bookHref(base, ch)}>الفصل {ch.num}: {ch.ar}</a><span>‹</span><span>التمارين</span></nav>
+    <h1>تمارين الفصل {ch.num} <span class="en">Exercises</span></h1>
+    <p class="lead">تمارين Erickson في نهاية الفصل كما هي في الكتاب. الكتاب لا ينشر حلولها، فحلها بالورقة والقلم، وسجّل لكل تمرين: حللته، أو أعود إليه. <BookExProgress client:load chapter={ch.num} nums={nums} /></p>
+    <div class="map card">
+      <b>أين يقع كل تمرين؟</b>
+      <ul>
+        {groups.map((g) => {
+          const ns = chapterPages(ch.num).exercises.filter((e) => e.group === g).map((e) => e.num);
+          const ss = [...new Set(ns.map(secOf).filter(Boolean))];
+          return <li><span class="ltr">{g}</span>: التمارين <span class="ltr">{ns[0]}–{ns[ns.length - 1]}</span>{ss.length > 0 && <> · {ss.map((s, i) => <>{i ? '، ' : ''}<a href={bookHref(base, ch, s!)}>القسم <span class="ltr">{s!.id}</span></a></>)}</>}</li>;
+        })}
+      </ul>
+    </div>
+    <BookExercises chapter={ch.num} nums={nums} groups />
+  </div>
+</Base>
+<style>
+  .exp { padding-top: 10px; max-width: 820px; }
+  .crumbs { display: flex; gap: 8px; flex-wrap: wrap; font-size: 0.86rem; color: var(--ink-3); padding: 16px 0 8px; }
+  .crumbs a { color: var(--ink-2); text-decoration: none; }
+  h1 .en { font-size: 0.45em; margin-inline-start: 6px; }
+  .lead { color: var(--ink-2); }
+  .map { padding: 12px 18px; margin: 14px 0 20px; font-size: 0.92rem; }
+  .map ul { margin: 6px 0 0; padding-inline-start: 1.2em; line-height: 1.8; }
+</style>

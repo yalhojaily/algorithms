@@ -1,0 +1,15 @@
+// Cut page images of the book (made by tools/extract_erickson.py).
+import ch01 from '../../data/book-pages/ch01.json';
+
+export interface Strip { src: string; w: number; h: number; page: number }
+export interface ChapterPages {
+  chapter: number;
+  reading: Record<string, Strip[]>;
+  exercises: { num: number; group: string | null; strips: Strip[] }[];
+}
+
+const ALL: Record<number, ChapterPages> = { 1: ch01 as ChapterPages };
+
+export const chapterPages = (n: number): ChapterPages => ALL[n];
+export const readingStrips = (sectionId: string): Strip[] => ALL[+sectionId.split('.')[0]]?.reading[sectionId] ?? [];
+export const exerciseStrips = (chapter: number, num: number) => ALL[chapter]?.exercises.find((e) => e.num === num);

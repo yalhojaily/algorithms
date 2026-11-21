@@ -86,6 +86,18 @@ export const REC_PROGRAMS: RecProgram[] = [
     }, (v) => String(v)),
   },
   {
+    key: 'peasant', label: 'ضرب الفلاح', param: 'x', min: 0, max: 60, start: 13,
+    pseudo: ['PeasantMultiply(x, y):', '  if x = 0: return 0', '  prod ← PeasantMultiply(⌊x/2⌋, y + y)', '  if x is odd: prod ← prod + y', '  return prod'],
+    run: (x) => trace((rec) => {
+      const f = (a: number, b: number): number => rec(`PM(${a}, ${b})`, () => {
+        if (a === 0) return 0;
+        const p = f(Math.floor(a / 2), b + b);
+        return a % 2 ? p + b : p;
+      });
+      return f(x, 7);
+    }),
+  },
+  {
     key: 'fib', label: 'فيبوناتشي (الساذج)', param: 'n', min: 0, max: 8, start: 5,
     pseudo: ['FIB(n):', '  if n < 2: return n', '  return FIB(n − 1) + FIB(n − 2)'],
     run: (n) => trace((rec) => {

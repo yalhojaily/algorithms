@@ -3,8 +3,8 @@ import { REC_PROGRAMS, maxDepth, replay, type RecFrame } from '../lib/recursion'
 import { Player, Pseudocode, useStepper } from '../engine/stepper';
 
 /** Replay a recursive computation: the call stack on one side, the call tree growing on the other. */
-export default function CallTreeLab() {
-  const [key, setKey] = useState('fact');
+export default function CallTreeLab({ initial = 'fact' }: { initial?: string }) {
+  const [key, setKey] = useState(initial);
   const P = REC_PROGRAMS.find((p) => p.key === key)!;
   const [n, setN] = useState(P.start);
   const t = useMemo(() => P.run(n), [P, n]);
@@ -21,7 +21,7 @@ export default function CallTreeLab() {
   const distinct = new Set(t.nodes.map((x) => x.label)).size;
   const leaves = Math.max(...t.nodes.map((x) => x.x)) + 1;
   const depth = maxDepth(t);
-  const CW = key === 'hanoi' ? 86 : key === 'pow' ? 92 : 66, RH = 58;
+  const CW = key === 'hanoi' ? 86 : key === 'pow' ? 92 : key === 'peasant' ? 84 : 66, RH = 58;
   const W = Math.max(leaves * CW, 300), H = depth * RH + 10;
   const X = (x: number) => CW / 2 + x * CW;
   const Y = (d: number) => 22 + d * RH;

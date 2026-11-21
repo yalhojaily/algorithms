@@ -1,0 +1,48 @@
+---
+// End-of-chapter exercises from the book, as page strips, each with a status the learner can set.
+import { exerciseStrips } from './pages';
+import BookExStatus from './BookExStatus.tsx';
+
+interface Props { chapter: number; nums: number[]; core?: number[]; groups?: boolean }
+const { chapter, nums, core = [], groups = false } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const items = nums.map((n) => exerciseStrips(chapter, n)).filter(Boolean) as NonNullable<ReturnType<typeof exerciseStrips>>[];
+---
+<div class="bex">
+  <p class="bex-legend">علامات Erickson: <span class="h">♥</span> تمرين صعب (بعضها من امتحانات الدكتوراه في Illinois)، و<span class="h big">♥</span> الكبيرة صعب جدًا، و<span class="d">◆</span> يحتاج إلى فصل لاحق، و<span class="c">♣</span> يحتاج إلى مادة من خارج الكتاب، و<span class="s">♠</span> يحتاج إلى عمل طويل أو برمجة.</p>
+  {items.map((e, i) => (
+    <>
+      {groups && e.group && (i === 0 || items[i - 1].group !== e.group) && <h3 class="bex-group ltr">{e.group}</h3>}
+      <article class={`bex-item ${core.includes(e.num) ? 'core' : ''}`} id={`bx-${e.num}`}>
+        <header class="bex-head">
+          <span class="bex-num">تمرين <b class="ltr">{e.num}</b></span>
+          {core.includes(e.num) && <span class="bex-core">أساسي</span>}
+          <span class="bex-page">ص <span class="ltr">{e.strips[0]?.page}</span></span>
+          <BookExStatus client:visible chapter={chapter} num={e.num} />
+        </header>
+        <div class="bex-img">
+          {e.strips.map((s) => <img src={`${base}/${s.src}`} width={s.w} height={s.h} loading="lazy" decoding="async" alt={`Erickson, Algorithms، التمرين ${e.num}`} />)}
+        </div>
+      </article>
+    </>
+  ))}
+</div>
+<style>
+  .bex-legend { font-size: 0.8rem; color: var(--ink-3); margin: 0.4em 0 0.8em; line-height: 1.8; }
+  .bex-legend .h { color: #d0263b; } .bex-legend .big { font-size: 1.2em; } .bex-legend .d { color: #2f62c9; } .bex-legend .c { color: #2e8b57; } .bex-legend .s { color: var(--ink); }
+  .bex-group { margin: 1.6em 0 0.4em; font-family: var(--font-num); font-size: 1.15rem; color: var(--brand); text-align: right; }
+  .bex-item { border: 1px solid var(--line); border-radius: var(--radius); background: var(--card); margin: 0.9em 0; overflow: hidden; }
+  .bex-item.core { border-color: color-mix(in srgb, var(--brand) 45%, var(--line)); }
+  .bex-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 8px 14px; background: var(--paper-2); border-bottom: 1px solid var(--line); font-size: 0.9rem; }
+  .bex-num b { font-family: var(--font-num); font-size: 1.05rem; color: var(--brand); }
+  .bex-core { font-size: 0.75rem; font-weight: 700; color: var(--brand); background: var(--brand-soft); padding: 1px 8px; border-radius: 99px; }
+  .bex-page { color: var(--ink-3); font-size: 0.8rem; }
+  .bex-img { background: #fff; padding: 8px 4px; direction: ltr; }
+  .bex-img img { display: block; width: 100%; max-width: 640px; height: auto; margin: 0 auto; }
+  :global([data-theme='dark']) .bex-img { background: #16181e; }
+  :global([data-theme='dark']) .bex-img img { filter: invert(0.9) hue-rotate(180deg) contrast(0.95); }
+  @media (prefers-color-scheme: dark) {
+    :global(:root:not([data-theme='light'])) .bex-img { background: #16181e; }
+    :global(:root:not([data-theme='light'])) .bex-img img { filter: invert(0.9) hue-rotate(180deg) contrast(0.95); }
+  }
+</style>

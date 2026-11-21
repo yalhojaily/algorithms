@@ -1,0 +1,849 @@
+{
+ "chapter": 1,
+ "offset": 18,
+ "pages": [
+  21,
+  70
+ ],
+ "exercisesPage": 44,
+ "reading": {
+  "1.1": [
+   {
+    "src": "book/ch01/1.1-1.webp",
+    "w": 999,
+    "h": 1558,
+    "page": 21
+   },
+   {
+    "src": "book/ch01/1.1-2.webp",
+    "w": 1002,
+    "h": 952,
+    "page": 22
+   }
+  ],
+  "1.2": [
+   {
+    "src": "book/ch01/1.2-1.webp",
+    "w": 1002,
+    "h": 484,
+    "page": 22
+   },
+   {
+    "src": "book/ch01/1.2-2.webp",
+    "w": 999,
+    "h": 1499,
+    "page": 23
+   }
+  ],
+  "1.3": [
+   {
+    "src": "book/ch01/1.3-1.webp",
+    "w": 1002,
+    "h": 1498,
+    "page": 24
+   },
+   {
+    "src": "book/ch01/1.3-2.webp",
+    "w": 999,
+    "h": 1490,
+    "page": 25
+   },
+   {
+    "src": "book/ch01/1.3-3.webp",
+    "w": 1002,
+    "h": 1109,
+    "page": 26
+   }
+  ],
+  "1.4": [
+   {
+    "src": "book/ch01/1.4-1.webp",
+    "w": 1002,
+    "h": 340,
+    "page": 26
+   },
+   {
+    "src": "book/ch01/1.4-2.webp",
+    "w": 999,
+    "h": 1492,
+    "page": 27
+   },
+   {
+    "src": "book/ch01/1.4-3.webp",
+    "w": 1002,
+    "h": 1501,
+    "page": 28
+   }
+  ],
+  "1.5": [
+   {
+    "src": "book/ch01/1.5-1.webp",
+    "w": 999,
+    "h": 1498,
+    "page": 29
+   },
+   {
+    "src": "book/ch01/1.5-2.webp",
+    "w": 1002,
+    "h": 1494,
+    "page": 30
+   },
+   {
+    "src": "book/ch01/1.5-3.webp",
+    "w": 999,
+    "h": 332,
+    "page": 31
+   }
+  ],
+  "1.6": [
+   {
+    "src": "book/ch01/1.6-1.webp",
+    "w": 999,
+    "h": 566,
+    "page": 31
+   }
+  ],
+  "1.7": [
+   {
+    "src": "book/ch01/1.7-1.webp",
+    "w": 999,
+    "h": 526,
+    "page": 31
+   },
+   {
+    "src": "book/ch01/1.7-2.webp",
+    "w": 1002,
+    "h": 1501,
+    "page": 32
+   },
+   {
+    "src": "book/ch01/1.7-3.webp",
+    "w": 999,
+    "h": 1506,
+    "page": 33
+   },
+   {
+    "src": "book/ch01/1.7-4.webp",
+    "w": 1002,
+    "h": 1504,
+    "page": 34
+   },
+   {
+    "src": "book/ch01/1.7-5.webp",
+    "w": 999,
+    "h": 824,
+    "page": 35
+   }
+  ],
+  "1.8": [
+   {
+    "src": "book/ch01/1.8-1.webp",
+    "w": 999,
+    "h": 650,
+    "page": 35
+   },
+   {
+    "src": "book/ch01/1.8-2.webp",
+    "w": 1002,
+    "h": 1504,
+    "page": 36
+   },
+   {
+    "src": "book/ch01/1.8-3.webp",
+    "w": 999,
+    "h": 1494,
+    "page": 37
+   },
+   {
+    "src": "book/ch01/1.8-4.webp",
+    "w": 1002,
+    "h": 1442,
+    "page": 38
+   },
+   {
+    "src": "book/ch01/1.8-5.webp",
+    "w": 999,
+    "h": 1500,
+    "page": 39
+   }
+  ],
+  "1.9": [
+   {
+    "src": "book/ch01/1.9-1.webp",
+    "w": 1002,
+    "h": 1500,
+    "page": 40
+   },
+   {
+    "src": "book/ch01/1.9-2.webp",
+    "w": 999,
+    "h": 1500,
+    "page": 41
+   },
+   {
+    "src": "book/ch01/1.9-3.webp",
+    "w": 1002,
+    "h": 1050,
+    "page": 42
+   }
+  ],
+  "1.10": [
+   {
+    "src": "book/ch01/1.10-1.webp",
+    "w": 1002,
+    "h": 382,
+    "page": 42
+   },
+   {
+    "src": "book/ch01/1.10-2.webp",
+    "w": 999,
+    "h": 1502,
+    "page": 43
+   },
+   {
+    "src": "book/ch01/1.10-3.webp",
+    "w": 1002,
+    "h": 812,
+    "page": 44
+   }
+  ]
+ },
+ "exercises": [
+  {
+   "num": 1,
+   "group": "Tower of Hanoi",
+   "strips": [
+    {
+     "src": "book/ch01/ex1-1.webp",
+     "w": 1002,
+     "h": 532,
+     "page": 44
+    },
+    {
+     "src": "book/ch01/ex1-2.webp",
+     "w": 999,
+     "h": 584,
+     "page": 45
+    }
+   ]
+  },
+  {
+   "num": 2,
+   "group": "Tower of Hanoi",
+   "strips": [
+    {
+     "src": "book/ch01/ex2-1.webp",
+     "w": 999,
+     "h": 885,
+     "page": 45
+    },
+    {
+     "src": "book/ch01/ex2-2.webp",
+     "w": 1002,
+     "h": 1166,
+     "page": 46
+    }
+   ]
+  },
+  {
+   "num": 3,
+   "group": "Tower of Hanoi",
+   "strips": [
+    {
+     "src": "book/ch01/ex3-1.webp",
+     "w": 1002,
+     "h": 309,
+     "page": 46
+    },
+    {
+     "src": "book/ch01/ex3-2.webp",
+     "w": 999,
+     "h": 970,
+     "page": 47
+    }
+   ]
+  },
+  {
+   "num": 4,
+   "group": "Tower of Hanoi",
+   "strips": [
+    {
+     "src": "book/ch01/ex4-1.webp",
+     "w": 999,
+     "h": 502,
+     "page": 47
+    },
+    {
+     "src": "book/ch01/ex4-2.webp",
+     "w": 1002,
+     "h": 496,
+     "page": 48
+    }
+   ]
+  },
+  {
+   "num": 5,
+   "group": "Tower of Hanoi",
+   "strips": [
+    {
+     "src": "book/ch01/ex5-1.webp",
+     "w": 1002,
+     "h": 768,
+     "page": 48
+    }
+   ]
+  },
+  {
+   "num": 6,
+   "group": "Recursion Trees",
+   "strips": [
+    {
+     "src": "book/ch01/ex6-1.webp",
+     "w": 999,
+     "h": 199,
+     "page": 49
+    }
+   ]
+  },
+  {
+   "num": 7,
+   "group": "Recursion Trees",
+   "strips": [
+    {
+     "src": "book/ch01/ex7-1.webp",
+     "w": 999,
+     "h": 182,
+     "page": 49
+    }
+   ]
+  },
+  {
+   "num": 8,
+   "group": "Recursion Trees",
+   "strips": [
+    {
+     "src": "book/ch01/ex8-1.webp",
+     "w": 999,
+     "h": 230,
+     "page": 49
+    }
+   ]
+  },
+  {
+   "num": 9,
+   "group": "Sorting",
+   "strips": [
+    {
+     "src": "book/ch01/ex9-1.webp",
+     "w": 999,
+     "h": 727,
+     "page": 49
+    },
+    {
+     "src": "book/ch01/ex9-2.webp",
+     "w": 1002,
+     "h": 237,
+     "page": 50
+    }
+   ]
+  },
+  {
+   "num": 10,
+   "group": "Sorting",
+   "strips": [
+    {
+     "src": "book/ch01/ex10-1.webp",
+     "w": 1002,
+     "h": 520,
+     "page": 50
+    }
+   ]
+  },
+  {
+   "num": 11,
+   "group": "Sorting",
+   "strips": [
+    {
+     "src": "book/ch01/ex11-1.webp",
+     "w": 1002,
+     "h": 612,
+     "page": 50
+    }
+   ]
+  },
+  {
+   "num": 12,
+   "group": "Sorting",
+   "strips": [
+    {
+     "src": "book/ch01/ex12-1.webp",
+     "w": 1002,
+     "h": 84,
+     "page": 50
+    },
+    {
+     "src": "book/ch01/ex12-2.webp",
+     "w": 999,
+     "h": 977,
+     "page": 51
+    }
+   ]
+  },
+  {
+   "num": 13,
+   "group": "Sorting",
+   "strips": [
+    {
+     "src": "book/ch01/ex13-1.webp",
+     "w": 999,
+     "h": 202,
+     "page": 51
+    }
+   ]
+  },
+  {
+   "num": 14,
+   "group": "Sorting",
+   "strips": [
+    {
+     "src": "book/ch01/ex14-1.webp",
+     "w": 999,
+     "h": 311,
+     "page": 51
+    },
+    {
+     "src": "book/ch01/ex14-2.webp",
+     "w": 1002,
+     "h": 611,
+     "page": 52
+    }
+   ]
+  },
+  {
+   "num": 15,
+   "group": "Sorting",
+   "strips": [
+    {
+     "src": "book/ch01/ex15-1.webp",
+     "w": 1002,
+     "h": 683,
+     "page": 52
+    }
+   ]
+  },
+  {
+   "num": 16,
+   "group": "Selection",
+   "strips": [
+    {
+     "src": "book/ch01/ex16-1.webp",
+     "w": 1002,
+     "h": 91,
+     "page": 52
+    },
+    {
+     "src": "book/ch01/ex16-2.webp",
+     "w": 999,
+     "h": 400,
+     "page": 53
+    }
+   ]
+  },
+  {
+   "num": 17,
+   "group": "Selection",
+   "strips": [
+    {
+     "src": "book/ch01/ex17-1.webp",
+     "w": 999,
+     "h": 323,
+     "page": 53
+    }
+   ]
+  },
+  {
+   "num": 18,
+   "group": "Selection",
+   "strips": [
+    {
+     "src": "book/ch01/ex18-1.webp",
+     "w": 999,
+     "h": 539,
+     "page": 53
+    }
+   ]
+  },
+  {
+   "num": 19,
+   "group": "Selection",
+   "strips": [
+    {
+     "src": "book/ch01/ex19-1.webp",
+     "w": 999,
+     "h": 155,
+     "page": 53
+    },
+    {
+     "src": "book/ch01/ex19-2.webp",
+     "w": 1002,
+     "h": 1502,
+     "page": 54
+    },
+    {
+     "src": "book/ch01/ex19-3.webp",
+     "w": 999,
+     "h": 209,
+     "page": 55
+    }
+   ]
+  },
+  {
+   "num": 20,
+   "group": "Selection",
+   "strips": [
+    {
+     "src": "book/ch01/ex20-1.webp",
+     "w": 999,
+     "h": 768,
+     "page": 55
+    }
+   ]
+  },
+  {
+   "num": 21,
+   "group": "Selection",
+   "strips": [
+    {
+     "src": "book/ch01/ex21-1.webp",
+     "w": 999,
+     "h": 468,
+     "page": 55
+    },
+    {
+     "src": "book/ch01/ex21-2.webp",
+     "w": 1002,
+     "h": 198,
+     "page": 56
+    }
+   ]
+  },
+  {
+   "num": 22,
+   "group": "Arithmetic",
+   "strips": [
+    {
+     "src": "book/ch01/ex22-1.webp",
+     "w": 1002,
+     "h": 625,
+     "page": 56
+    }
+   ]
+  },
+  {
+   "num": 23,
+   "group": "Arithmetic",
+   "strips": [
+    {
+     "src": "book/ch01/ex23-1.webp",
+     "w": 1002,
+     "h": 552,
+     "page": 56
+    }
+   ]
+  },
+  {
+   "num": 24,
+   "group": "Arithmetic",
+   "strips": [
+    {
+     "src": "book/ch01/ex24-1.webp",
+     "w": 999,
+     "h": 1213,
+     "page": 57
+    }
+   ]
+  },
+  {
+   "num": 25,
+   "group": "Arithmetic",
+   "strips": [
+    {
+     "src": "book/ch01/ex25-1.webp",
+     "w": 999,
+     "h": 267,
+     "page": 57
+    },
+    {
+     "src": "book/ch01/ex25-2.webp",
+     "w": 1002,
+     "h": 1501,
+     "page": 58
+    },
+    {
+     "src": "book/ch01/ex25-3.webp",
+     "w": 999,
+     "h": 126,
+     "page": 59
+    }
+   ]
+  },
+  {
+   "num": 26,
+   "group": "Arrays",
+   "strips": [
+    {
+     "src": "book/ch01/ex26-1.webp",
+     "w": 999,
+     "h": 272,
+     "page": 59
+    }
+   ]
+  },
+  {
+   "num": 27,
+   "group": "Arrays",
+   "strips": [
+    {
+     "src": "book/ch01/ex27-1.webp",
+     "w": 999,
+     "h": 611,
+     "page": 59
+    }
+   ]
+  },
+  {
+   "num": 28,
+   "group": "Arrays",
+   "strips": [
+    {
+     "src": "book/ch01/ex28-1.webp",
+     "w": 999,
+     "h": 359,
+     "page": 59
+    },
+    {
+     "src": "book/ch01/ex28-2.webp",
+     "w": 1002,
+     "h": 489,
+     "page": 60
+    }
+   ]
+  },
+  {
+   "num": 29,
+   "group": "Arrays",
+   "strips": [
+    {
+     "src": "book/ch01/ex29-1.webp",
+     "w": 1002,
+     "h": 892,
+     "page": 60
+    }
+   ]
+  },
+  {
+   "num": 30,
+   "group": "Arrays",
+   "strips": [
+    {
+     "src": "book/ch01/ex30-1.webp",
+     "w": 1002,
+     "h": 92,
+     "page": 60
+    },
+    {
+     "src": "book/ch01/ex30-2.webp",
+     "w": 999,
+     "h": 485,
+     "page": 61
+    }
+   ]
+  },
+  {
+   "num": 31,
+   "group": "Arrays",
+   "strips": [
+    {
+     "src": "book/ch01/ex31-1.webp",
+     "w": 999,
+     "h": 332,
+     "page": 61
+    }
+   ]
+  },
+  {
+   "num": 32,
+   "group": "Arrays",
+   "strips": [
+    {
+     "src": "book/ch01/ex32-1.webp",
+     "w": 999,
+     "h": 277,
+     "page": 61
+    },
+    {
+     "src": "book/ch01/ex32-2.webp",
+     "w": 1002,
+     "h": 161,
+     "page": 62
+    }
+   ]
+  },
+  {
+   "num": 33,
+   "group": "Arrays",
+   "strips": [
+    {
+     "src": "book/ch01/ex33-1.webp",
+     "w": 1002,
+     "h": 485,
+     "page": 62
+    }
+   ]
+  },
+  {
+   "num": 34,
+   "group": "Arrays",
+   "strips": [
+    {
+     "src": "book/ch01/ex34-1.webp",
+     "w": 1002,
+     "h": 820,
+     "page": 62
+    },
+    {
+     "src": "book/ch01/ex34-2.webp",
+     "w": 999,
+     "h": 569,
+     "page": 63
+    }
+   ]
+  },
+  {
+   "num": 35,
+   "group": "Arrays",
+   "strips": [
+    {
+     "src": "book/ch01/ex35-1.webp",
+     "w": 999,
+     "h": 546,
+     "page": 63
+    }
+   ]
+  },
+  {
+   "num": 36,
+   "group": "Arrays",
+   "strips": [
+    {
+     "src": "book/ch01/ex36-1.webp",
+     "w": 999,
+     "h": 351,
+     "page": 63
+    },
+    {
+     "src": "book/ch01/ex36-2.webp",
+     "w": 1002,
+     "h": 171,
+     "page": 64
+    }
+   ]
+  },
+  {
+   "num": 37,
+   "group": "Trees",
+   "strips": [
+    {
+     "src": "book/ch01/ex37-1.webp",
+     "w": 1002,
+     "h": 564,
+     "page": 64
+    }
+   ]
+  },
+  {
+   "num": 38,
+   "group": "Trees",
+   "strips": [
+    {
+     "src": "book/ch01/ex38-1.webp",
+     "w": 1002,
+     "h": 608,
+     "page": 64
+    }
+   ]
+  },
+  {
+   "num": 39,
+   "group": "Trees",
+   "strips": [
+    {
+     "src": "book/ch01/ex39-1.webp",
+     "w": 999,
+     "h": 864,
+     "page": 65
+    }
+   ]
+  },
+  {
+   "num": 40,
+   "group": "Trees",
+   "strips": [
+    {
+     "src": "book/ch01/ex40-1.webp",
+     "w": 999,
+     "h": 615,
+     "page": 65
+    },
+    {
+     "src": "book/ch01/ex40-2.webp",
+     "w": 1002,
+     "h": 553,
+     "page": 66
+    }
+   ]
+  },
+  {
+   "num": 41,
+   "group": "Trees",
+   "strips": [
+    {
+     "src": "book/ch01/ex41-1.webp",
+     "w": 1002,
+     "h": 542,
+     "page": 66
+    },
+    {
+     "src": "book/ch01/ex41-2.webp",
+     "w": 999,
+     "h": 1359,
+     "page": 67
+    }
+   ]
+  },
+  {
+   "num": 42,
+   "group": "Trees",
+   "strips": [
+    {
+     "src": "book/ch01/ex42-1.webp",
+     "w": 999,
+     "h": 128,
+     "page": 67
+    },
+    {
+     "src": "book/ch01/ex42-2.webp",
+     "w": 1002,
+     "h": 1498,
+     "page": 68
+    },
+    {
+     "src": "book/ch01/ex42-3.webp",
+     "w": 999,
+     "h": 276,
+     "page": 69
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,76 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../../layouts/Base.astro';
+import BookExProgress from '../../../components/book/BookExProgress.tsx';
+import { chapters, bookHref, pdfHref } from '../../../data/book';
+import { chapterPages } from '../../../components/book/pages';
+
+export function getStaticPaths() {
+  return chapters.map((ch) => ({ params: { chapter: ch.slug }, props: { ch } }));
+}
+const { ch } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const entries = await getCollection('book');
+const summary = new Map(entries.map((e) => [e.data.section, e.data]));
+const allEx = chapterPages(ch.num).exercises.map((e) => e.num);
+---
+<Base title={`الفصل ${ch.num}: ${ch.ar} · كتاب Erickson`} description={ch.blurb}>
+  <div class="container ch-page">
+    <nav class="crumbs"><a href={`${base}book/`}>الكتاب</a><span>‹</span><span>الفصل {ch.num}</span></nav>
+    <header class="ch-head">
+      <span class="ch-num">{ch.num}</span>
+      <div>
+        <h1>{ch.ar} <span class="en">{ch.en}</span></h1>
+        <p class="lead">{ch.blurb}</p>
+        <p class="meta">صفحات الكتاب <span class="ltr">{ch.pages[0]}–{ch.pages[1]}</span> · <a href={pdfHref(base, ch.pages[0])} target="_blank" rel="noopener">افتح الفصل في الكتاب ↗</a></p>
+      </div>
+    </header>
+    <div class="sec-cards">
+      {ch.sections.map((s) => {
+        const d = summary.get(s.id);
+        return d ? (
+          <a class="sc card" href={bookHref(base, ch, s)}>
+            <span class="sc-id ltr">{s.id}</span>
+            <span class="sc-t">{s.ar}<small class="ltr">{s.en}</small></span>
+            <span class="sc-sum">{d.summary}</span>
+            <span class="sc-meta">ص <span class="ltr">{s.page}</span> · ≈ {d.minutes} دقيقة{s.exercises.length > 0 && <> · {s.exercises.length} من تمارين الكتاب</>}</span>
+          </a>
+        ) : (
+          <div class="sc card soon">
+            <span class="sc-id ltr">{s.id}</span>
+            <span class="sc-t">{s.ar}<small class="ltr">{s.en}</small></span>
+            <span class="sc-meta">قريبًا · ص <span class="ltr">{s.page}</span></span>
+          </div>
+        );
+      })}
+      <a class="sc card ex" href={`${bookHref(base, ch)}exercises/`}>
+        <span class="sc-id">✎</span>
+        <span class="sc-t">تمارين الفصل كلها<small class="ltr">Exercises</small></span>
+        <span class="sc-sum">{allEx.length} تمرينًا في نهاية الفصل، مجموعة حسب الموضوع. <BookExProgress client:load chapter={ch.num} nums={allEx} /></span>
+        <span class="sc-meta">ص <span class="ltr">{ch.exercisesPage}–{ch.pages[1]}</span></span>
+      </a>
+    </div>
+  </div>
+</Base>
+<style>
+  .ch-page { padding-top: 10px; max-width: 1000px; }
+  .crumbs { display: flex; gap: 8px; font-size: 0.86rem; color: var(--ink-3); padding: 16px 0 8px; }
+  .crumbs a { color: var(--ink-2); text-decoration: none; }
+  .ch-head { display: flex; gap: 18px; align-items: flex-start; margin-bottom: 22px; }
+  .ch-num { flex: none; display: grid; place-items: center; width: 64px; height: 64px; border-radius: 16px; background: var(--brand-soft); color: var(--brand); font: 700 2rem/1 var(--font-num); }
+  .ch-head h1 { margin: 0 0 6px; }
+  .ch-head h1 .en { font-size: 0.45em; margin-inline-start: 6px; }
+  .lead { color: var(--ink-2); margin: 0 0 6px; }
+  .meta { font-size: 0.86rem; color: var(--ink-3); margin: 0; }
+  .meta a { color: var(--brand); text-decoration: none; }
+  .sec-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 12px; }
+  .sc { display: grid; grid-template-columns: 52px 1fr; gap: 2px 12px; padding: 14px 16px; text-decoration: none; color: var(--ink); }
+  a.sc:hover { border-color: var(--brand); }
+  .sc.soon { opacity: 0.55; }
+  .sc-id { grid-row: span 3; display: grid; place-items: center; width: 52px; height: 52px; border-radius: 12px; background: var(--olive-soft); color: var(--brand); font: 700 1.1rem/1 var(--font-num); }
+  .sc-t { font-family: var(--font-head); font-weight: 700; font-size: 1.05rem; }
+  .sc-t small { display: block; font-family: var(--font-sans); font-weight: 500; font-size: 0.76rem; color: var(--ink-3); text-align: right; }
+  .sc-sum { font-size: 0.86rem; color: var(--ink-2); line-height: 1.6; }
+  .sc-meta { font-size: 0.76rem; color: var(--ink-3); }
+  .sc.ex .sc-id { background: var(--brand-soft); }
+</style>

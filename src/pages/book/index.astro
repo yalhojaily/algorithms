@@ -1,0 +1,80 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { BOOK, TOC, chapters, bookHref, pdfHref } from '../../data/book';
+
+const base = import.meta.env.BASE_URL;
+const ready = new Set((await getCollection('book')).map((e) => e.data.section));
+---
+<Base title="كتاب Erickson · الخوارزميات" description="دراسة كتاب Jeff Erickson «Algorithms» قسمًا قسمًا: صفحات الكتاب نفسها، ثم شرح عربي موسّع، ومحاكاة، وتمارين.">
+  <div class="container book-home">
+    <header class="bh-head">
+      <div class="bh-kicker">المسار الجديد · كتاب واحد من أوله إلى آخره</div>
+      <h1><span class="ltr">Algorithms</span> <span class="by">لـ Jeff Erickson</span></h1>
+      <p class="lead">نقرأ الكتاب نفسه، قسمًا قسمًا. في كل قسم تجد صفحات الكتاب الأصلية أولًا مع دليل يوجه قراءتك، ثم شرحًا عربيًا موسّعًا بالمصطلحات الإنجليزية، ومحاكاة تفاعلية، وأسئلة سريعة، ثم تمارين الكتاب نفسه مع تمارين محلولة إضافية.</p>
+      <div class="bh-actions">
+        <a class="btn btn-primary" href={bookHref(base, chapters[0], chapters[0].sections[0])}>ابدأ الفصل 1 ←</a>
+        <a class="btn" href={pdfHref(base, 1)} target="_blank" rel="noopener">الكتاب كاملًا (PDF) ↗</a>
+      </div>
+    </header>
+
+    <section class="how card">
+      <h2>كيف يسير كل قسم؟</h2>
+      <ol class="steps">
+        <li><b>تمهيد:</b> السؤال الذي يجيب عنه القسم، قبل أي تعريف.</li>
+        <li><b>اقرأ من الكتاب:</b> صفحات الكتاب الأصلية، ومعها دليل قراءة: ما الذي تركز عليه، والمصطلحات.</li>
+        <li><b>الشرح والتجربة:</b> الأفكار نفسها بالعربية، بتفصيل واستطراد، مع محاكاة تفاعلية.</li>
+        <li><b>تحقّق من فهمك:</b> أسئلة سريعة.</li>
+        <li><b>تمارين الكتاب:</b> تمارين الفصل التي تخص هذا القسم، وتمارين إضافية بتلميحات وحلول كاملة.</li>
+        <li><b>الخلاصة:</b> القسم في سطور.</li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>فهرس الكتاب</h2>
+      <div class="toc">
+        {TOC.map((c) => {
+          const ch = chapters.find((x) => x.num === c.num);
+          const n = ch ? ch.sections.filter((s) => ready.has(s.id)).length : 0;
+          return ch && n > 0 ? (
+            <a class="toc-card card on" href={bookHref(base, ch)}>
+              <span class="tc-num">{c.num}</span>
+              <span class="tc-t">{c.ar}<small class="ltr">{c.en}</small></span>
+              <span class="tc-meta">{n} من {ch.sections.length} أقسام · ص <span class="ltr">{c.page}</span></span>
+            </a>
+          ) : (
+            <div class="toc-card card">
+              <span class="tc-num">{c.num}</span>
+              <span class="tc-t">{c.ar}<small class="ltr">{c.en}</small></span>
+              <span class="tc-meta">قريبًا · ص <span class="ltr">{c.page}</span></span>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+
+    <p class="license">الكتاب: Jeff Erickson، <i class="ltr">Algorithms</i>، {BOOK.edition}، متاح مجانًا من <a href={BOOK.home} target="_blank" rel="noopener" class="ltr">jeffe.cs.illinois.edu</a> بترخيص <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>، وهو ما يسمح بعرض صفحاته هنا مع نسبتها إليه. الشرح العربي والمحاكاة والتمارين الإضافية من هذا الموقع.</p>
+  </div>
+</Base>
+<style>
+  .book-home { padding-top: 28px; max-width: 980px; }
+  .bh-kicker { color: var(--brand); font-weight: 700; font-size: 0.9rem; }
+  .bh-head h1 { margin: 6px 0 10px; font-size: clamp(2rem, 5vw, 3rem); }
+  .bh-head h1 .ltr { font-family: var(--font-num); }
+  .bh-head .by { font-size: 0.5em; color: var(--ink-2); }
+  .lead { font-size: 1.1rem; color: var(--ink-2); max-width: 760px; }
+  .bh-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0 28px; }
+  .how { padding: 16px 22px; margin-bottom: 30px; }
+  .how h2 { margin-top: 0; font-size: 1.2rem; border: 0; padding: 0; }
+  .steps { margin: 0; padding-inline-start: 1.3em; line-height: 1.9; }
+  .toc { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 12px; }
+  .toc-card { display: grid; grid-template-columns: 44px 1fr; grid-template-rows: auto auto; gap: 2px 12px; padding: 12px 14px; text-decoration: none; color: var(--ink-3); opacity: 0.75; }
+  .toc-card.on { color: var(--ink); opacity: 1; border-color: color-mix(in srgb, var(--brand) 40%, var(--line)); }
+  a.toc-card.on:hover { border-color: var(--brand); }
+  .tc-num { grid-row: span 2; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 12px; background: var(--paper-2); font: 700 1.3rem/1 var(--font-num); }
+  .on .tc-num { background: var(--brand-soft); color: var(--brand); }
+  .tc-t { font-family: var(--font-head); font-weight: 700; }
+  .tc-t small { display: block; font-family: var(--font-sans); font-weight: 500; font-size: 0.78rem; color: var(--ink-3); text-align: right; }
+  .tc-meta { font-size: 0.78rem; color: var(--ink-3); }
+  .license { margin-top: 30px; font-size: 0.85rem; color: var(--ink-3); }
+</style>

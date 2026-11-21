@@ -1,0 +1,45 @@
+---
+// The book's own pages for one section, cut into strips (tools/extract_erickson.py).
+import { readingStrips } from './pages';
+import { pdfHref } from '../../data/book';
+
+interface Props { section: string }
+const { section } = Astro.props;
+const strips = readingStrips(section);
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+{strips.length > 0 && (
+  <div class="bookp">
+    {strips.map((s, i) => {
+      const newPage = i === 0 || strips[i - 1].page !== s.page;
+      return (
+        <>
+          {newPage && (
+            <div class="pg-mark">
+              <span>صفحة <b class="ltr">{s.page}</b></span>
+              <a href={pdfHref(base, s.page)} target="_blank" rel="noopener">افتح في الكتاب ↗</a>
+            </div>
+          )}
+          <img src={`${base}/${s.src}`} width={s.w} height={s.h} loading="lazy" decoding="async" alt={`Erickson, Algorithms، صفحة ${s.page}`} />
+        </>
+      );
+    })}
+    <div class="credit">Jeff Erickson, <i>Algorithms</i> (2019) · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a></div>
+  </div>
+)}
+<style>
+  .bookp { direction: ltr; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 6px 4px 10px; margin: 1em 0 1.4em; }
+  .bookp img { display: block; width: 100%; max-width: 640px; height: auto; margin: 0 auto; }
+  .pg-mark { direction: rtl; display: flex; justify-content: space-between; align-items: center; max-width: 640px; margin: 10px auto 4px; padding: 6px 12px 0; font-size: 0.78rem; color: #8a8f99; border-top: 1px dashed #e3e0d8; }
+  .pg-mark:first-child { border-top: 0; margin-top: 2px; }
+  .pg-mark a { color: #8a8f99; text-decoration: none; }
+  .pg-mark a:hover { color: #b3263a; }
+  .credit { text-align: center; font-size: 0.72rem; color: #9a9da5; margin-top: 8px; }
+  .credit a { color: inherit; }
+  :global([data-theme='dark']) .bookp { background: #16181e; }
+  :global([data-theme='dark']) .bookp img { filter: invert(0.9) hue-rotate(180deg) contrast(0.95); }
+  @media (prefers-color-scheme: dark) {
+    :global(:root:not([data-theme='light'])) .bookp { background: #16181e; }
+    :global(:root:not([data-theme='light'])) .bookp img { filter: invert(0.9) hue-rotate(180deg) contrast(0.95); }
+  }
+</style>
