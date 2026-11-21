@@ -739,3 +739,78 @@ table.rel-grid { border-collapse: separate; border-spacing: 4px; margin: 0 auto;
 .inv-banner.sq-ok { border: 1.5px solid var(--green); background: var(--green-soft); }
 
 .sq-code { display: block; font-family: var(--font-mono); font-size: 0.85rem; margin-top: 4px; color: var(--brand); text-align: left; }
+
+/* ---------- Hash table with chaining (lesson 2.5) ---------- */
+.hc-table { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 3px 12px; padding: 8px; border: 1px solid var(--line); border-radius: 12px; background: var(--paper); margin-bottom: 12px; }
+.hc-row { display: flex; align-items: center; gap: 6px; min-width: 0; padding: 2px; border-radius: 6px; }
+.hc-row.hot { background: var(--red-soft); }
+.hc-i { width: 22px; text-align: right; font-family: var(--font-mono); font-size: 0.72rem; color: var(--ink-3); flex: none; }
+.hc-chain { display: flex; flex-wrap: wrap; gap: 3px; min-width: 0; }
+.hc-chain i { font-style: normal; font-family: var(--font-mono); font-size: 0.72rem; padding: 1px 5px; border-radius: 4px; background: var(--brand-soft); border: 1px solid var(--brand); }
+.hc-chain i + i::before { content: ''; }
+.hc-chain em { font-style: normal; color: var(--ink-3); font-size: 0.75rem; }
+.hc-hist { display: flex; align-items: flex-end; gap: 6px; height: 120px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); margin-bottom: 8px; }
+.hc-col { flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; min-width: 0; }
+.hc-bar { position: relative; flex: 1; width: 100%; display: flex; align-items: flex-end; }
+.hc-bar i { display: block; width: 100%; background: var(--amber); border-radius: 3px 3px 0 0; }
+.hc-bar b { position: absolute; left: 50%; width: 8px; height: 8px; margin-left: -4px; margin-bottom: -4px; border-radius: 50%; background: var(--blue); }
+.hc-col span { font-family: var(--font-mono); font-size: 0.7rem; color: var(--ink-3); }
+
+/* ---------- Open addressing (lesson 2.6) ---------- */
+.oa-in { width: 90px; padding: 5px 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); font-family: var(--font-mono); }
+.oa-cells { display: grid; grid-template-columns: repeat(16, 1fr); gap: 3px; margin: 10px 0; }
+@media (max-width: 640px) { .oa-cells { grid-template-columns: repeat(8, 1fr); } }
+.oa-cell { position: relative; height: 44px; border-radius: 6px; border: 1px solid var(--line); background: var(--paper); display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 0; }
+.oa-cell.full { background: var(--brand-soft); border-color: var(--brand); }
+.oa-cell.tomb { background: repeating-linear-gradient(45deg, var(--card), var(--card) 4px, var(--paper) 4px, var(--paper) 8px); }
+.oa-cell.path { outline: 2px solid var(--amber); outline-offset: 1px; }
+.oa-cell.end { outline-color: var(--green); outline-width: 3px; }
+.oa-v { font-family: var(--font-mono); font-size: 0.74rem; font-weight: 700; }
+.oa-i { font-family: var(--font-mono); font-size: 0.58rem; color: var(--ink-3); }
+.oa-step { position: absolute; top: -8px; right: -5px; min-width: 15px; height: 15px; border-radius: 8px; background: var(--amber); color: var(--paper); font-size: 0.6rem; font-family: var(--font-mono); display: flex; align-items: center; justify-content: center; padding: 0 3px; }
+.oa-c { stroke-width: 2.2; }
+.oa-c.lm { stroke: var(--brand); }
+.oa-c.lh { stroke: var(--amber); }
+.oa-c.um { stroke: var(--blue); stroke-dasharray: 5 4; }
+.oa-now { stroke: var(--ink-3); stroke-dasharray: 3 3; }
+.oa-pt.miss { fill: var(--red); stroke: var(--paper); stroke-width: 1.5; }
+.oa-pt.hit { fill: var(--amber); stroke: var(--paper); stroke-width: 1.5; }
+
+/* ---------- Binary search (lesson 2.7) ---------- */
+.bsl-arr { display: grid; grid-template-columns: repeat(25, 1fr); gap: 2px; margin: 26px 0 22px; }
+@media (max-width: 640px) { .bsl-arr { grid-template-columns: repeat(9, 1fr); row-gap: 26px; } }
+.bsl-cell { position: relative; height: 40px; border-radius: 5px; border: 1px solid var(--line); background: var(--paper); opacity: 0.4; display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 0; }
+.bsl-cell.live { opacity: 1; background: var(--card); border-color: var(--ink-3); }
+.bsl-cell.eq .bsl-v { text-decoration: underline; text-decoration-color: var(--amber); text-decoration-thickness: 2px; }
+.bsl-cell.mid { background: var(--brand); border-color: var(--brand); opacity: 1; }
+.bsl-cell.mid .bsl-v, .bsl-cell.mid .bsl-i { color: var(--paper); }
+.bsl-cell.res { background: var(--green); border-color: var(--green); opacity: 1; }
+.bsl-cell.res .bsl-v, .bsl-cell.res .bsl-i { color: var(--paper); }
+.bsl-cell.end { border-style: dashed; }
+.bsl-v { font-family: var(--font-mono); font-size: 0.76rem; font-weight: 700; }
+.bsl-i { font-family: var(--font-mono); font-size: 0.55rem; color: var(--ink-3); }
+.bsl-tag { position: absolute; font-family: var(--font-mono); font-size: 0.62rem; font-weight: 700; }
+.bsl-tag.lo { bottom: -16px; color: var(--blue); }
+.bsl-tag.hi { top: -16px; color: var(--amber); }
+.bsl-line { position: relative; height: 70px; margin: 18px 14px; }
+.bsl-track { position: absolute; left: 0; right: 0; top: 30px; height: 4px; background: var(--line); border-radius: 2px; }
+.bsl-range { position: absolute; top: 24px; height: 16px; background: var(--blue-soft); border: 2px solid var(--blue); border-radius: 8px; transition: all .25s; min-width: 4px; }
+.bsl-midpin { position: absolute; top: 18px; width: 0; }
+.bsl-midpin::before { content: ''; position: absolute; left: -2px; top: 0; width: 4px; height: 28px; background: var(--brand); border-radius: 2px; }
+.bsl-midpin span { position: absolute; top: -18px; transform: translateX(-50%); font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; color: var(--brand); }
+.bsl-end { position: absolute; top: 44px; font-family: var(--font-mono); font-size: 0.7rem; color: var(--ink-3); }
+.bsl-end.l { left: 0; } .bsl-end.r { right: 0; }
+
+/* ---------- Sort race (lesson 2.8) ---------- */
+.sr-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 10px 0; }
+.sr-lane { border: 1px solid var(--line); border-radius: 12px; background: var(--paper); padding: 8px; min-width: 0; }
+.sr-lane.fin { border-color: var(--green); }
+.sr-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.sr-done { font-size: 0.78rem; color: var(--green); font-weight: 700; }
+.sr-bars { display: flex; align-items: flex-end; gap: 2px; height: 120px; }
+.sr-bars i { flex: 1; min-width: 0; background: var(--ink-3); border-radius: 2px 2px 0 0; transition: height .15s; }
+.sr-bars i.ok { background: var(--green); }
+.sr-bars i.cmp { background: var(--brand); }
+.sr-stats { display: flex; justify-content: space-between; gap: 6px; margin-top: 6px; font-size: 0.8rem; flex-wrap: wrap; }
+.sr-stats b { font-family: var(--font-mono); }
+.sr-stats em { font-style: normal; color: var(--ink-3); font-family: var(--font-mono); font-size: 0.72rem; }
