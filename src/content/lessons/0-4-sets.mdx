@@ -275,6 +275,7 @@ INTERSECT(A[0..n-1], B[0..m-1]):   // both sorted, no repeats
 
 $A \cup B$، و$A \cap B$، و$A - B$، و$B - A$، و$A \,\triangle\, B$، و$\overline{A}$، و$\overline{A \cup B}$، و$A \times (A \cap B)$.
 
+<div slot="hint">اعمل عنصرًا عنصرًا. الفرق المتماثل: العناصر في واحدة بالضبط. والمتممة نسبةً إلى $U$. وحاصل الضرب الديكارتي: كل ثنائي $(a, b)$ حيث $a$ من الأولى و$b$ من الثانية.</div>
 <div slot="solution">
 
 - $A \cup B = \{1, 2, 3, 4, 5\}$
@@ -300,6 +301,7 @@ $A \cup B$، و$A \cap B$، و$A - B$، و$B - A$، و$A \,\triangle\, B$، و$\
 7. $(1, 2) = (2, 1)$
 8. $|\mathcal{P}(\mathcal{P}(\varnothing))| = 2$
 
+<div slot="hint">فرّق بين «عنصر في» ($\in$) و«مجموعة جزئية من» ($\subseteq$). اكتب عناصر كل مجموعة صراحة، ثم اسأل: هل الشيء الأيسر **أحد العناصر**، أم أن **كل عناصره** موجودة في الأيمن؟</div>
 <div slot="solution">
 
 1. كاذبة، فعنصرا المجموعة هما 1 و2، وليس $\{1\}$ أحدهما.
@@ -323,6 +325,7 @@ $A \cup B$، و$A \cap B$، و$A - B$، و$B - A$، و$A \,\triangle\, B$، و$\
 3. العناصر التي في $A$ فقط، أي ليست في $B$ ولا في $C$.
 4. العناصر التي ليست في أي منها.
 
+<div slot="hint">ترجم كل وصف إلى منطق: «في $A$ وليس في $B$» هو $A \cap \overline{B}$. وفي الجزء 2: «اثنتين على الأقل» يعني أن أحد الأزواج الثلاثة يحتوي العنصر.</div>
 <div slot="solution">
 
 1. $A \,\triangle\, B$، أو $(A - B) \cup (B - A)$.
@@ -341,6 +344,7 @@ $A \cup B$، و$A \cap B$، و$A - B$، و$B - A$، و$A \,\triangle\, B$، و$\
 2. اكتب بالرموز مسألة إيجاد أصغر فريق.
 3. كم فريقًا ستفحص الخوارزمية التي تجرّب كل الفرق، إذا كان عدد المرشحين 30؟
 
+<div slot="hint">الفريق يغطي المهارات إذا كان اتحاد مهارات أعضائه يحتوي $M$. وكل فريق مجموعة جزئية من $C$، فكم مجموعة جزئية لمجموعة فيها 30 عنصرًا؟</div>
 <div slot="solution">
 
 1. $\bigcup_{p \in T} S_p = M$. ويكفي أن نكتب $M \subseteq \bigcup_{p \in T} S_p$.
@@ -354,6 +358,7 @@ $A \cup B$، و$A \cap B$، و$A - B$، و$B - A$، و$A \,\triangle\, B$، و$\
 
 أثبت أن العبارات الثلاث متكافئة: (أ) $A \subseteq B$، و(ب) $A \cap B = A$، و(ج) $A \cup B = B$. يكفي أن تثبت (أ) ← (ب) ← (ج) ← (أ).
 
+<div slot="hint">لكل اتجاه، اكتب ما تريد إثباته: تساوي مجموعتين يعني احتواءً في الاتجاهين. وأحد الاحتواءين دائمًا صحيح، فركّز على الآخر.</div>
 <div slot="solution">
 
 **(أ) ← (ب):** دائمًا $A \cap B \subseteq A$. وفي الاتجاه الآخر: إذا كان $x \in A$ فإن $x \in B$ بالفرض، فـ $x \in A \cap B$. إذن $A \cap B = A$.
@@ -386,6 +391,7 @@ $A \cup B$، و$A \cap B$، و$A - B$، و$B - A$، و$A \,\triangle\, B$، و$\
 1. أثبت أن $\mathcal{P}(A) \cap \mathcal{P}(B) = \mathcal{P}(A \cap B)$.
 2. أثبت أن $\mathcal{P}(A) \cup \mathcal{P}(B) \subseteq \mathcal{P}(A \cup B)$، وبيّن بمثال مضاد أن التساوي لا يتحقق دائمًا.
 
+<div slot="hint">$X \in \mathcal{P}(A)$ تعني $X \subseteq A$. ترجم الطرفين بهذا. وللمثال المضاد في الجزء 2: جرّب $A$ و$B$ منفصلتين، وابحث عن مجموعة جزئية من $A \cup B$ تأخذ من الاثنتين.</div>
 <div slot="solution">
 
 1. $X \in \mathcal{P}(A) \cap \mathcal{P}(B) \iff X \subseteq A \land X \subseteq B \iff X \subseteq A \cap B \iff X \in \mathcal{P}(A \cap B)$. الخطوة الوسطى تحتاج إلى برهان قصير: كل عنصر في $X$ عنصر في $A$ وفي $B$، أي في $A \cap B$. والعكس كذلك.
