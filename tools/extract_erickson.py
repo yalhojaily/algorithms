@@ -31,6 +31,11 @@ CHAPTERS = {
         ("0.1", "What is an algorithm?"), ("0.2", "Multiplication"), ("0.3", "Congressional Apportionment"),
         ("0.4", "A Bad Example"), ("0.5", "Describing Algorithms"), ("0.6", "Analyzing Algorithms"),
     ]),
+    2: dict(first=71, last=96, exercises=93, sections=[
+        ("2.1", "N Queens"), ("2.2", "Game Trees"), ("2.3", "Subset Sum"), ("2.4", "The General Pattern"),
+        ("2.5", "Text Segmentation (Interpunctio Verborum)"), ("2.6", "Longest Increasing Subsequence"),
+        ("2.7", "Longest Increasing Subsequence, Take 2"), ("2.8", "Optimal Binary Search Trees"),
+    ]),
     1: dict(first=21, last=70, exercises=44, sections=[
         ("1.1", "Reductions"), ("1.2", "Simplify and Delegate"), ("1.3", "Tower of Hanoi"),
         ("1.4", "Mergesort"), ("1.5", "Quicksort"), ("1.6", "The Pattern"), ("1.7", "Recursion Trees"),

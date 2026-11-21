@@ -64,6 +64,20 @@ export const chapters: BookChapter[] = [
       sec('1.10', 'Exponentiation', 'الرفع إلى أس', 42, [24, 25]),
     ],
   },
+  {
+    num: 2, slug: '02-backtracking', en: 'Backtracking', ar: 'التراجع', pages: [71, 96], exercisesPage: 93,
+    blurb: 'ابنِ الحل قطعة قطعة، وجرّب كل خيار للقطعة التالية بالاستدعاء: الملكات، وأشجار الألعاب، ومجموع المجموعة الجزئية، وتقطيع النص، وأطول متتالية متزايدة، وأشجار البحث المثلى. وأهم سؤال في كل مرة: ماذا نتذكر من القرارات السابقة؟',
+    sections: [
+      sec('2.1', 'N Queens', 'الملكات', 71),
+      sec('2.2', 'Game Trees', 'أشجار الألعاب', 74),
+      sec('2.3', 'Subset Sum', 'مجموع المجموعة الجزئية', 76, [1]),
+      sec('2.4', 'The General Pattern', 'النمط العام', 79, [3]),
+      sec('2.5', 'Text Segmentation (Interpunctio Verborum)', 'تقطيع النص', 80, [2]),
+      sec('2.6', 'Longest Increasing Subsequence', 'أطول متتالية متزايدة', 86, [5]),
+      sec('2.7', 'Longest Increasing Subsequence, Take 2', 'أطول متتالية متزايدة، المحاولة الثانية', 89, [4]),
+      sec('2.8', 'Optimal Binary Search Trees', 'أشجار البحث الثنائية المثلى', 91, [6]),
+    ],
+  },
 ];
 
 /** The whole book, for the table of contents (chapters not yet on the site are shown as coming). */
