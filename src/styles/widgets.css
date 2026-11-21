@@ -377,3 +377,45 @@ table.rel-grid { border-collapse: separate; border-spacing: 4px; margin: 0 auto;
 .fm-node.miss circle { stroke: var(--amber); stroke-dasharray: 4 3; stroke-width: 2.4; }
 .fm-node.coll circle { stroke: var(--red); stroke-width: 2.6; }
 .fm-node:hover circle { stroke-width: 3; }
+
+/* ---------- Tromino tiling (lesson 0.6) ---------- */
+.tr-wrap { display: flex; flex-direction: column; align-items: center; gap: 8px; margin: 10px 0 14px; }
+.tr-board { position: relative; display: grid; gap: 0; border: 2px solid var(--ink); background: var(--paper-2); }
+.tr-cell { border: 0.5px solid color-mix(in srgb, var(--ink) 15%, transparent); background: var(--card); padding: 0; cursor: pointer; font-size: 0.8rem; color: var(--ink); transition: background 0.15s; }
+.tr-cell.on { opacity: 0.85; }
+.tr-cell.last { opacity: 1; box-shadow: inset 0 0 0 2px #fff; }
+.tr-cell.miss { background: var(--ink) !important; color: var(--gold); font-size: 1rem; }
+.tr-cell.reg:not(.on):not(.miss) { background: var(--amber-soft); }
+.tr-frame { position: absolute; border: 3px solid var(--amber); pointer-events: none; box-sizing: border-box; transition: all 0.2s; }
+.tr-legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 0.8rem; color: var(--ink-2); }
+.tr-legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: middle; margin-inline-end: 4px; }
+
+/* ---------- Enumeration + Pascal (lesson 0.7) ---------- */
+.en-slots { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: center; padding: 14px; border-radius: 12px; background: var(--paper-2); margin: 10px 0 12px; }
+.en-slot { width: 58px; height: 64px; border-radius: 10px; border: 1.5px dashed var(--line); background: var(--card); display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.en-slot span { font-family: var(--font-num); font-weight: 700; font-size: 1.5rem; min-height: 1.6rem; }
+.en-slot i { font-style: normal; font-size: 0.65rem; color: var(--ink-3); }
+.en-slot.on { border-style: solid; border-color: var(--brand); }
+.en-slot.on span { color: var(--brand); }
+.en-slot.now { background: var(--amber-soft); border-color: var(--amber); }
+.en-formula { margin-left: 14px; }
+.pt-tri { display: flex; flex-direction: column; align-items: center; gap: 3px; overflow-x: auto; padding: 6px 0; }
+.pt-row { display: flex; gap: 3px; }
+.pt-cell { min-width: 36px; height: 30px; padding: 0 4px; border-radius: 8px; border: 1px solid var(--line); background: var(--card); color: var(--ink-2); font-family: var(--font-mono); font-size: 0.74rem; cursor: pointer; }
+.pt-cell.sel { background: var(--brand); border-color: var(--brand); color: #fff; font-weight: 700; }
+.pt-cell.par { background: var(--amber-soft); border-color: var(--amber); color: var(--ink); font-weight: 700; }
+.pt-cell.row { background: var(--blue-soft); border-color: var(--blue); color: var(--blue); font-weight: 700; }
+.pt-cell.odd { background: var(--brand); border-color: var(--brand); color: #fff; }
+.pt-cell.even { opacity: 0.45; }
+.pt-explain { text-align: center; margin-top: 8px; min-height: 2.4em; overflow-x: auto; }
+@media (max-width: 560px) { .pt-cell { min-width: 22px; height: 24px; font-size: 0.6rem; padding: 0 2px; } .pt-row, .pt-tri { gap: 2px; } }
+
+/* ---------- Loop counter (lesson 0.8) ---------- */
+.lc-svg { width: 100%; height: auto; background: var(--card); border-radius: 12px; border: 1px solid var(--line); margin: 6px 0; }
+.lc-axis { stroke: var(--ink-3); stroke-width: 1.5; }
+.lc-bar { fill: var(--paper-2); stroke: var(--line); transition: fill 0.15s; }
+.lc-bar.on { fill: color-mix(in srgb, var(--brand) 70%, transparent); stroke: var(--brand); }
+.lc-bar.now { fill: var(--amber); stroke: var(--amber); }
+.lc-lbl { font-family: var(--font-mono); font-size: 10px; fill: var(--ink-3); }
+.lc-diag { stroke: var(--blue); stroke-width: 2; stroke-dasharray: 6 4; }
+.lc-sum { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: center; padding: 10px; border-radius: 10px; background: var(--paper-2); margin-bottom: 12px; overflow-x: auto; }
