@@ -81,9 +81,9 @@ export const curriculum: Phase[] = [
       ['0.6', 'الاستقراء الرياضي والاستقراء القوي', 'Induction and Strong Induction', 2, { prereqs: ['0.3'], lab: true }],
       ['0.7', 'التباديل والتوافيق', 'Permutations and Combinations', 2, { prereqs: ['0.4'], lab: true }],
       ['0.8', 'المتتاليات والمجاميع', 'Sequences and Sums', 2, { prereqs: ['0.6'], lab: true }],
-      ['0.9', 'الأسس واللوغاريتمات', 'Exponents and Logarithms', 3],
-      ['0.10', 'الاحتمالات والقيمة المتوقعة', 'Probability and Expected Value', 3, { prereqs: ['0.7'] }],
-      ['0.11', 'مبادئ نظرية الرسوم البيانية', 'Graph Theory Basics', 3, { prereqs: ['0.5', '0.6'] }],
+      ['0.9', 'الأسس واللوغاريتمات', 'Exponents and Logarithms', 3, { lab: true }],
+      ['0.10', 'الاحتمالات والقيمة المتوقعة', 'Probability and Expected Value', 3, { prereqs: ['0.7'], lab: true }],
+      ['0.11', 'مبادئ نظرية الرسوم البيانية', 'Graph Theory Basics', 3, { prereqs: ['0.5', '0.6'], lab: true }],
     ], false),
 
   phase(1, 'أساسيات تحليل الخوارزميات', 'Foundations of Analysis', [4, 6],
