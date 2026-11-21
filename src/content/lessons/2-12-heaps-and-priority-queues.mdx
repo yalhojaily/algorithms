@@ -1,0 +1,311 @@
+---
+id: "2.12"
+title: الكومة وطابور الأولوية وHeapsort
+summary: طابور الأولوية يعطيك دائمًا العنصر الأهم. نبنيه بالكومة الثنائية، وهي شجرة كاملة تعيش في مصفوفة بلا مؤشرات، فيكون الإدراج والحذف O(log n). ونبرهن أن بناء الكومة من مصفوفة O(n) لا O(n log n)، ونحصل منها على Heapsort، ثم نستعملها لأكبر k عناصر ولدمج k قائمة مرتبة.
+minutes: 140
+objectives:
+  - تعرّف واجهة طابور الأولوية، وتقارن تطبيقاتها بالمصفوفة والقائمة المرتبة والكومة.
+  - تنتقل بين الشجرة الكاملة وتمثيلها بمصفوفة بصيغ الأب والابنين.
+  - تكتب INSERT بالرفع وEXTRACT-MAX بالإنزال، وتبرهن أن كلًا منهما O(log n).
+  - تبرهن أن BUILD-HEAP من الأسفل إلى الأعلى O(n).
+  - تكتب Heapsort في المكان، وتعرف خصائصه.
+  - تحل مسائل أكبر k عناصر ودمج k قائمة مرتبة بكومة صغيرة.
+readings:
+  - source: "MIT 6.006 (OCW, Spring 2020)"
+    part: "ملاحظات المحاضرة 8: Binary Heaps (Priority Queue Interface وHeap Sort)"
+    url: "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/resources/mit6_006s20_lec8/"
+  - source: "Open Data Structures (Pat Morin)"
+    part: "القسم 10.1: BinaryHeap: An Implicit Binary Tree"
+    url: "https://opendatastructures.org/newhtml/ods/latex/heaps.html#tex2htm-109"
+  - source: "Open Data Structures (Pat Morin)"
+    part: "القسم 11.1.3: Heap-sort (مع BUILD-HEAP الخطي)"
+    url: "https://opendatastructures.org/newhtml/ods/latex/sorting.html#tex2htm-119"
+---
+
+import Callout from '../../components/Callout.astro';
+import Exercise from '../../components/Exercise.astro';
+import StepReveal from '../../components/StepReveal.tsx';
+import QuickCheck from '../../components/QuickCheck.tsx';
+import HeapLab from '../../components/HeapLab.tsx';
+import CodeLab from '../../components/CodeLab.tsx';
+import * as lab from '../../labs/2-12-heap.ts';
+
+## <span class="sec">1</span>طابور الأولوية
+
+الطابور العادي (الدرس 2.4) يخرج منه الأقدم. لكن كثيرًا ما نريد أن يخرج **الأهم**: المريض الأخطر حالة في الطوارئ، والمهمة الأعلى أولوية في نظام التشغيل، والحدث الأقرب زمنًا في المحاكاة، والعقدة الأقرب مسافة في خوارزمية Dijkstra (الدرس 4.6).
+
+<Callout type="definition" title="طابور الأولوية (أكبر أولًا)">
+- **INSERT(x):** أضف $x$.
+- **MAX():** أعد أكبر عنصر دون حذفه.
+- **EXTRACT-MAX():** احذف أكبر عنصر وأعده.
+
+ونسخة «أصغر أولًا» متناظرة تمامًا.
+</Callout>
+
+<div class="table-scroll">
+<table class="nice">
+  <thead><tr><th>التطبيق</th><th>INSERT</th><th>MAX</th><th>EXTRACT-MAX</th><th>بناء من n عنصرًا</th></tr></thead>
+  <tbody>
+    <tr><td>مصفوفة غير مرتبة</td><td>$O(1)$</td><td>$O(n)$</td><td>$O(n)$</td><td>$O(n)$</td></tr>
+    <tr><td>مصفوفة مرتبة</td><td>$O(n)$</td><td>$O(1)$</td><td>$O(1)$</td><td>$O(n \log n)$</td></tr>
+    <tr><td>**كومة ثنائية**</td><td>$O(\log n)$</td><td>$O(1)$</td><td>$O(\log n)$</td><td>$O(n)$</td></tr>
+  </tbody>
+</table>
+</div>
+
+التطبيقان الأولان يدفعان $O(n)$ في عملية من العمليتين. الكومة توازن بينهما: لا شيء أسوأ من $O(\log n)$.
+
+## <span class="sec">2</span>الكومة: شجرة في مصفوفة
+
+<Callout type="definition" title="الكومة الثنائية (max-heap)">
+شجرة ثنائية:
+1. **كاملة:** كل المستويات ممتلئة إلا الأخير، وهو ممتلئ من اليسار. فارتفاعها $\lfloor \log_2 n \rfloor$.
+2. **خاصية الكومة:** كل عقدة $\ge$ أبنائها. فالأكبر في **الجذر**.
+</Callout>
+
+الكومة **ليست مرتبة**: الأخوان لا علاقة بينهما، والعنصر الثاني في الحجم قد يكون أي ابن من ابني الجذر. هي ترتيب **جزئي** فقط، ولهذا هي أرخص من الترتيب الكامل.
+
+**الحيلة الكبرى:** لأن الشجرة كاملة، نخزنها في مصفوفة **مستوى بعد مستوى**، دون أي مؤشرات:
+
+$$\text{parent}(i) = \left\lfloor \frac{i - 1}{2} \right\rfloor, \qquad \text{left}(i) = 2i + 1, \qquad \text{right}(i) = 2i + 2.$$
+
+لا ذاكرة إضافية، والتنقل في الشجرة عمليات حسابية رخيصة. ولهذا تسمى أحيانًا **شجرة ضمنية** (implicit).
+
+## <span class="sec">3</span>العمليتان
+
+**INSERT(x)** — **الرفع** (sift-up): ضع $x$ في أول خانة فارغة، أي آخر المصفوفة. قد يكون أكبر من أبيه، فخاصية الكومة مكسورة على حافة واحدة فقط. بدّله مع أبيه ما دام أكبر منه. يتوقف عند الجذر على الأكثر: $O(\log n)$.
+
+**EXTRACT-MAX()** — **الإنزال** (sift-down): الجذر هو الجواب. لكن لا يمكن ترك فراغ في القمة. انقل **آخر عنصر** إلى الجذر (فتبقى الشجرة كاملة)، ثم أنزله: بدّله مع **الابن الأكبر** ما دام أصغر منه. لماذا الأكبر؟ لأن الابن الذي يصعد يصبح أبًا للآخر، فيجب أن يكون الأكبر. يتوقف عند ورقة على الأكثر: $O(\log n)$، بمقارنتين لكل مستوى.
+
+## <span class="sec">4</span>المختبر التفاعلي
+
+<HeapLab client:visible />
+
+جرّب:
+
+1. أدرج عددًا أكبر من الجذر، وتابع صعوده: كم مقارنة؟ قارن بارتفاع الشجرة.
+2. نفّذ EXTRACT-MAX عدة مرات. لاحظ أن العنصر الذي ينزل يأتي دائمًا من آخر المصفوفة.
+3. BUILD-HEAP لمصفوفة عشوائية: كم مقارنة؟ قارن بـ $2n$.
+4. HEAPSORT: لاحظ أن الجزء الأخضر في آخر المصفوفة يكبر من اليمين، والكومة تصغر من اليسار، والمصفوفة نفسها تحمل الاثنين.
+
+<QuickCheck
+  client:visible
+  id="q1"
+  question="في كومة max-heap فيها 1000 عنصر مختلف، أين يمكن أن يكون **أصغر** عنصر؟"
+  options={['في الجذر', 'في الموضع 999 بالضبط', 'في أي ورقة: المواضع من 500 إلى 999', 'في أي موضع']}
+  answer={2}
+  explain="الأصغر لا يمكن أن يكون أبًا لأحد: الأب أكبر من ابنه. فهو ورقة. والأوراق هي العقد التي ليس لها ابن: $2i + 1 \ge 1000$، أي $i \ge 500$. فنصف الكومة تقريبًا مرشح، والبحث عن الأصغر في max-heap يكلف $\Theta(n)$."
+  wrong={{ 0: 'الجذر هو **الأكبر**.', 1: 'الموضع الأخير ورقة، لكنه ليس الورقة الوحيدة.', 3: 'لو كان له ابن، لكان ابنه أصغر منه.' }}
+/>
+
+## <span class="sec">5</span>BUILD-HEAP في زمن خطي
+
+لبناء كومة من $n$ عنصرًا، الطريقة البديهية: $n$ عملية INSERT، أي $O(n \log n)$. لكن هناك طريقة أفضل: كل ورقة كومة وحدها بالفعل. فنمر على العقد غير الأوراق **من الأسفل إلى الأعلى**، من $\lfloor n/2 \rfloor - 1$ إلى 0، وننزل كل واحدة. حين ننزل العقدة $i$، يكون الفرعان تحتها كومتين بالفعل، فالإنزال يجعل الشجرة تحت $i$ كومة.
+
+يبدو أن هذا $O(n \log n)$ أيضًا: $\frac{n}{2}$ إنزالًا، كل منها $O(\log n)$. لكن معظم العقد **قريبة من الأسفل**، وإنزالها رخيص.
+
+<StepReveal
+  client:visible
+  title="BUILD-HEAP يكلف O(n)"
+  problem="لنفرض أن الشجرة ممتلئة، ارتفاعها $h$، و$n = 2^{h+1} - 1$. الإنزال من عقدة ارتفاعها $j$ (بعدها عن الأوراق) يكلف $O(j)$."
+  steps={[
+    { show: 'عدد العقد على ارتفاع $j$ هو $2^{h-j} = \\dfrac{2^h}{2^j} \\le \\dfrac{n}{2^{j+1}} \\cdot 2$.', why: 'الأوراق ($j = 0$) نحو نصف العقد، والتي فوقها ربعها، وهكذا.' },
+    { show: 'التكلفة الكلية $\\le \\displaystyle\\sum_{j=0}^{h} \\frac{n}{2^j} \\cdot c\\,j = cn \\sum_{j=0}^{h} \\frac{j}{2^j}$', why: 'نضرب عدد العقد على كل ارتفاع في تكلفة إنزالها.' },
+    { show: '$\\displaystyle\\sum_{j=0}^{\\infty} \\frac{j}{2^j} = 2$', why: 'متسلسلة معروفة: $\\sum j x^j = \\frac{x}{(1-x)^2}$، ومع $x = \\frac{1}{2}$ تعطي 2.' },
+  ]}
+  answer="المجموع $\le 2cn = O(n)$. الفكرة: العقد الكثيرة رخيصة، والعقد الغالية قليلة. وهذا عكس ما يحدث مع $n$ عملية INSERT، حيث العقد الكثيرة في الأسفل تصعد مسافة طويلة."
+/>
+
+## <span class="sec">6</span>Heapsort
+
+1. **BUILD-HEAP** على المصفوفة كلها: $O(n)$.
+2. كرر $n - 1$ مرة: بدّل الجذر (الأكبر) مع **آخر عنصر في الكومة**، وقلل حجم الكومة بواحد، ثم أنزل الجذر الجديد. الأكبر يذهب إلى مكانه النهائي في آخر المصفوفة.
+
+**الزمن:** $O(n) + (n - 1) \cdot O(\log n) = O(n \log n)$ في **أسوأ حالة**. و**في المكان**: الكومة والجزء المرتب يتقاسمان المصفوفة نفسها، $O(1)$ ذاكرة إضافية. وهذه ميزته: Heapsort هو الوحيد بين الخوارزميات التي رأيناها الذي يجمع **في المكان** و**$O(n \log n)$ مضمون**.
+
+لكنه **غير ثابت** (التمرين 5)، وعمليًا أبطأ من السريع: يقفز في الذاكرة بين $i$ و$2i + 1$، وهذا سيئ للذاكرة المؤقتة. ولهذا تستعمله Introsort **احتياطًا** فقط، حين يتعمق السريع أكثر من اللازم (الدرس 2.9).
+
+<div class="table-scroll">
+<table class="nice">
+  <thead><tr><th></th><th>الإدراج</th><th>الدمج</th><th>السريع</th><th>Heapsort</th><th>Radix</th></tr></thead>
+  <tbody>
+    <tr><td>أسوأ حالة</td><td>$n^2$</td><td>$n \log n$</td><td>$n^2$</td><td>$n \log n$</td><td>$d(n + b)$</td></tr>
+    <tr><td>متوقع / متوسط</td><td>$n^2$</td><td>$n \log n$</td><td>$n \log n$</td><td>$n \log n$</td><td>$d(n + b)$</td></tr>
+    <tr><td>ذاكرة إضافية</td><td>$1$</td><td>$n$</td><td>$\log n$</td><td>$1$</td><td>$n + b$</td></tr>
+    <tr><td>ثابت</td><td>✓</td><td>✓</td><td>✗</td><td>✗</td><td>✓</td></tr>
+    <tr><td>بالمقارنة</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td><td>✗</td></tr>
+  </tbody>
+</table>
+</div>
+
+## <span class="sec">7</span>استعمالات الكومة
+
+- **أكبر $k$ عناصر** من $n$ (أو من تيار لا ينتهي): احتفظ بكومة **أصغر أولًا** بحجم $k$. كل عنصر جديد أكبر من جذرها يحل محله. الزمن $O(n \log k)$، والذاكرة $O(k)$ فقط. فمع $k = 10$ ومليار عنصر، لا نحتاج إلا إلى عشر خانات.
+- **دمج $k$ قائمة مرتبة:** كومة فيها رأس كل قائمة. نخرج الأصغر، وندخل العنصر الذي بعده من قائمته. $O(N \log k)$ لمجموع $N$ عنصرًا. وهكذا يُرتب ما لا تتسع له الذاكرة: ترتيب أجزاء، ثم دمجها كلها مرة واحدة.
+- **الوسيط المتحرك:** كومتان، max-heap للنصف الأصغر وmin-heap للنصف الأكبر. الوسيط عند جذر إحداهما (التمرين 7).
+- **Dijkstra وPrim** (المرحلة 4): الكومة تختار العقدة التالية.
+
+## <span class="sec">8</span>التمارين
+
+<Exercise id="e1" level="apply" title="هل هي كومة؟">
+
+أي المصفوفات التالية max-heap؟ وفي التي ليست كذلك، أين تنكسر الخاصية؟
+
+1. $[90, 15, 10, 7, 12, 2, 7, 3]$
+2. $[23, 17, 14, 6, 13, 10, 1, 5, 7, 12]$
+3. $[50, 30, 40, 35, 20, 10]$
+
+<div slot="hint">تحقق من $A[\lfloor (i-1)/2 \rfloor] \ge A[i]$ لكل $i$.</div>
+<div slot="solution">
+
+1. **نعم.** 90 فوق 15 و10، و15 فوق 7 و12، و10 فوق 2 و7، و7 فوق 3.
+2. **لا:** $A[3] = 6$ وابنه $A[8] = 7$. ($6 \lt 7$.)
+3. **لا:** $A[1] = 30$ وابنه $A[3] = 35$.
+
+</div>
+</Exercise>
+
+<Exercise id="e2" level="apply" title="تتبّع العمليتين">
+
+ابدأ بالكومة $[50, 30, 45, 12, 25, 40, 8]$. أدرج 47، ثم نفّذ EXTRACT-MAX. اكتب المصفوفة بعد كل عملية، وعدد التبديلات.
+
+<div slot="hint">47 يدخل في الموضع 7، وأبوه الموضع 3.</div>
+<div slot="solution">
+
+**INSERT(47):** $[50, 30, 45, 12, 25, 40, 8, 47]$. الأب $A[3] = 12 \lt 47$: نبدّل. ثم الأب $A[1] = 30 \lt 47$: نبدّل. ثم $A[0] = 50 \ge 47$: توقف. النتيجة $[50, 47, 45, 30, 25, 40, 8, 12]$، بتبديلين.
+
+**EXTRACT-MAX:** نخرج 50، ونضع 12 في الجذر: $[12, 47, 45, 30, 25, 40, 8]$. الابن الأكبر 47: نبدّل، $[47, 12, 45, 30, 25, 40, 8]$. ابنا الموضع 1 هما 30 و25، الأكبر 30: نبدّل، $[47, 30, 45, 12, 25, 40, 8]$. الموضع 3 ورقة. تبديلان.
+
+</div>
+</Exercise>
+
+<Exercise id="e3" level="apply" title="BUILD-HEAP يدويًا">
+
+ابنِ max-heap من $[4, 1, 3, 2, 16, 9, 10, 14, 8, 7]$ بطريقة الأسفل إلى الأعلى. اكتب المصفوفة بعد إنزال كل عقدة.
+
+<div slot="hint">$n = 10$، فنبدأ من $i = 4$ وننزل إلى 0.</div>
+<div slot="solution">
+
+- $i = 4$ (16، ابنه 7): لا تغيير.
+- $i = 3$ (2، ابناه 14 و8): $[4, 1, 3, 14, 16, 9, 10, 2, 8, 7]$.
+- $i = 2$ (3، ابناه 9 و10): $[4, 1, 10, 14, 16, 9, 3, 2, 8, 7]$.
+- $i = 1$ (1، ابناه 14 و16): يصعد 16، ثم 1 مع ابنه 7: $[4, 16, 10, 14, 7, 9, 3, 2, 8, 1]$.
+- $i = 0$ (4، ابناه 16 و10): يصعد 16، ثم 4 مع ابنيه 14 و7، فيصعد 14، ثم 4 مع ابنيه 2 و8، فيصعد 8: $[16, 14, 10, 8, 7, 9, 3, 2, 4, 1]$.
+
+</div>
+</Exercise>
+
+<Exercise id="e4" level="prove" title="ارتفاع الكومة">
+
+برهن أن الكومة التي فيها $n$ عنصرًا ارتفاعها $\lfloor \log_2 n \rfloor$ بالضبط. واستنتج أن INSERT يقوم بـ $\lfloor \log_2 n \rfloor$ مقارنة على الأكثر.
+
+<div slot="hint">شجرة كاملة ارتفاعها $h$ فيها بين $2^h$ و$2^{h+1} - 1$ عقدة.</div>
+<div slot="solution">
+
+المستويات $0..h-1$ ممتلئة: $2^h - 1$ عقدة، والمستوى $h$ فيه عقدة واحدة على الأقل و$2^h$ على الأكثر. فـ $2^h \le n \le 2^{h+1} - 1 \lt 2^{h+1}$، أي $h \le \log_2 n \lt h + 1$، فـ $h = \lfloor \log_2 n \rfloor$.
+
+الرفع يبدأ من ورقة على عمق $\le h$، وكل مقارنة تصعد مستوى. فـ $h$ مقارنة على الأكثر. ∎
+
+</div>
+</Exercise>
+
+<Exercise id="e5" level="apply" title="Heapsort ليس ثابتًا">
+
+أعط مدخلًا صغيرًا يغير فيه Heapsort ترتيب عنصرين متساويين.
+
+<div slot="hint">جرّب ثلاثة عناصر، اثنان منها متساويان وأكبر من الثالث.</div>
+<div slot="solution">
+
+$[2_a, 2_b, 1]$: هذه كومة بالفعل. الخطوة الأولى تبدّل الجذر $2_a$ مع الأخير: $[1, 2_b, 2_a]$، والكومة $[1, 2_b]$. الإنزال: $[2_b, 1]$. التبديل التالي: $[1, 2_b, 2_a]$. النتيجة $1, 2_b, 2_a$: انعكس ترتيب المتساويين.
+
+</div>
+</Exercise>
+
+<Exercise id="e6" level="apply" title="الكومة الأصغر لأكبر k">
+
+لماذا نستعمل كومة **أصغر أولًا** لإيجاد **أكبر** $k$ عناصر؟ وما زمن الطريقة البديلة: BUILD-HEAP على كل العناصر ثم $k$ عملية EXTRACT-MAX؟ متى تكون أفضل؟
+
+<div slot="hint">ما العنصر الذي نحتاج إلى معرفته لنقرر هل يدخل العنصر الجديد؟</div>
+<div slot="solution">
+
+نحتاج إلى أن نعرف **أضعف** العناصر الـ $k$ المحتفظ بها، لنقارنه بالجديد ونخرجه إن خسر. وهذا جذر الكومة الأصغر، بـ $O(1)$.
+
+البديل: $O(n) + k \cdot O(\log n) = O(n + k \log n)$. وهو أفضل من $O(n \log k)$ حين يكون $k$ صغيرًا جدًا والبيانات كلها في الذاكرة. لكنه يحتاج إلى $\Theta(n)$ ذاكرة، ولا يعمل على **تيار** لا نعرف آخره. والكومة الصغيرة تحتاج إلى $O(k)$ فقط.
+
+</div>
+</Exercise>
+
+<Exercise id="e7" level="apply" title="الوسيط المتحرك">
+
+الأعداد تصل واحدًا بعد الآخر، ونريد الوسيط بعد كل وصول. صمم هيكلًا بكومتين، يعطي الوسيط في $O(1)$ ويقبل الإدراج في $O(\log n)$.
+
+<div slot="hint">max-heap $L$ للنصف الأصغر، وmin-heap $R$ للنصف الأكبر. ما الشرط بين جذريهما؟ وبين حجميهما؟</div>
+<div slot="solution">
+
+نحافظ على شرطين: كل عنصر في $L$ $\le$ كل عنصر في $R$ (أي $\max L \le \min R$)، و$|L| = |R|$ أو $|L| = |R| + 1$.
+
+**الإدراج:** إذا كان $x \le \max L$ ضعه في $L$، وإلا في $R$. ثم وازن: إذا صار $|L| \gt |R| + 1$، انقل $\max L$ إلى $R$. وإذا صار $|R| \gt |L|$، انقل $\min R$ إلى $L$. عمليات كومة محدودة العدد: $O(\log n)$.
+
+**الوسيط:** $\max L$ إذا كان العدد فرديًا، ومتوسط $\max L$ و$\min R$ إذا كان زوجيًا. $O(1)$.
+
+</div>
+</Exercise>
+
+<Exercise id="e8" level="prove" title="الحذف من أي موضع">
+
+صمم عملية DELETE(i) تحذف العنصر في الموضع $i$ من max-heap في $O(\log n)$، وبرهن صحتها.
+
+<div slot="hint">انقل آخر عنصر إلى الموضع $i$. هل يجب أن يصعد أم ينزل؟ ربما أيًا منهما.</div>
+<div slot="solution">
+
+ضع $y = A[n-1]$ في الموضع $i$، وقلل الحجم. الخاصية قد تنكسر عند $i$ فقط:
+- إذا كان $y \gt A[\text{parent}(i)]$: **ارفع**. (وحينئذ $y$ أكبر من القديم في الموضع $i$، والقديم كان أكبر من أبنائه، فلا مشكلة في الأسفل.)
+- وإلا: **أنزل**.
+
+إحدى العمليتين فقط تتحرك فعلًا، وكلتاهما $O(\log n)$. الصحة: بعد الرفع أو الإنزال، كل حافة كانت سليمة تبقى سليمة، والحافة المكسورة الوحيدة تنتقل حتى تختفي، كما في INSERT وEXTRACT-MAX.
+
+</div>
+</Exercise>
+
+## <span class="sec">9</span>المختبر البرمجي
+
+`MinHeap` بدالة مقارنة، فيعمل مع أي نوع من البيانات (المختبر يستعمله لأزواج في `mergeKSorted`). و`heapify` في المكان، و`heapSort` يحتاج إلى **max-heap** على نسخة. الاختبار الأخير يتحقق من أن `kLargest` لا يرتب المصفوفة كلها: يعمل على مليون عنصر و$k = 10$.
+
+<CodeLab
+  client:visible
+  id="2.12-heap"
+  title="كومة، وترتيب، واستعمالان"
+  exports={['MinHeap', 'heapify', 'heapSort', 'kLargest', 'mergeKSorted']}
+  starter={lab.starter}
+  tests={[
+    { name: 'MinHeap: يُخرج بالترتيب، و undefined حين يفرغ', code: '(() => { const H = new MinHeap(); if (H.pop() !== undefined || H.peek() !== undefined || H.size() !== 0) return false; const A = Array.from({ length: 300 }, () => Math.floor(Math.random() * 100)); A.forEach((x) => H.push(x)); if (H.size() !== 300 || H.peek() !== Math.min(...A)) return false; const out = []; while (H.size()) out.push(H.pop()); return out.join() === A.slice().sort((a, b) => a - b).join() && H.pop() === undefined; })()' },
+    { name: 'MinHeap: دالة مقارنة مخصصة (أكبر أولًا)', code: '(() => { const H = new MinHeap((a, b) => b.p - a.p); [3, 9, 1, 7, 5].forEach((p) => H.push({ p })); return [H.pop().p, H.pop().p, H.pop().p].join() === "9,7,5" && H.size() === 2; })()' },
+    { name: 'MinHeap: عمليات مختلطة', code: '(() => { const H = new MinHeap(); const ref = []; for (let t = 0; t < 2000; t++) { if (Math.random() < 0.6 || !ref.length) { const x = Math.floor(Math.random() * 1000); H.push(x); ref.push(x); } else { ref.sort((a, b) => a - b); if (H.pop() !== ref.shift()) return false; } } return H.size() === ref.length; })()' },
+    { name: 'heapify: في المكان ويعطي min-heap', code: '(() => { for (let t = 0; t < 100; t++) { const A = Array.from({ length: Math.floor(Math.random() * 64) }, () => Math.floor(Math.random() * 50)); const s = A.slice().sort().join(); const B = heapify(A); if (B !== A || A.slice().sort().join() !== s) return false; for (let i = 1; i < A.length; i++) if (A[(i - 1) >> 1] > A[i]) return false; } return true; })()' },
+    { name: 'heapSort: صحيح ولا يغيّر الأصل', code: '(() => { for (let t = 0; t < 100; t++) { const A = Array.from({ length: Math.floor(Math.random() * 80) }, () => Math.floor(Math.random() * 60) - 30); const c = A.join(); if (heapSort(A).join() !== A.slice().sort((a, b) => a - b).join() || A.join() !== c) return false; } return true; })()' },
+    { name: 'mergeKSorted', code: '(() => { const L = Array.from({ length: 20 }, () => Array.from({ length: Math.floor(Math.random() * 30) }, () => Math.floor(Math.random() * 500)).sort((a, b) => a - b)); return mergeKSorted(L).join() === L.flat().sort((a, b) => a - b).join() && mergeKSorted([]).length === 0 && mergeKSorted([[], [1], []]).join() === "1"; })()' },
+    { name: 'kLargest: صحيح، ومليون عنصر مع k = 10 بسرعة', code: '(() => { const A = Array.from({ length: 200 }, () => Math.floor(Math.random() * 1000)); if (kLargest(A, 7).join() !== A.slice().sort((a, b) => b - a).slice(0, 7).join() || kLargest(A, 0).length !== 0) return false; const B = Array.from({ length: 1000000 }, () => Math.random()); const t = performance.now(); const r = kLargest(B, 10); const ms = performance.now() - t; let m = -1; for (const x of B) if (x > m) m = x; return r.length === 10 && r[0] === m && ms < 300; })()' },
+  ]}
+  bench={{
+    title: 'زمن heapSort على n عنصرًا عشوائيًا',
+    fn: 'heapSort',
+    make: 'Array.from({ length: n }, () => Math.random())',
+    ns: [100000, 200000, 400000, 800000],
+  }}
+  solution={lab.solution}
+/>
+
+<Callout type="tip" title="بعد التشغيل">
+الزمن $n \log n$ كالسريع، لكن قارن الأرقام نفسها بالدرس 2.9: Heapsort أبطأ عادة بمرتين أو ثلاث. السبب الذاكرة المؤقتة لا عدد المقارنات: الإنزال يقفز من $i$ إلى $2i + 1$، فيقرأ مواضع متباعدة في المصفوفة الكبيرة.
+</Callout>
+
+## <span class="sec">10</span>الخلاصة
+
+- **طابور الأولوية:** INSERT وMAX وEXTRACT-MAX. والكومة تعطي $O(\log n)$ و$O(1)$ و$O(\log n)$.
+- **الكومة:** شجرة كاملة بخاصية «الأب $\ge$ الابن»، مخزنة في مصفوفة: $\text{parent}(i) = \lfloor \frac{i-1}{2} \rfloor$، و$\text{left}(i) = 2i + 1$.
+- **الرفع** للإدراج، و**الإنزال** مع الابن الأكبر للحذف.
+- **BUILD-HEAP** من الأسفل $O(n)$، لأن $\sum \frac{j}{2^j} = 2$.
+- **Heapsort:** في المكان و$O(n \log n)$ مضمون، لكنه غير ثابت وأبطأ عمليًا من السريع.
+- **أكبر $k$** بكومة صغرى حجمها $k$: $O(n \log k)$. و**دمج $k$ قائمة**: $O(N \log k)$.
+
+**الدرس التالي:** الكومة تعطي الأكبر بسرعة، لكنها لا تبحث عن عنصر معين، ولا تعطي العناصر مرتبة. في الدرس 2.13 نبني **شجرة البحث الثنائية**: كل عقدة أكبر من كل ما في يسارها وأصغر من كل ما في يمينها، فنبحث وندرج ونحذف ونمر على العناصر بالترتيب.
