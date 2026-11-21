@@ -1024,3 +1024,24 @@ table.rel-grid { border-collapse: separate; border-spacing: 4px; margin: 0 auto;
 .hn-stack-cap { font-family: var(--font-sans); font-size: 0.8rem; color: var(--ink-3); padding: 0 8px 4px; }
 .hn-call { white-space: pre; color: var(--ink-3); padding: 1px 8px; }
 .hn-call.cur { color: var(--ink); font-weight: 700; background: var(--brand-soft); }
+
+/* ---------- book 1.8 MomGridLab ---------- */
+.mg-grid { display: grid; gap: 4px; margin: 12px auto; max-width: 520px; }
+.mg-col { display: flex; flex-direction: column; gap: 4px; padding: 3px; border-radius: 8px; }
+.mg-col.momcol { background: var(--amber-soft); }
+.mg-cell { display: grid; place-items: center; height: 30px; border-radius: 6px; border: 1px solid var(--line); background: var(--card); font: 700 0.82rem var(--font-mono); transition: all .2s; }
+.mg-cell.med { border-color: var(--ink-2); }
+.mg-cell.sm { background: var(--green-soft); border-color: var(--green); }
+.mg-cell.lg { background: var(--red-soft); border-color: var(--red); }
+.mg-cell.mom { background: var(--amber); border-color: var(--amber); color: #fff; }
+
+/* ---------- book 1.10 PowerLab ---------- */
+.pw-rows { display: flex; flex-direction: column; gap: 8px; margin: 10px 0; }
+.pw-row { border: 1px solid var(--line); border-radius: 10px; background: var(--paper); padding: 8px 12px; }
+.pw-row.opt { border-color: var(--green); background: var(--green-soft); }
+.pw-head { display: flex; justify-content: space-between; gap: 10px; font-size: 0.86rem; color: var(--ink-2); }
+.pw-head b { font-family: var(--font-num); font-size: 1.15rem; color: var(--brand); }
+.pw-chain { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; font-family: var(--font-num); }
+.pw-chain span { padding: 1px 7px; border-radius: 6px; background: var(--card); border: 1px solid var(--line); font-size: 0.9rem; }
+.pw-chain span.end { background: var(--brand); color: #fff; border-color: var(--brand); }
+.pw-chain i { color: var(--ink-3); }

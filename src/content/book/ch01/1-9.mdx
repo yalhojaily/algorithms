@@ -1,0 +1,258 @@
+---
+section: "1.9"
+summary: قصة رياضي كبير خمّن أن ضرب عددين يحتاج إلى n² خطوة على الأقل، وطالب في الثالثة والعشرين هدم التخمين في أسبوع. التقسيم البسيط إلى أربعة ضروب لا يوفر شيئًا، وحيلة جبرية واحدة تجعلها ثلاثة، فينزل الزمن إلى n^1.585. وشجرة الاستدعاء تفسر الفرق كله.
+minutes: 60
+goals:
+  - تكتب SplitMultiply بأربعة استدعاءات، وتبين بشجرة الاستدعاء لماذا يبقى Θ(n²)
+  - تشتق هوية Karatsuba (بصيغة الكتاب والصيغة الأصلية)، وتكتب FastMultiply
+  - تحل T(n) = 3T(n/2) + O(n) وتعرف أي حالة من حالات شجرة الاستدعاء هي
+  - تعرف السلسلة التاريخية بعد Karatsuba، من Toom-Cook إلى O(n log n)
+terms:
+  - { en: SplitMultiply, ar: الضرب بالتقسيم (أربعة استدعاءات) }
+  - { en: FastMultiply / Karatsuba, ar: ضرب Karatsuba (ثلاثة استدعاءات) }
+  - { en: subquadratic, ar: أسرع من التربيعي }
+  - { en: shift, ar: إزاحة (الضرب في قوة للعشرة) }
+  - { en: Fast Fourier Transform, ar: تحويل Fourier السريع }
+---
+
+import Stage from '../../../components/book/Stage.astro';
+import ReadingGuide from '../../../components/book/ReadingGuide.astro';
+import BookPages from '../../../components/book/BookPages.astro';
+import BookExercises from '../../../components/book/BookExercises.astro';
+import Takeaways from '../../../components/book/Takeaways.astro';
+import Callout from '../../../components/Callout.astro';
+import Exercise from '../../../components/Exercise.astro';
+import QuickCheck from '../../../components/QuickCheck.tsx';
+import KaratsubaLab from '../../../components/KaratsubaLab.tsx';
+import CodeLab from '../../../components/CodeLab.tsx';
+import * as lab from '../../../labs/book-1-9-mult.ts';
+
+<Stage n={1} id="warmup" title="تمهيد" sub="فكرة القسم قبل أي تعريف">
+
+اضرب $1234 \times 5678$ بالطريقة المدرسية. كل رقم من الأول في كل رقم من الثاني: 16 ضربًا لرقمين، ثم جمع. ومع عددين بمليون رقم: $10^{12}$ ضرب. ويبدو ذلك حتميًا: كيف تعرف الناتج دون أن «يلتقي» كل رقم بكل رقم؟
+
+هذا بالضبط ما ظنه Andrei Kolmogorov، أحد أعظم رياضيي القرن العشرين. وهذا القسم قصة الأسبوع الذي هُدم فيه ظنه، وقصة رقم واحد، 3 بدل 4، يغير الأس.
+
+</Stage>
+
+<Stage n={2} id="reading" title="اقرأ من الكتاب" sub="صفحات الكتاب الأصلية لهذا القسم، ومعها دليل يوجه قراءتك">
+
+<ReadingGuide pages="40–42" minutes={20}>
+
+- **الهوية الأولى وSplitMultiply:** أربعة ضروب جزئية: $ac$ و$bc$ و$ad$ و$bd$. والضرب في $10^m$ ليس ضربًا حقيقيًا، بل إزاحة في $O(n)$.
+- **«So I guess that didn't work. Too bad. It was a nice idea.»** وFigure 1.14: لماذا لم يوفر التقسيم شيئًا.
+- **قصة Kolmogorov وKaratsuba:** بكلمات Karatsuba نفسه. وقد انتهت بإلغاء الحلقة الدراسية كلها.
+- **الهوية الجديدة وFastMultiply:** الكتاب يكتب $ac + bd - (a - b)(c - d) = bc + ad$. والحاشية 10 تشرح أن Karatsuba استعمل $(a + b)(c + d)$، وأن الصيغة بالطرح من Knuth.
+- **ما بعد Karatsuba:** Toom-Cook، ثم FFT وGauss، ثم Schönhage-Strassen، وأخيرًا 2019.
+
+</ReadingGuide>
+
+<BookPages section="1.9" />
+
+</Stage>
+
+<Stage n={3} id="explain" title="الشرح والتجربة" sub="الأفكار نفسها بالعربية، بتفصيل، مع تجربة تفاعلية">
+
+### محاولة أولى: قسّم كل عدد نصفين
+
+اكتب كل عدد بـ $n$ رقمًا نصفين، كل منهما بـ $m = \lceil n/2 \rceil$ رقمًا تقريبًا:
+
+$$
+x = 10^m a + b, \qquad y = 10^m c + d.
+$$
+
+فـ
+
+$$
+xy = 10^{2m}\, ac + 10^m (bc + ad) + bd.
+$$
+
+أربعة ضروب لأعداد بنصف الطول: $ac$ و$bc$ و$ad$ و$bd$. والضرب في $10^m$ «مجاني» نسبيًا: نضيف أصفارًا إلى اليمين، في $O(n)$. فنحصل على خوارزمية فرّق تسد واضحة (SplitMultiply في الكتاب)، وصحتها بالاستقراء مباشرة من الهوية.
+
+والزمن؟
+
+$$
+T(n) = 4\,T(n/2) + O(n).
+$$
+
+بشجرة الاستدعاء: المستوى الثاني $4 \cdot \frac{n}{2} = 2n$، ضعف الجذر. **متزايدة**، فالأوراق تهيمن: $O(n^{\log_2 4}) = O(n^2)$. لم نكسب شيئًا. والسبب، كما يقول Erickson، أن هذه الخوارزمية في الحقيقة تضرب **كل رقم من $x$ في كل رقم من $y$**، تمامًا كالطريقة المدرسية، لكن بترتيب آخر. وعدد الأوراق، $n^2$، هو عدد هذه الضروب. «It was a nice idea.»
+
+### أسبوع في موسكو
+
+في منتصف الخمسينات خمّن Kolmogorov علنًا أنه **لا توجد** خوارزمية تضرب عددين بـ $n$ رقمًا في زمن أقل من التربيعي. وفي سنة 1960 نظم حلقة في جامعة موسكو، وأعاد فيها تخمين $n^2$. وبعد أسبوع تقريبًا جاءه طالب في الثالثة والعشرين، Anatolii Karatsuba، بمثال ينقضه. يروي Karatsuba أن Kolmogorov «انزعج كثيرًا»، ثم عرض الطريقة بنفسه في اللقاء التالي، و**أُلغيت الحلقة**. ويقول الكتاب إن خوارزمية Karatsuba هي، بشكل ما، بداية تصميم الخوارزميات وتحليلها بوصفهما علمًا.
+
+### الحيلة: ثلاثة ضروب بدل أربعة
+
+انظر إلى ما نحتاج إليه فعلًا. لا نحتاج إلى $bc$ و$ad$ كلًا على حدة، بل إلى **مجموعهما** $bc + ad$. ويمكن الحصول على المجموع بضرب واحد إضافي، مستعملين $ac$ و$bd$ اللذين نحسبهما على كل حال:
+
+$$
+ac + bd - (a - b)(c - d) = bc + ad.
+$$
+
+افتح القوس لتتحقق:
+
+$$
+(a - b)(c - d) = ac - ad - bc + bd \;\Longrightarrow\; ac + bd - (a - b)(c - d) = ad + bc. \checkmark
+$$
+
+```
+FastMultiply(x, y, n):
+  if n = 1: return x · y
+  m ← ⌈n/2⌉
+  a ← ⌊x / 10^m⌋;  b ← x mod 10^m          ⟨⟨x = 10^m a + b⟩⟩
+  c ← ⌊y / 10^m⌋;  d ← y mod 10^m          ⟨⟨y = 10^m c + d⟩⟩
+  e ← FastMultiply(a, c, m)
+  f ← FastMultiply(b, d, m)
+  g ← FastMultiply(a − b, c − d, m)
+  return 10^{2m} e + 10^m (e + f − g) + f
+```
+
+وصيغة Karatsuba الأصلية (الحاشية 10) كانت:
+
+$$
+(a + b)(c + d) - ac - bd = bc + ad.
+$$
+
+وهي تعمل بالطريقة نفسها، لكن $a + b$ قد يكون فيه $m + 1$ رقمًا، فالعلاقة أكثر فوضى قليلًا. أما صيغة Knuth بالطرح فتبقي الأطوال $m$، مقابل أن تقبل أعدادًا سالبة.
+
+### التحليل
+
+$$
+T(n) = 3\,T(n/2) + O(n).
+$$
+
+المستوى الثاني $3 \cdot \frac{n}{2} = 1.5n$: ما زالت **متزايدة**، والأوراق تهيمن. لكن عدد الأوراق الآن $3^{\log_2 n} = n^{\log_2 3}$:
+
+$$
+T(n) = O(n^{\log_2 3}) = O(n^{1.58496\ldots}).
+$$
+
+الفرق بين $n^2$ و$n^{1.585}$ يبدو صغيرًا، وهو ليس كذلك. مع مليون رقم: $10^{12}$ مقابل نحو $3 \times 10^9$، أي أسرع بأكثر من 300 مرة. وكلما كبر $n$ كبر الفرق بلا حد. والسبب كله في رقم واحد: **عدد الاستدعاءات** يحدد عدد الأوراق، وعدد الأوراق يحدد الأس. ضرب واحد أقل في كل مستوى يتضاعف أثره عبر $\log_2 n$ مستوى.
+
+تابع شجرة الاستدعاءات. المحاكاة تستعمل صيغة Karatsuba الأصلية بالجمع:
+
+<KaratsubaLab client:visible />
+
+### بعد Karatsuba
+
+- **Toom-Cook:** قسّم العدد $k$ قطع بدل قطعتين، واستعمل $2k - 1$ ضربًا. الزمن $O(n^{1 + 1/\lg k})$ لأي $k$ ثابت، أي أقرب إلى $n^{1+\varepsilon}$ كلما كبر $k$، بثوابت أكبر.
+- **تحويل Fourier السريع (FFT):** النتيجة المنطقية لتقسيم أكثر فأكثر. يذكر Erickson أن Gauss نفسه اكتشفه بهذا الطريق. وأول خوارزمية ضرب بـ FFT، لـ Schönhage وStrassen سنة 1971: $O(n \log n \log\log n)$.
+- **2019:** David Harvey وJoris van der Hoeven: $O(n \log n)$. لكن الحاشية 12 تنبه إلى أنها أسرع «عمليًا» فقط لأعداد فيها أرقام أكثر من الجسيمات في الكون. وفي الواقع، Schönhage-Strassen الأسرع للأعداد فوق 75 ألف رقم تقريبًا.
+
+</Stage>
+
+<Stage n={4} id="check" title="تحقق من فهمك" sub="أسئلة سريعة قبل التمارين">
+
+<QuickCheck
+  client:visible
+  id="q1"
+  question="لماذا لا تسرّع SplitMultiply شيئًا مع أنها تقسم المسألة نصفين؟"
+  options={['لأن الإزاحة في 10^m مكلفة', 'لأن أربعة استدعاءات بنصف الحجم تعطي n^(log₂ 4) = n² ورقة: كل رقم يُضرب في كل رقم', 'لأن الجمع تربيعي', 'لأن الاستدعاء الذاتي بطيء دائمًا']}
+  answer={1}
+  explain="الشجرة متزايدة، والأوراق تهيمن. وعدد الأوراق $4^{\log_2 n} = n^2$. لتسريع شيء يجب تقليل عدد الاستدعاءات، لا تغيير طريقة التقسيم."
+  wrong={{ 0: 'الإزاحة خطية، وهي جزء من $O(n)$ في كل عقدة.', 2: 'الجمع خطي.', 3: 'MergeSort ذاتي الاستدعاء وسريع.' }}
+/>
+
+<QuickCheck
+  client:visible
+  id="q2"
+  question="لو وجدنا طريقة لضرب عددين بقسمة كل منهما إلى 3 قطع واستعمال 5 ضروب فقط، فما الزمن؟"
+  options={['O(n^(log₃ 5)) ≈ O(n^1.465)', 'O(n^(log₂ 5))', 'O(n^1.585)', 'O(n log n)']}
+  answer={0}
+  explain="$T(n) = 5T(n/3) + O(n)$: متزايدة، والأوراق $5^{\log_3 n} = n^{\log_3 5}$. وهذا Toom-3: $2k - 1 = 5$ مع $k = 3$."
+  wrong={{ 1: 'الحجم يقسم على 3 لا على 2.', 2: 'هذا Karatsuba.', 3: 'هذا يحتاج إلى FFT.' }}
+/>
+
+</Stage>
+
+<Stage n={5} id="exercises" title="تمارين الكتاب" sub="حلّها بالورقة والقلم، ثم سجّل حالتها. الكتاب لا ينشر حلولها">
+
+<BookExercises chapter={1} nums={[22, 23]} core={[23]} />
+
+<Callout type="tip" title="تلميحات لتمارين الكتاب">
+- **التمرين 23(a):** عدد بـ $m$ رقمًا في عدد بـ $n$ رقمًا، مع $n \ge m$. قسّم الأطول إلى $n/m$ قطعة بطول $m$، واضرب كل قطعة في الأقصر بـ Karatsuba. كم يكلف ذلك؟ وكم تكلف الإزاحات والجمع؟
+- **التمرين 22:** اقرأ القصة بهدوء: الطريقة السومرية ترجمة لهوية جبرية. اكتبها بالرموز أولًا، ثم ابحث عن عدد الضروب «الصعبة».
+</Callout>
+
+### تمارين إضافية بحلول كاملة
+
+<Exercise id="e1" level="apply" title="Karatsuba باليد">
+
+احسب $47 \times 83$ بخطوة واحدة من FastMultiply ($m = 1$)، بصيغة الكتاب ذات الطرح.
+
+<div slot="hint">$a = 4$، $b = 7$، $c = 8$، $d = 3$. و$(a - b)(c - d) = (-3)(5)$.</div>
+<div slot="solution">
+
+$e = ac = 32$، و$f = bd = 21$، و$g = (4 - 7)(8 - 3) = -15$. الحد الأوسط $e + f - g = 32 + 21 + 15 = 68$. الناتج $3200 + 680 + 21 = 3901$. وفعلًا $47 \times 83 = 3901$.
+
+</div>
+</Exercise>
+
+<Exercise id="e2" level="prove" title="كم ضربًا لرقمين؟">
+
+ليكن $n = 2^k$. برهن أن FastMultiply يقوم بـ $3^k = n^{\log_2 3}$ ضربًا لرقمين بالضبط (بافتراض أن الطرح لا يغير الأطوال، كما في صيغة الكتاب).
+
+<div slot="hint">$M(1) = 1$، و$M(n) = 3M(n/2)$.</div>
+<div slot="solution">
+
+الضروب الوحيدة لرقمين تحدث في الأوراق، والاستدعاءات الثلاثة كلها بطول $n/2$. فـ $M(2^k) = 3M(2^{k-1}) = \cdots = 3^k M(1) = 3^k$. و$3^k = 3^{\log_2 n} = n^{\log_2 3}$. مع $n = 1024$: $59{,}049$ ضربًا، مقابل $1{,}048{,}576$ في الطريقة المدرسية.
+
+</div>
+</Exercise>
+
+<Exercise id="e3" level="apply" title="ضرب كثيرات الحدود">
+
+الفكرة نفسها تعمل على كثيرات الحدود. اضرب $A(x) = a_1 x + a_0$ في $B(x) = b_1 x + b_0$ بثلاثة ضروب للمعاملات. ثم عمّم: كيف تضرب كثيرتي حدود من الدرجة $n - 1$ في $O(n^{\log_2 3})$؟
+
+<div slot="hint">$A(x)B(x) = a_1 b_1 x^2 + (a_1 b_0 + a_0 b_1) x + a_0 b_0$. هل يذكرك الحد الأوسط بشيء؟</div>
+<div slot="solution">
+
+$e = a_1 b_1$، و$f = a_0 b_0$، و$g = (a_1 + a_0)(b_1 + b_0)$، والحد الأوسط $g - e - f$. وللتعميم: اكتب $A(x) = A_1(x) x^{n/2} + A_0(x)$، وكذلك $B$، وطبق الحيلة نفسها بالاستدعاء الذاتي. الإزاحة هنا ضرب في $x^{n/2}$، أي تحريك المعاملات. و$T(n) = 3T(n/2) + O(n)$. بل إن كثيرات الحدود أسهل، لأنها بلا «حمل» (carry) بين الخانات.
+
+</div>
+</Exercise>
+
+### المختبر البرمجي
+
+الأعداد سلاسل نصية عشرية، والدوال المساعدة جاهزة في أعلى المحرر. تكتب SplitMultiply ثم Karatsuba. الاختبارات تقارن بـ `BigInt`. والقياس هو التجربة الحاسمة: **توقّع** قبل التشغيل، بماذا يُضرب الزمن إذا تضاعف عدد الأرقام؟
+
+<CodeLab
+  client:visible
+  id="book-1.9-mult"
+  title="أربعة ضروب، ثم ثلاثة"
+  exports={['splitMultiply', 'karatsuba']}
+  starter={lab.starter}
+  tests={[
+    { name: 'splitMultiply: أمثلة', code: '(() => splitMultiply("0", "123") === "0" && splitMultiply("47", "83") === "3901" && splitMultiply("12345", "6789") === "83810205" && splitMultiply("7", "9") === "63")()' },
+    { name: 'splitMultiply يطابق BigInt', code: '(() => { const rnd = (n) => { let s = String(1 + Math.floor(Math.random() * 9)); for (let i = 1; i < n; i++) s += Math.floor(Math.random() * 10); return s; }; for (let t = 0; t < 30; t++) { const a = rnd(1 + Math.floor(Math.random() * 40)), b = rnd(1 + Math.floor(Math.random() * 40)); if (splitMultiply(a, b) !== (BigInt(a) * BigInt(b)).toString()) return false; } return true; })()' },
+    { name: 'karatsuba يطابق BigInt على أعداد طويلة', code: '(() => { const rnd = (n) => { let s = String(1 + Math.floor(Math.random() * 9)); for (let i = 1; i < n; i++) s += Math.floor(Math.random() * 10); return s; }; for (let t = 0; t < 20; t++) { const a = rnd(1 + Math.floor(Math.random() * 400)), b = rnd(1 + Math.floor(Math.random() * 400)); if (karatsuba(a, b) !== (BigInt(a) * BigInt(b)).toString()) return false; } return karatsuba("0", "5") === "0"; })()' },
+    { name: 'karatsuba: عددان بـ 2000 رقم بسرعة', code: '(() => { const a = "9".repeat(2000), b = "7".repeat(2000); const t = performance.now(); const r = karatsuba(a, b); return r === (BigInt(a) * BigInt(b)).toString() && performance.now() - t < 3000; })()' },
+  ]}
+  bench={{
+    title: 'زمن karatsuba على عددين بـ n رقمًا',
+    fn: 'karatsuba',
+    make: '[Array.from({ length: n }, (_, i) => i ? Math.floor(Math.random() * 10) : 1 + Math.floor(Math.random() * 9)).join(""), Array.from({ length: n }, (_, i) => i ? Math.floor(Math.random() * 10) : 1 + Math.floor(Math.random() * 9)).join("")]',
+    spread: true,
+    ns: [256, 512, 1024, 2048],
+  }}
+  solution={lab.solution}
+/>
+
+<Callout type="tip" title="بعد التشغيل">
+كل مضاعفة لعدد الأرقام تضرب الزمن في نحو 3، لا 4: هذا $n^{\log_2 3}$ أمامك. وجرّب في المحرر أن تقيس `splitMultiply` على 1024 رقمًا وعلى 2048: ستجد العامل 4.
+</Callout>
+
+</Stage>
+
+<Stage n={6} id="summary" title="الخلاصة">
+
+<Takeaways>
+
+- **SplitMultiply:** أربعة ضروب بنصف الطول: $T(n) = 4T(n/2) + O(n) = O(n^2)$. التقسيم وحده لا يوفر شيئًا.
+- **Karatsuba (1960):** $bc + ad = ac + bd - (a-b)(c-d)$، فثلاثة ضروب تكفي.
+- $T(n) = 3T(n/2) + O(n) = O(n^{\log_2 3}) \approx O(n^{1.585})$: الأوراق تهيمن، وعددها يحدده عدد الاستدعاءات.
+- **بعده:** Toom-Cook، ثم FFT، ثم $O(n \log n)$ سنة 2019.
+
+</Takeaways>
+
+</Stage>
