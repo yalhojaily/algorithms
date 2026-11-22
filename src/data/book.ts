@@ -105,6 +105,19 @@ export const chapters: BookChapter[] = [
       sec('4.5', 'Stable Matching', 'المطابقة المستقرة', 170, [9, 10, 11]),
     ],
   },
+  {
+    num: 5, slug: '05-graphs', en: 'Basic Graph Algorithms', ar: 'خوارزميات الرسوم الأساسية', pages: [187, 224], exercisesPage: 207,
+    blurb: 'الرسم: مجموعة أزواج من الأشياء. تعريفاته ومصطلحاته، وطرق تمثيله بقوائم الجوار ومصفوفة الجوار، ثم خوارزمية واحدة عامة لزيارة كل ما يمكن الوصول إليه: البحث «أيًا كان أولًا». بمكدس تصير بحثًا بالعمق، وبطابور بحثًا بالعرض، وبطابور أولويات Prim وDijkstra. وأخيرًا ملء المناطق في الصور، أول مثال على الاختزال إلى رسم.',
+    sections: [
+      sec('5.1', 'Introduction and History', 'مقدمة وتاريخ', 187),
+      sec('5.2', 'Basic Definitions', 'التعريفات الأساسية', 190, [1, 2, 3]),
+      sec('5.3', 'Representations and Examples', 'التمثيلات والأمثلة', 192, [5, 6]),
+      sec('5.4', 'Data Structures', 'بنى البيانات', 195),
+      sec('5.5', 'Whatever-First Search', 'البحث أيًا كان أولًا', 199, [9, 10]),
+      sec('5.6', 'Important Variants', 'المتغيرات المهمة', 201, [8]),
+      sec('5.7', 'Graph Reductions: Flood Fill', 'الاختزال إلى رسم: ملء المناطق', 205, [11, 14, 16, 19]),
+    ],
+  },
 ];
 
 /** The whole book, for the table of contents (chapters not yet on the site are shown as coming). */

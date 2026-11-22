@@ -46,6 +46,11 @@ CHAPTERS = {
         ("4.1", "Storing Files on Tape"), ("4.2", "Scheduling Classes"), ("4.3", "General Pattern"),
         ("4.4", "Huffman Codes"), ("4.5", "Stable Matching"),
     ]),
+    5: dict(first=187, last=224, exercises=207, sections=[
+        ("5.1", "Introduction and History"), ("5.2", "Basic Deﬁnitions"), ("5.3", "Representations and Examples"),
+        ("5.4", "Data Structures"), ("5.5", "Whatever-First Search"), ("5.6", "Important Variants"),
+        ("5.7", "Graph Reductions: Flood Fill"),
+    ]),
     1: dict(first=21, last=70, exercises=44, sections=[
         ("1.1", "Reductions"), ("1.2", "Simplify and Delegate"), ("1.3", "Tower of Hanoi"),
         ("1.4", "Mergesort"), ("1.5", "Quicksort"), ("1.6", "The Pattern"), ("1.7", "Recursion Trees"),
