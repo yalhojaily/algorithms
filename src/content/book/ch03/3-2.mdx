@@ -1,0 +1,194 @@
+---
+section: "3.2"
+summary: "قسم اختياري قصير، ودرسه أكبر من حجمه. حساب Fibonacci بضرب مصفوفة 2×2 في نفسها يبدو أنه يحتاج إلى O(log n) عملية فقط، أي أسرع أسيًا من الحلقة. لكن الجواب نفسه فيه نحو n/5 رقمًا، فكيف نكتبه في زمن لوغاريتمي؟ المفارقة تنحل حين نتذكر أن العمليات على الأعداد الكبيرة ليست مجانية، فيتغير ترتيب الخوارزميات كلها."
+minutes: 35
+goals:
+  - تكتب Fibonacci بضرب مصفوفات، وتطبق التربيع المتكرر من القسم 1.10
+  - تشتق خوارزمية Lucas بالمضاعفة من الهويتين F(2n−1) و F(2n)
+  - تحل المفارقة بين O(log n) عملية و Ω(n) رقمًا في الجواب
+  - تعيد حساب الزمن الحقيقي للخوارزميات الثلاث بتكلفة الحساب الدقيق
+terms:
+  - { en: matrix exponentiation, ar: رفع المصفوفة إلى أس }
+  - { en: repeated squaring, ar: التربيع المتكرر }
+  - { en: fast doubling, ar: المضاعفة السريعة }
+  - { en: arbitrary-precision arithmetic, ar: الحساب بدقة غير محدودة }
+  - { en: "M(n)", ar: زمن ضرب عددين بـ n رقمًا }
+---
+
+import Stage from '../../../components/book/Stage.astro';
+import ReadingGuide from '../../../components/book/ReadingGuide.astro';
+import BookPages from '../../../components/book/BookPages.astro';
+import Takeaways from '../../../components/book/Takeaways.astro';
+import Callout from '../../../components/Callout.astro';
+import Exercise from '../../../components/Exercise.astro';
+import QuickCheck from '../../../components/QuickCheck.tsx';
+import CodeLab from '../../../components/CodeLab.tsx';
+import * as lab from '../../../labs/book-3-2-fastfibo.ts';
+
+<Stage n={1} id="warmup" title="تمهيد" sub="فكرة القسم قبل أي تعريف">
+
+في القسم 3.1 انتقلنا من خوارزمية أسية إلى خطية. هل يمكن أسرع؟ في القسم 1.10 رأيت أن حساب $a^n$ يحتاج إلى $O(\log n)$ ضربًا فقط، وأن $a$ يمكن أن يكون مصفوفة. وفي مختبر ذلك القسم حسبت $F_n$ لـ $n = 10^{18}$ بالباقي. فلماذا لا نحسب $F_n$ نفسه في زمن لوغاريتمي؟ الجواب يكشف فخًا في كل تحليل يعدّ «العمليات» دون أن يسأل عن حجمها.
+
+</Stage>
+
+<Stage n={2} id="reading" title="اقرأ من الكتاب" sub="صفحات الكتاب الأصلية لهذا القسم، ومعها دليل يوجه قراءتك">
+
+<ReadingGuide pages="103–105" minutes={12}>
+
+- **العلامة ª:** القسم اختياري في الكتاب. لكن الجزء الأخير منه «Whoa! Not so fast!» يستحق القراءة حتى لو تخطيت الباقي.
+- **المصفوفة:** ضرب متجه في المصفوفة $\begin{pmatrix} 0 & 1 \\ 1 & 1 \end{pmatrix}$ هو دورة واحدة من IterFibo2. والحاشية 9: Piṅgala نفسه اقترح التربيع المتكرر.
+- **هوية Lucas** سنة 1898، ثم FastRecFibo.
+- **Whoa!:** عدد أرقام $F_n$، وM$(n)$، و«addition isn't free, either!».
+
+</ReadingGuide>
+
+<BookPages section="3.2" />
+
+</Stage>
+
+<Stage n={3} id="explain" title="الشرح والتجربة" sub="الأفكار نفسها بالعربية، بتفصيل، مع تجربة تفاعلية">
+
+### Fibonacci بالمصفوفات
+
+دورة واحدة من حلقة IterFibo2 تأخذ زوجًا متجاورًا $(x, y)$ وتعطي $(y, x + y)$. وهذا بالضبط ضرب في مصفوفة:
+
+$$
+\begin{pmatrix} 0 & 1 \\ 1 & 1 \end{pmatrix} \begin{pmatrix} x \\ y \end{pmatrix} = \begin{pmatrix} y \\ x + y \end{pmatrix}.
+$$
+
+فضرب المتجه في المصفوفة $n$ مرة هو تكرار الحلقة $n$ مرة:
+
+$$
+\begin{pmatrix} 0 & 1 \\ 1 & 1 \end{pmatrix}^{n} \begin{pmatrix} 1 \\ 0 \end{pmatrix} = \begin{pmatrix} F_{n-1} \\ F_n \end{pmatrix}.
+$$
+
+فلحساب $F_n$ يكفي حساب القوة $n$ للمصفوفة. وبالتربيع المتكرر (القسم 1.10، وتذكر أن Piṅgala نفسه اقترحه لقوى 2)، هذا $O(\log n)$ ضربًا لمصفوفات $2 \times 2$، وكل ضرب منها عدد ثابت من ضروب الأعداد وجمعها. فـ $F_n$ بـ $O(\log n)$ عملية حسابية.
+
+### المضاعفة: هويتا Lucas
+
+الهوية $F_n = F_m F_{n-m-1} + F_{m+1} F_{n-m}$ تصح لكل $m$ و$n$ (بالاستقراء!). وبتطبيقها مع $n = 2m$ تقريبًا نحصل على علاقة متبادلة للأزواج المتجاورة، اقترحها Édouard Lucas سنة 1898:
+
+$$
+F_{2n-1} = F_{n-1}^2 + F_n^2, \qquad F_{2n} = F_n\,(F_{n-1} + F_{n+1}) = F_n\,(2F_{n-1} + F_n).
+$$
+
+فمن الزوج $(F_{m-1}, F_m)$ نحسب $(F_{2m-1}, F_{2m})$ مباشرة، ومنهما $F_{2m+1}$ بجمع. وهذا فرّق تسد بنصف الحجم، كـ Piṅgala بالضبط:
+
+```
+FastRecFibo(n):          ⟨⟨Compute the pair F(n−1), F(n)⟩⟩
+  if n = 1
+    return 0, 1
+  m ← ⌊n/2⌋
+  hprv, hcur ← FastRecFibo(m)          ⟨⟨F(m−1), F(m)⟩⟩
+  prev ← hprv² + hcur²                  ⟨⟨F(2m−1)⟩⟩
+  curr ← hcur · (2 · hprv + hcur)       ⟨⟨F(2m)⟩⟩
+  next ← prev + curr                    ⟨⟨F(2m+1)⟩⟩
+  if n is even
+    return prev, curr
+  else
+    return curr, next
+```
+
+وشجرة الاستدعاء مسار بطول $\log_2 n$، فـ $O(\log n)$ عملية حسابية. تحسن أسي على الحلقة، التي كانت هي نفسها تحسنًا أسيًا على الاستدعاء الساذج. صحيح؟
+
+### «مهلًا! ليس بهذه السرعة!»
+
+ليس تمامًا. أعداد Fibonacci تنمو أسيًا. $F_n$ فيه نحو $n \log_{10} \varphi \approx n/5$ رقمًا عشريًا، أو $n \log_2 \varphi \approx 2n/3$ بتًا. **فلا يمكن حساب $F_n$ في زمن لوغاريتمي: نحتاج إلى $\Omega(n)$ زمنًا لمجرد كتابة الجواب!**
+
+والمخرج من هذه المفارقة الظاهرة: **الحساب بدقة غير محدودة لا يأخذ زمنًا ثابتًا.** «العملية الواحدة» في التحليل السابق قد تكون ضرب عددين بمئات الآلاف من الأرقام. ليكن $M(n)$ زمن ضرب عددين بـ $n$ رقمًا. فزمن FastRecFibo الحقيقي:
+
+$$
+T(n) = T(\lfloor n/2 \rfloor) + M(n),
+$$
+
+لأن الأعداد في المستوى الأعلى بطول $\Theta(n)$ رقمًا، وفي المستوى التالي بنصفه، وهكذا. وشجرة الاستدعاء متناقصة هندسيًا (القسم 1.7)، فالجذر يهيمن: $T(n) = O(M(n))$. وأسرع خوارزمية ضرب معروفة (حتى 2019، القسم 1.9) $O(n \log n)$، فهذا زمن أسرع خوارزمية معروفة لـ Fibonacci أيضًا.
+
+**وهل هذا أبطأ من الخوارزمية «الخطية»؟** لا! **الجمع ليس مجانيًا أيضًا.** جمع عددين بـ $n$ رقمًا يأخذ $O(n)$ زمنًا، وIterFibo تقوم بـ $n$ جمعًا على أعداد تكبر حتى $\Theta(n)$ رقمًا. فزمنها الحقيقي $O(n^2)$. (هل ترى لماذا؟ مجموع أطوال الأعداد $\sum_i \Theta(i) = \Theta(n^2)$.) فـ FastRecFibo أسرع كثيرًا من الخوارزميتين التكراريتين، لكن **ليس أسيًا**.
+
+وفي الخوارزمية الاستدعائية الساذجة، التكلفة الإضافية للحساب الدقيق تغرق في العدد الهائل من الاستدعاءات: العلاقة الصحيحة $T(n) = T(n-1) + T(n-2) + O(n)$، وحلها ما زال $O(\varphi^n)$.
+
+| الخوارزمية | عمليات حسابية | الزمن الحقيقي بأعداد كبيرة |
+|---|---|---|
+| RecFibo | $\Theta(\varphi^n)$ | $\Theta(\varphi^n)$ |
+| IterFibo / IterFibo2 | $\Theta(n)$ | $O(n^2)$ |
+| FastRecFibo | $\Theta(\log n)$ | $O(M(n)) = O(n \log n)$ |
+
+<Callout type="warning" title="الدرس العام">
+حين تعدّ «عمليات» في تحليل، اسأل دائمًا: على أي أعداد؟ في معظم الكتاب الأعداد بحجم ثابت (تتسع في كلمة آلة)، فالعملية الواحدة $O(1)$ فعلًا. لكن حين تنمو الأعداد مع المدخل، كما هنا وفي القسم 1.9، يجب أن يدخل حجمها في التحليل. وفي المختبر ستراه بالأرقام.
+</Callout>
+
+</Stage>
+
+<Stage n={4} id="check" title="تحقق من فهمك" sub="أسئلة سريعة قبل التمارين">
+
+<QuickCheck
+  client:visible
+  id="q1"
+  question="كم رقمًا عشريًا تقريبًا في F(100000)؟"
+  options={['17', 'نحو 20,900', 'نحو 100,000', 'نحو 69,000']}
+  answer={1}
+  explain="$n \log_{10} \varphi \approx 100000 \times 0.209 \approx 20{,}900$. (والعدد الدقيق 20,899.)"
+  wrong={{ 0: 'هذا $\\log_2 n$ تقريبًا، أي عدد العمليات في FastRecFibo.', 2: 'كل رقم يحتاج إلى أكثر من خطوة واحدة.', 3: 'هذا عدد البتات تقريبًا، لا الأرقام العشرية.' }}
+/>
+
+<QuickCheck
+  client:visible
+  id="q2"
+  question="لماذا IterFibo في O(n²) لا O(n) حين نحسب بدقة كاملة؟"
+  options={['لأن الحلقة متداخلة', 'لأن الجمع رقم i يعمل على أعداد بـ Θ(i) رقمًا، والمجموع Θ(n²)', 'لأن الذاكرة O(n²)', 'هي O(n)']}
+  answer={1}
+  explain="$\sum_{i=1}^{n} \Theta(i) = \Theta(n^2)$. والعملية «الواحدة» تكبر مع الأعداد."
+  wrong={{ 0: 'الحلقة واحدة.', 2: 'الذاكرة ليست الزمن.', 3: 'فقط إن كان الجمع $O(1)$، وهو ليس كذلك هنا.' }}
+/>
+
+</Stage>
+
+<Stage n={5} id="exercises" title="تمارين" sub="لا يخص الكتاب هذا القسم بتمارين، فهذه تمارين إضافية بحلول كاملة، ثم مختبر">
+
+<Exercise id="e1" level="prove" title="هوية الجمع">
+
+برهن $F_{m+n} = F_m F_{n-1} + F_{m+1} F_n$ لكل $m \ge 0$ و$n \ge 1$، واستنتج هويتي Lucas.
+
+<div slot="hint">استقراء على $n$ مع تثبيت $m$. أو: انظر إلى $M^{m+n} = M^m M^n$ للمصفوفة $M$ من الشرح.</div>
+<div slot="solution">
+
+بالمصفوفات: $M = \begin{pmatrix} 0 & 1 \\ 1 & 1 \end{pmatrix}$ تحقق $M^k = \begin{pmatrix} F_{k-1} & F_k \\ F_k & F_{k+1} \end{pmatrix}$ (بالاستقراء، كما في تمرين القسم 1.10 بصيغة أخرى). و$M^{m+n} = M^m M^n$. قارن المدخل في الصف الثاني والعمود الأول: $F_{m+n} = F_m F_{n-1} + F_{m+1} F_n$. ∎
+
+ومع $m = n - 1$: $F_{2n-1} = F_{n-1}^2 + F_n^2$. ومع $m = n$: $F_{2n} = F_n F_{n-1} + F_{n+1} F_n = F_n(F_{n-1} + F_{n+1})$، و$F_{n+1} = F_n + F_{n-1}$ يعطي $F_n(2F_{n-1} + F_n)$.
+
+</div>
+</Exercise>
+
+### المختبر البرمجي
+
+اكتب FastRecFibo بـ `BigInt`. ثم شغّل القياس: لاحظ كيف ينمو الزمن مع $n$، وقارنه بتوقعك $O(M(n))$. وجرّب في المحرر أن تقيس `iterFibo2` من مختبر القسم 3.1 على $n = 100{,}000$.
+
+<CodeLab
+  client:visible
+  id="book-3.2-fastfibo"
+  title="المضاعفة السريعة"
+  exports={['fastRecFibo', 'fastFibo']}
+  starter={lab.starter}
+  tests={[
+    { name: 'أزواج صغيرة', code: 'JSON.stringify(fastRecFibo(1).map(String)) === \'["0","1"]\' && JSON.stringify(fastRecFibo(10).map(String)) === \'["34","55"]\' && fastFibo(0) === 0n && fastFibo(1) === 1n && fastFibo(2) === 1n' },
+    { name: 'يطابق الحلقة حتى 300', code: '(() => { let a = 0n, b = 1n; for (let n = 0; n <= 300; n++) { if (fastFibo(n) !== a) return false; [a, b] = [b, a + b]; } return true; })()' },
+    { name: 'F(100000): 20,899 رقمًا، بسرعة', code: '(() => { const t = performance.now(); const s = String(fastFibo(100000)); return s.length === 20899 && s.startsWith("2597406934") && performance.now() - t < 2000; })()' },
+  ]}
+  bench={{ title: 'زمن fastFibo(n) بأعداد كبيرة', fn: 'fastFibo', make: '[n]', spread: true, ns: [100000, 200000, 400000, 800000] }}
+  solution={lab.solution}
+/>
+
+</Stage>
+
+<Stage n={6} id="summary" title="الخلاصة">
+
+<Takeaways>
+
+- **المصفوفة:** $\begin{pmatrix} 0 & 1 \\ 1 & 1 \end{pmatrix}^n$ تعطي $(F_{n-1}, F_n)$، والتربيع المتكرر $O(\log n)$ ضربًا.
+- **Lucas:** $F_{2n-1} = F_{n-1}^2 + F_n^2$ و$F_{2n} = F_n(2F_{n-1} + F_n)$: مضاعفة بنصف الحجم.
+- **المفارقة:** $F_n$ فيه $\approx n/5$ رقمًا، فلا يُحسب في أقل من $\Omega(n)$.
+- **الحل:** العمليات على الأعداد الكبيرة ليست $O(1)$. الزمن الحقيقي $O(M(n))$ للسريعة و$O(n^2)$ للحلقة.
+
+</Takeaways>
+
+</Stage>

@@ -78,6 +78,22 @@ export const chapters: BookChapter[] = [
       sec('2.8', 'Optimal Binary Search Trees', 'أشجار البحث الثنائية المثلى', 91, [6]),
     ],
   },
+  {
+    num: 3, slug: '03-dynamic-programming', en: 'Dynamic Programming', ar: 'البرمجة الديناميكية', pages: [97, 158], exercisesPage: 123,
+    blurb: 'استدعاء بلا تكرار. خوارزميات التراجع من الفصل 2 كانت تحل المسائل الجزئية نفسها مرة بعد مرة. احفظ كل جواب في جدول، ثم املأ الجدول بالترتيب الصحيح عمدًا: Fibonacci، وتقطيع النص، وأطول متتالية متزايدة، والمسافة التحريرية، ومجموع المجموعة الجزئية، والأشجار المثلى، والأشجار.',
+    sections: [
+      sec('3.1', 'Mātrāvṛtta', 'المقاطع الشعرية وFibonacci', 97),
+      sec('3.2', 'Aside: Even Faster Fibonacci Numbers', 'استطراد: Fibonacci أسرع', 103),
+      sec('3.3', 'Interpunctio Verborum Redux', 'تقطيع النص مرة أخرى', 105, [2]),
+      sec('3.4', 'The Pattern: Smart Recursion', 'النمط: استدعاء ذكي', 105, [3, 4]),
+      sec('3.5', 'Warning: Greed is Stupid', 'تحذير: الجشع غباء', 107, [1]),
+      sec('3.6', 'Longest Increasing Subsequence', 'أطول متتالية متزايدة', 109, [5, 10]),
+      sec('3.7', 'Edit Distance', 'المسافة التحريرية', 111, [6, 7, 9]),
+      sec('3.8', 'Subset Sum', 'مجموع المجموعة الجزئية', 116),
+      sec('3.9', 'Optimal Binary Search Trees', 'أشجار البحث الثنائية المثلى', 117, [12, 33, 38]),
+      sec('3.10', 'Dynamic Programming on Trees', 'البرمجة الديناميكية على الأشجار', 120, [46, 49]),
+    ],
+  },
 ];
 
 /** The whole book, for the table of contents (chapters not yet on the site are shown as coming). */

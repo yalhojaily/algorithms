@@ -1,0 +1,209 @@
+---
+section: "3.8"
+summary: "مجموع المجموعة الجزئية مرة أخرى، والآن بجدول (n+1)×(T+1) يعطي O(nT). ويكسر Erickson قاعدته عن التحسين المبكر ليحذف الحالات السالبة. ثم درسان صادمان: هذا الزمن لا يثبت أن P = NP مع أن المسألة NP-hard، والبرمجة الديناميكية قد تكون أبطأ من التراجع حين يكون الهدف ضخمًا."
+minutes: 40
+goals:
+  - تكتب العلاقة SS(i, t) بالصيغة اللاحقة، وتحذف الحالات t < 0 من الجدول
+  - تملأ الجدول صفًا صفًا من الأسفل، وتحلل O(nT)
+  - تفهم لماذا O(nT) ليس زمنًا متعدد الحدود في حجم المدخل
+  - تعرف متى يكون التراجع O(2ⁿ) أسرع من الجدول
+terms:
+  - { en: pseudo-polynomial time, ar: زمن شبه متعدد الحدود }
+  - { en: input size, ar: حجم المدخل (بالبتات) }
+  - { en: NP-hard, ar: NP-صعبة }
+  - { en: premature optimization, ar: التحسين المبكر }
+---
+
+import Stage from '../../../components/book/Stage.astro';
+import ReadingGuide from '../../../components/book/ReadingGuide.astro';
+import BookPages from '../../../components/book/BookPages.astro';
+import Takeaways from '../../../components/book/Takeaways.astro';
+import Callout from '../../../components/Callout.astro';
+import Exercise from '../../../components/Exercise.astro';
+import QuickCheck from '../../../components/QuickCheck.tsx';
+import SubsetTableLab from '../../../components/SubsetTableLab.tsx';
+import CodeLab from '../../../components/CodeLab.tsx';
+import * as lab from '../../../labs/book-3-8-subset.ts';
+
+<Stage n={1} id="warmup" title="تمهيد" sub="فكرة القسم قبل أي تعريف">
+
+في القسم 2.4 قلنا إن ملخص SubsetSum صغير جدًا: الهدف الباقي فقط. وآلاف الطرق المختلفة لاختيار العناصر السابقة توصل إلى **المسألة الجزئية نفسها**. وقلنا إن هذا سيهم في الفصل 3. هذا هو الوقت. لكن القسم ينتهي بمفاجأة: البرمجة الديناميكية **ليست دائمًا تحسنًا**.
+
+</Stage>
+
+<Stage n={2} id="reading" title="اقرأ من الكتاب" sub="صفحات الكتاب الأصلية لهذا القسم، ومعها دليل يوجه قراءتك">
+
+<ReadingGuide pages="116–117" minutes={10}>
+
+- **العلاقة باللاحقات:** SS$(i, t)$ على $X[i .. n]$، لا على البادئات كما في الفصل 2. والحاشية 15: «نعم، أنا أكسر قاعدتي ضد التحسين المبكر».
+- **الخطوات المعتادة**، ثم FastSubsetSum.
+- **الفقرة الأخيرة والحاشيتان 16 و17:** لماذا لا يثبت هذا أن P = NP، ولماذا قد يكون الجدول أبطأ. واقتباس Michie الطريف.
+
+</ReadingGuide>
+
+<BookPages section="3.8" />
+
+</Stage>
+
+<Stage n={3} id="explain" title="الشرح والتجربة" sub="الأفكار نفسها بالعربية، بتفصيل، مع تجربة تفاعلية">
+
+### العلاقة باللاحقات
+
+ثبّت المصفوفة الأصلية $X[1 .. n]$ وعرّف:
+
+> SS$(i, t)$ = True إذا وفقط إذا كانت هناك مجموعة جزئية من $X[i .. n]$ مجموعها $t$.
+
+والمطلوب SS$(1, T)$. (لاحظ أن الكتاب يستعمل هنا **اللاحقات** $X[i .. n]$، بينما استعمل الفصل 2 البادئات $X[1 .. i]$. الاثنان صحيحان، والاختيار ذوق.) والعلاقة:
+
+$$
+\text{SS}(i, t) =
+\begin{cases}
+\text{True} & t = 0 \\
+\text{False} & t \lt 0 \text{ or } i \gt n \\
+\text{SS}(i + 1, t) \lor \text{SS}(i + 1, t - X[i]) & \text{otherwise}
+\end{cases}
+$$
+
+### حذف الحالات السالبة
+
+**المسائل الجزئية:** عدد صحيح $i$ بين 1 و$n + 1$، وعدد صحيح $t \le T$. لكن المسائل بـ $t \lt 0$ تافهة (جوابها False دائمًا)، «فيبدو سخيفًا نوعًا ما أن نتذكّرها». فنعدل العلاقة بحيث **لا تظهر أبدًا**:
+
+$$
+\text{SS}(i, t) =
+\begin{cases}
+\text{True} & t = 0 \\
+\text{False} & i \gt n \\
+\text{SS}(i + 1, t) & t \lt X[i] \\
+\text{SS}(i + 1, t) \lor \text{SS}(i + 1, t - X[i]) & \text{otherwise}
+\end{cases}
+$$
+
+الحالة الثالثة جديدة: إن كان $X[i]$ أكبر من الهدف الباقي، فلا يمكن أخذه، فلا داعي لاستدعاء سيعيد False. والحاشية 15 اعتراف لطيف: «نعم، أنا أكسر قاعدتي ضد التحسين المبكر». وهذا التحسين بالذات له مبرر: يجعل الجدول مستطيلًا بسيطًا $0 \le t \le T$ بلا أعمدة سالبة.
+
+### الوصفة
+
+- **البنية:** مصفوفة ثنائية $S[1 .. n + 1, 0 .. T]$، حيث $S[i, t]$ تخزن SS$(i, t)$.
+- **الترتيب:** كل خانة $S[i, t]$ تعتمد على خانتين على الأكثر، **كلتاهما في الصف التالي** $i + 1$. فنملأ الصفوف **من الأسفل إلى الأعلى** في الحلقة الخارجية، والخانات داخل الصف **بأي ترتيب**.
+- **الزمن والذاكرة:** $O(nT)$ ذاكرة، وكل خانة $O(1)$، فـ $O(nT)$ زمنًا.
+
+```
+FastSubsetSum(X[1 .. n], T):
+  S[n + 1, 0] ← True
+  for t ← 1 to T
+    S[n + 1, t] ← False
+  for i ← n downto 1
+    S[i, 0] = True
+    for t ← 1 to X[i] − 1
+      S[i, t] ← S[i + 1, t]                ⟨⟨Avoid the case t < 0⟩⟩
+    for t ← X[i] to T
+      S[i, t] ← S[i + 1, t] ∨ S[i + 1, t − X[i]]
+  return S[1, T]
+```
+
+<SubsetTableLab client:visible />
+
+### لا يثبت P = NP
+
+الزمن $O(nT)$ تحسن **كبير** على التراجع $O(2^n)$ **حين يكون $T$ صغيرًا**. لكن انتبه: SubsetSum مسألة **NP-hard** (الفصل 12)، أي أن إيجاد خوارزمية متعددة الحدود لها يعني أن P = NP، وهو أشهر سؤال مفتوح في علوم الحاسوب. فهل حللناه للتو؟
+
+لا. الحاشية 16: الزمن $O(nT)$ **ليس** متعدد الحدود في **حجم المدخل**، لأن $T$ ليس بالضرورة محدودًا بدالة متعددة الحدود في الحجم. العدد $T$ يُكتب بـ $\log_2 T$ بت فقط. فمدخل حجمه نحو $n \log T$ بت قد يحتاج إلى زمن $nT$، وهذا **أسي** في عدد بتات $T$. مثال: $T = 2^{60}$ يُكتب في 60 بتًا، والجدول فيه $2^{60}$ عمودًا. ولهذا يسمى هذا النوع من الزمن **شبه متعدد الحدود** (pseudo-polynomial): متعدد الحدود في **قيمة** الأعداد، لا في **طول كتابتها**.
+
+### البرمجة الديناميكية ليست دائمًا تحسنًا
+
+وهنا الدرس الأغرب: إن كان الهدف $T$ **أكبر بكثير من $2^n$**، فالخوارزمية التكرارية **أبطأ** من التراجع الساذج! لأنها تضيع وقتها في حل مسائل جزئية **لا يطرحها التراجع أبدًا**: من أصل $T + 1$ قيمة ممكنة لـ $t$ في كل صف، التراجع يزور $2^{n-i+1}$ قيمة على الأكثر.
+
+> Dynamic programming isn't always an improvement!
+
+والحاشية 17 تقتبس Michie نفسه، مخترع memo functions، من مذكرته سنة 1967: «جدولة قيم دالة لن نحتاج إليها **إضاعة للمكان**، وإعادة حساب القيم نفسها أكثر من مرة **إضاعة للوقت**». ويضيف Erickson: لكن في الحقيقة، جدولة قيم لن نحتاج إليها **إضاعة للوقت أيضًا**!
+
+<Callout type="tip" title="التذكّر بقاموس يحل المعضلة">
+إن خزنّا النتائج في **قاموس** (جدول تجزئة) بدل مصفوفة، وتذكّرنا بالاستدعاء (لا بالملء الشامل)، فلا نحسب إلا المسائل التي يطرحها الاستدعاء فعلًا. فالزمن $O(\min\{nT, 2^n\})$ تقريبًا: الأفضل من العالمين. وهذا مثال على أن التذكّر والملء المتعمد ليسا متكافئين دائمًا في الزمن.
+</Callout>
+
+</Stage>
+
+<Stage n={4} id="check" title="تحقق من فهمك" sub="أسئلة سريعة قبل التمارين">
+
+<QuickCheck
+  client:visible
+  id="q1"
+  question="n = 30 عنصرًا، و T = 10¹². أي خوارزمية أسرع؟"
+  options={['FastSubsetSum: O(nT)', 'التراجع: O(2ⁿ) ≈ 10⁹', 'متساويتان', 'لا يمكن حلها']}
+  answer={1}
+  explain="$nT = 3 \\times 10^{13}$، و$2^{30} \\approx 10^9$. فالتراجع أسرع بنحو 30 ألف مرة."
+  wrong={{ 0: 'الجدول فيه $10^{12}$ عمودًا.', 2: 'الفرق هائل.', 3: 'يمكن حلها، بالتراجع.' }}
+/>
+
+<QuickCheck
+  client:visible
+  id="q2"
+  question="لماذا لا يُعد O(nT) زمنًا متعدد الحدود؟"
+  options={['لأن الجدول ثنائي', 'لأن T يُكتب بـ log T بت، فـ T أسي في حجم المدخل', 'لأن المسألة NP-hard', 'هو متعدد الحدود']}
+  answer={1}
+  explain="حجم المدخل يُقاس بعدد البتات اللازمة لكتابته. و$T = 2^{\\log_2 T}$."
+  wrong={{ 0: 'الأبعاد لا تهم بذاتها.', 2: 'هذا نتيجة، لا سبب.', 3: 'في **قيمة** $T$ فقط، لا في حجم المدخل.' }}
+/>
+
+</Stage>
+
+<Stage n={5} id="exercises" title="تمارين" sub="لا يخص الكتاب هذا القسم بتمارين، فهذه تمارين إضافية بحلول كاملة، ثم مختبر">
+
+<Exercise id="e1" level="apply" title="العدّ بالجدول">
+
+عدّل FastSubsetSum لتحسب **عدد** المجموعات الجزئية التي مجموعها $T$ (التمرين 1(a) في الفصل 2، لكن سريعًا).
+
+<div slot="hint">$\lor$ تصبح $+$، وTrue تصبح 1، وFalse تصبح 0.</div>
+<div slot="solution">
+
+$C[n + 1, 0] = 1$ و$C[n + 1, t] = 0$ لـ $t \gt 0$. ثم $C[i, t] = C[i + 1, t] + (t \ge X[i]\ ?\ C[i + 1, t - X[i]] : 0)$. والجواب $C[1, T]$. ولاحظ: $C[i, 0] = 1$ دائمًا (المجموعة الخالية وحدها)، وهذا يخرج من العلاقة تلقائيًا. الزمن $O(nT)$، على أن تكون العمليات على الأعداد $O(1)$ (وقد يكبر العدد حتى $2^n$).
+
+</div>
+</Exercise>
+
+<Exercise id="e2" level="prove" title="ذاكرة O(T)">
+
+برهن أن FastSubsetSum يمكن أن تعمل بذاكرة $O(T)$ فقط، بمصفوفة أحادية واحدة. وفي أي اتجاه يجب أن تمر $t$؟
+
+<div slot="hint">الصف $i$ يقرأ من الصف $i + 1$ فقط. إن كتبت فوق المصفوفة نفسها، أي القيم تحتاج إليها قبل أن تُكتب فوقها؟</div>
+<div slot="solution">
+
+نحفظ مصفوفة $R[0 .. T]$ تمثل الصف الحالي. للانتقال من الصف $i + 1$ إلى $i$: $R[t] \leftarrow R[t] \lor R[t - X[i]]$. نحتاج إلى $R[t - X[i]]$ **القديمة** (من الصف $i + 1$). فإن مررنا على $t$ **تنازليًا** من $T$ إلى $X[i]$، فـ $R[t - X[i]]$ (فهرس أصغر) لم يُكتب فوقه بعد في هذه الدورة. ولو مررنا تصاعديًا، لاستعملنا $X[i]$ أكثر من مرة: هذا يحل مسألة أخرى (عناصر قابلة للتكرار، كأوراق الباقي!).
+
+</div>
+</Exercise>
+
+### المختبر البرمجي
+
+<CodeLab
+  client:visible
+  id="book-3.8-subset"
+  title="SubsetSum في O(nT)"
+  exports={['fastSubsetSum', 'fastConstructSubset']}
+  starter={lab.starter}
+  tests={[
+    { name: 'مثالا الكتاب وحالات الأساس', code: 'fastSubsetSum([8, 6, 7, 5, 3, 10, 9], 15) === true && fastSubsetSum([11, 6, 5, 1, 7, 13, 12], 15) === false && fastSubsetSum([], 0) === true && fastSubsetSum([4], 3) === false' },
+    { name: 'يطابق فحص كل المجموعات', code: '(() => { for (let t = 0; t < 300; t++) { const n = Math.floor(Math.random() * 12), X = Array.from({ length: n }, () => 1 + Math.floor(Math.random() * 25)), T = Math.floor(Math.random() * 80); let ref = false; for (let m = 0; m < 1 << n && !ref; m++) { let s = 0; for (let i = 0; i < n; i++) if (m >> i & 1) s += X[i]; if (s === T) ref = true; } if (fastSubsetSum(X, T) !== ref) return false; } return true; })()' },
+    { name: 'fastConstructSubset: صحيحة أو null', code: '(() => { for (let t = 0; t < 300; t++) { const n = Math.floor(Math.random() * 12), X = Array.from({ length: n }, () => 1 + Math.floor(Math.random() * 25)), T = Math.floor(Math.random() * 80); const Y = fastConstructSubset(X, T); if (Y === null) { if (fastSubsetSum(X, T)) return false; continue; } if (Y.reduce((a, b) => a + b, 0) !== T) return false; const left = X.slice(); for (const y of Y) { const k = left.indexOf(y); if (k < 0) return false; left.splice(k, 1); } } return true; })()' },
+    { name: '60 عنصرًا وهدف 3000: لحظي (التراجع مستحيل هنا)', code: '(() => { const X = Array.from({ length: 60 }, () => 2 * (1 + Math.floor(Math.random() * 100))); const t = performance.now(); const r = fastSubsetSum(X, 2999); return r === false && performance.now() - t < 1000; })()' },
+  ]}
+  solution={lab.solution}
+/>
+
+<Callout type="tip" title="عن الاختبار الأخير">
+كل العناصر زوجية والهدف فردي، فلا حل. التراجع سيفحص كل المجموعات الجزئية الـ $2^{60}$ تقريبًا (مع قطع قليل بسبب $T \lt 0$)، وهذا قرون. والجدول فيه $61 \times 3000$ خانة فقط.
+</Callout>
+
+</Stage>
+
+<Stage n={6} id="summary" title="الخلاصة">
+
+<Takeaways>
+
+- **SS$(i, t)$** على اللاحقات، والحالة $t \lt X[i]$ تحذف المسائل السالبة من الجدول.
+- **الجدول** $S[1 .. n+1, 0 .. T]$: الصفوف من الأسفل، والخانات داخل الصف بأي ترتيب. $O(nT)$.
+- **شبه متعدد الحدود:** $T$ يُكتب بـ $\log T$ بت، فـ $O(nT)$ لا يثبت P = NP.
+- **ليست دائمًا تحسنًا:** إن كان $T \gg 2^n$ فالتراجع أسرع. والتذكّر بقاموس يأخذ الأفضل من الاثنين.
+
+</Takeaways>
+
+</Stage>

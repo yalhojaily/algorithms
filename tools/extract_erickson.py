@@ -36,6 +36,12 @@ CHAPTERS = {
         ("2.5", "Text Segmentation (Interpunctio Verborum)"), ("2.6", "Longest Increasing Subsequence"),
         ("2.7", "Longest Increasing Subsequence, Take 2"), ("2.8", "Optimal Binary Search Trees"),
     ]),
+    3: dict(first=97, last=158, exercises=123, sections=[
+        ("3.1", 'Mātrāvr.tta'), ("3.2", "Aside: Even Faster Fibonacci Numbers"), ("3.3", "Interpunctio Verborum Redux"),
+        ("3.4", "The Pattern: Smart Recursion"), ("3.5", "Warning: Greed is Stupid"), ("3.6", "Longest Increasing Subsequence"),
+        ("3.7", "Edit Distance"), ("3.8", "Subset Sum"), ("3.9", "Optimal Binary Search Trees"),
+        ("3.10", "Dynamic Programming on Trees"),
+    ]),
     1: dict(first=21, last=70, exercises=44, sections=[
         ("1.1", "Reductions"), ("1.2", "Simplify and Delegate"), ("1.3", "Tower of Hanoi"),
         ("1.4", "Mergesort"), ("1.5", "Quicksort"), ("1.6", "The Pattern"), ("1.7", "Recursion Trees"),
@@ -153,7 +159,7 @@ def main(chap):
         for i, l in enumerate(ls):
             if p == ex_head[0] and l["y0"] <= ex_head[1] + GAP + 2:
                 continue
-            m = re.match(r"^(\d+)\.\s", l["text"])
+            m = re.match(r"^(?:ª\s*)?(\d+)\.\s", l["text"])
             if m and l["x0"] <= left[p % 2] + 26:
                 n = int(m.group(1))
                 ex_markers.append((n, p, l["y0"] - 4))

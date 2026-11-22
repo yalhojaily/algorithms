@@ -1,0 +1,236 @@
+---
+section: "3.6"
+summary: "لأطول متتالية متزايدة خوارزميتا تراجع من الفصل 2، وكلتاهما أسية. وهنا تصبحان O(n²) بالوصفة نفسها. الأولى بجدول ثنائي ترتيبه ليس واضحًا من الاستدعاء، فنستخرجه من صورة الاعتمادات. والثانية بجدول أحادي. وفي القسم درس عن الترتيب: الترتيب الذي نختاره ليس بالضرورة ما كان الاستدعاء سيفعله، وهذا لا يهم."
+minutes: 50
+goals:
+  - تحول LISbigger(i, j) إلى جدول ثنائي، وتستخرج ترتيب الملء من صورة الاعتمادات
+  - تحول LISfirst(i) إلى جدول أحادي وتحلل الزمن O(n²)
+  - تقارن البنيتين، وتعرف لماذا تُقلص الذاكرة إلى O(n)
+  - تعيد بناء المتتالية نفسها من الجدول
+terms:
+  - { en: column-major order, ar: ترتيب الأعمدة (عمودًا عمودًا) }
+  - { en: dependency picture, ar: صورة الاعتمادات }
+  - { en: sentinel, ar: حارس }
+  - { en: constant factors, ar: الثوابت (العوامل الثابتة) }
+---
+
+import Stage from '../../../components/book/Stage.astro';
+import ReadingGuide from '../../../components/book/ReadingGuide.astro';
+import BookPages from '../../../components/book/BookPages.astro';
+import BookExercises from '../../../components/book/BookExercises.astro';
+import Takeaways from '../../../components/book/Takeaways.astro';
+import Callout from '../../../components/Callout.astro';
+import Exercise from '../../../components/Exercise.astro';
+import QuickCheck from '../../../components/QuickCheck.tsx';
+import LISTableLab from '../../../components/LISTableLab.tsx';
+import CodeLab from '../../../components/CodeLab.tsx';
+import * as lab from '../../../labs/book-3-6-lis.ts';
+
+<Stage n={1} id="warmup" title="تمهيد" sub="فكرة القسم قبل أي تعريف">
+
+في القسمين 2.6 و2.7 كتبت خوارزميتين لأطول متتالية متزايدة، وفي جدول المحاكاة رأيت عدد استدعاءاتهما ينفجر مع $n$. الآن نطبق الوصفة من القسم 3.4 على العلاقتين كما هما، بلا تغيير في المنطق. والمفاجأة الوحيدة هنا: في العلاقة الأولى لا يتضح ترتيب الملء من الاستدعاء، ويجب أن نرسم.
+
+</Stage>
+
+<Stage n={2} id="reading" title="اقرأ من الكتاب" sub="صفحات الكتاب الأصلية لهذا القسم، ومعها دليل يوجه قراءتك">
+
+<ReadingGuide pages="109–111" minutes={15}>
+
+- **First Recurrence: Is This Next?** $O(n^2)$ مسألة جزئية، وكل منها $O(1)$. ثم الترتيب: «not immediately clear».
+- **Figure 3.4:** صورة الاعتمادات على اليسار، وترتيب صالح على اليمين. السهم المزدوج الحلقة الخارجية، والمفرد الداخلية.
+- **FastLIS:** ولاحظ التعليق «⟨⟨... or whatever⟩⟩»: ترتيب الحلقة الداخلية لا يهم. والحاشيتان 12 و13 عن الثوابت.
+- **Second Recurrence: What's Next?** جدول أحادي، وFastLIS2.
+
+</ReadingGuide>
+
+<BookPages section="3.6" />
+
+</Stage>
+
+<Stage n={3} id="explain" title="الشرح والتجربة" sub="الأفكار نفسها بالعربية، بتفصيل، مع تجربة تفاعلية">
+
+### العلاقة الأولى: هل هذا هو التالي؟
+
+من القسم 2.6: LISbigger$(i, j)$ = طول أطول متتالية متزايدة من $A[j .. n]$ كل عناصرها أكبر من $A[i]$. والعلاقة:
+
+$$
+\text{LISbigger}(i, j) =
+\begin{cases}
+0 & j \gt n \\
+\text{LISbigger}(i, j + 1) & A[i] \ge A[j] \\
+\max\left\{\begin{array}{l} \text{LISbigger}(i, j + 1) \\ 1 + \text{LISbigger}(j, j + 1) \end{array}\right\} & \text{otherwise}
+\end{cases}
+$$
+
+مع الحارس $A[0] = -\infty$، والمطلوب LISbigger$(0, 1)$. ونطبق الوصفة:
+
+- **المسائل الجزئية:** كل مسألة يحددها فهرسان $i$ و$j$، فلا يوجد إلا $O(n^2)$ مسألة مختلفة.
+- **البنية:** مصفوفة ثنائية LISbigger$[0 .. n, 1 .. n + 1]$. (الحاشية 12: لا نحتاج إلا إلى نصفها، لأن $i \lt j$ دائمًا. «لكن حتى لو اهتممنا بالثوابت في هذا الكتاب، ونحن لا نهتم، لكان هذا الوقت الخطأ للاهتمام بها».)
+- **الزمن المتوقع:** كل مسألة $O(1)$ بلا الاستدعاءات، فـ $O(n^2)$.
+
+### الترتيب من الصورة
+
+هنا الصعوبة الوحيدة. **ترتيب** ملء الخوارزمية المتذكّرة للجدول «ليس واضحًا فورًا». كل ما تقوله العلاقة: الخانة $[i, j]$ تُملأ بعد الخانتين $[i, j + 1]$ و$[j, j + 1]$، وكلتاهما في **العمود التالي** $j + 1$.
+
+وهذه المعلومة الجزئية **تكفي** لترتيب صالح: إن ملأنا الجدول **عمودًا عمودًا من اليمين إلى اليسار**، فكلما وصلنا إلى خانة، فكل ما تعتمد عليه في العمود الذي على يمينها، وقد امتلأ. وداخل العمود الواحد، الترتيب **لا يهم**: لا خانة في العمود تعتمد على خانة في العمود نفسه. ولهذا الأسهم الداخلية في Figure 3.4 ثنائية الاتجاه، ولهذا التعليق في الكود «... or whatever».
+
+ويقول Erickson جملة تستحق التوقف: **«قد لا يكون هذا الترتيب الذي كان سيستعمله الاستدعاء، لكنه يعمل، فلنمضِ به».** فالبرمجة الديناميكية لا تحاكي الاستدعاء، بل تحسب القيم نفسها بأي ترتيب يحترم الاعتمادات (تمرين القسم 3.4).
+
+```
+FastLIS(A[1 .. n]):
+  A[0] ← −∞                              ⟨⟨Add a sentinel⟩⟩
+  for i ← 0 to n                         ⟨⟨Base cases⟩⟩
+    LISbigger[i, n + 1] ← 0
+  for j ← n down to 1
+    for i ← 0 to j − 1                   ⟨⟨... or whatever⟩⟩
+      keep ← 1 + LISbigger[j, j + 1]
+      skip ← LISbigger[i, j + 1]
+      if A[i] ≥ A[j]
+        LISbigger[i, j] ← skip
+      else
+        LISbigger[i, j] ← max{keep, skip}
+  return LISbigger[0, 1]
+```
+
+الزمن $O(n^2)$ بوضوح. وإن احتجنا، يمكن تقليص الذاكرة من $O(n^2)$ إلى $O(n)$ بحفظ آخر **عمودين** فقط، $[\cdot, j]$ و$[\cdot, j + 1]$. والحاشية 13: «ألم أقل لك ألا تهتم بالثوابت بعد؟».
+
+### العلاقة الثانية: ما التالي؟
+
+من القسم 2.7: LISfirst$(i)$ = طول أطول متتالية متزايدة من $A[i .. n]$ **تبدأ بـ $A[i]$**:
+
+$$
+\text{LISfirst}(i) = 1 + \max\{\, \text{LISfirst}(j) : j \gt i,\ A[j] \gt A[i] \,\}, \qquad \max \emptyset = 0.
+$$
+
+هنا المسائل يحددها **فهرس واحد**، فجدول أحادي LISfirst$[0 .. n]$. وكل خانة تعتمد على خانات بفهرس **أكبر**، فنملأ تنازليًا. ولحساب كل خانة نمر على كل $j \gt i$، لكن **بأي ترتيب**:
+
+```
+FastLIS2(A[1 .. n]):
+  A[0] ← −∞                                  ⟨⟨Add a sentinel⟩⟩
+  for i ← n downto 0
+    LISfirst[i] ← 1
+    for j ← i + 1 to n                       ⟨⟨... or whatever⟩⟩
+      if A[j] > A[i] and 1 + LISfirst[j] > LISfirst[i]
+        LISfirst[i] ← 1 + LISfirst[j]
+  return LISfirst[0] − 1                     ⟨⟨Don't count the sentinel⟩⟩
+```
+
+الزمن $O(n^2)$ والذاكرة $O(n)$ مباشرة. تابع الملء على أرقام π:
+
+<LISTableLab client:visible />
+
+### مقارنة
+
+| | FastLIS | FastLIS2 |
+|---|---|---|
+| المسألة الجزئية | $(i, j)$: آخر مأخوذ، وأول غير مفحوص | $i$: أول عنصر |
+| الجدول | ثنائي $O(n^2)$ | أحادي $O(n)$ |
+| الوقت لكل خانة | $O(1)$ | $O(n)$ |
+| الزمن الكلي | $O(n^2)$ | $O(n^2)$ |
+| الترتيب | أعمدة من اليمين | تنازلي |
+
+الزمن نفسه، لكن البنية مختلفة: FastLIS يوزع العمل على خانات كثيرة رخيصة، وFastLIS2 على خانات قليلة مكلفة. والقاعدة من القسم 3.4 تعمل: FastLIS بمتغيرين ($i, j$) وFastLIS2 بمتغيرين ($i$ والـ $j$ داخل الـ $\max$).
+
+<Callout type="tip" title="هل يمكن أسرع؟">
+نعم: توجد خوارزمية لأطول متتالية متزايدة في $O(n \log n)$، تحفظ لكل طول $\ell$ **أصغر عنصر أخير** ممكن لمتتالية بهذا الطول، وتبحث فيه بحثًا ثنائيًا. وهذا موضوع التمرين 5 وغيره بصيغ مختلفة. لكن ترتيب العمل في الكتاب واضح: اجعلها تعمل أولًا ($O(n^2)$ بالوصفة)، ثم أسرع.
+</Callout>
+
+</Stage>
+
+<Stage n={4} id="check" title="تحقق من فهمك" sub="أسئلة سريعة قبل التمارين">
+
+<QuickCheck
+  client:visible
+  id="q1"
+  question="في FastLIS، لماذا لا يهم ترتيب i داخل العمود j؟"
+  options={['لأن الخانات كلها صفر', 'لأن كل خانة في العمود j تعتمد فقط على خانات في العمود j + 1', 'لأن i أصغر من j', 'لأن الجدول متماثل']}
+  answer={1}
+  explain="الاعتمادات كلها من العمود التالي. فلا خانة في العمود تنتظر خانة أخرى في العمود نفسه."
+  wrong={{ 0: 'القيم تختلف.', 2: 'صحيح لكنه ليس السبب.', 3: 'ليس متماثلًا.' }}
+/>
+
+<QuickCheck
+  client:visible
+  id="q2"
+  question="ما المتتالية التي يجدها LISfirst[0] − 1 لـ A = [3, 1, 4, 1, 5]؟ (طولها)"
+  options={['2', '3', '4', '5']}
+  answer={1}
+  explain="مثلًا 3، 4، 5 أو 1، 4، 5. لا يمكن أطول: 1 مكررة، و4 تأتي قبل 5 فقط."
+  wrong={{ 0: 'يمكن ثلاثة.', 2: 'لا توجد أربعة بترتيب متزايد بصرامة.', 3: 'المصفوفة ليست متزايدة.' }}
+/>
+
+</Stage>
+
+<Stage n={5} id="exercises" title="تمارين الكتاب" sub="حلّها بالورقة والقلم، ثم سجّل حالتها. الكتاب لا ينشر حلولها">
+
+<BookExercises chapter={3} nums={[5, 10]} core={[5]} />
+
+<Callout type="tip" title="تلميحات للتمرينين 5 و10">
+- **التمرين 5** هو تمرين الفصل 2 رقم 4 نفسه، والآن بجدول. وتلميح الكتاب: **واحد بالضبط** من أجزائه يُحل بخوارزمية جشعة في $O(n)$. أيها؟ فكّر في الذي لا يحتاج فيه القرار الحالي إلى أي مقارنة بين بدائل.
+- **5(a) lcs:** المسألة الجزئية لاحقتان $(i, j)$، فجدول $O(mn)$. وهي قريبة جدًا من المسافة التحريرية في القسم 3.7.
+- **5(c) bitonic:** جدولان: LISfirst، ومثيله للمتناقصة **التي تنتهي** عند $i$ (أو تبدأ). ثم اجمع عند القمة.
+- **التمرين 10:** الملخص: آخر موضع وصلت إليه **وقيمته**، والقيم تزيد دائمًا. فرتب المسائل الجزئية حسب **القيمة** لا حسب الموضع. وانتبه: الحركة يمينًا أو يسارًا حسب زوجية الفهرس.
+</Callout>
+
+### تمارين إضافية بحلول كاملة
+
+<Exercise id="e1" level="apply" title="عدد المتتاليات المتزايدة الأطول">
+
+عدّل FastLIS2 لتحسب **عدد** المتتاليات المتزايدة التي طولها أكبر ما يمكن.
+
+<div slot="hint">احفظ لكل $i$ قيمتين: LISfirst$[i]$، وCount$[i]$ = عدد المتتاليات الأطول التي تبدأ بـ $A[i]$.</div>
+<div slot="solution">
+
+لكل $i$ تنازليًا: LISfirst$[i] = 1 + \max$ كما سبق، وCount$[i]$ = مجموع Count$[j]$ على كل $j \gt i$ مع $A[j] \gt A[i]$ و**LISfirst$[j]$ يساوي الأكبر** بالضبط (وإن لم يوجد $j$ مرشح فـ Count$[i] = 1$). والجواب Count$[0]$ مع الحارس. الزمن ما زال $O(n^2)$. مثال: $[1, 3, 2, 4]$: الطول 3، والعدد 2 (1، 3، 4 و1، 2، 4).
+
+</div>
+</Exercise>
+
+<Exercise id="e2" level="prove" title="الذاكرة O(n) لـ FastLIS">
+
+اكتب FastLIS بذاكرة $O(n)$، وبيّن لماذا يكفي عمودان.
+
+<div slot="hint">الخانة $[i, j]$ تقرأ $[i, j + 1]$ و$[j, j + 1]$ فقط.</div>
+<div slot="solution">
+
+نحفظ مصفوفتين: next$[0 .. n]$ للعمود $j + 1$، وcur$[0 .. n]$ للعمود $j$. في البداية next كلها أصفار (العمود $n + 1$). ولكل $j$ من $n$ إلى 1: لكل $i \lt j$، cur$[i] \leftarrow$ next$[i]$ إن كان $A[i] \ge A[j]$، وإلا $\max\{\text{next}[i], 1 + \text{next}[j]\}$. ثم next $\leftarrow$ cur. والجواب next$[0]$ في النهاية. يكفي عمودان لأن كل قراءة من العمود $j + 1$ فقط. وفي الحقيقة يكفي **عمود واحد** إن كتبنا فوقه بحذر: $[j, j+1]$ لا يُكتب فوقه في الدورة $j$ لأن $i \lt j$.
+
+</div>
+</Exercise>
+
+### المختبر البرمجي
+
+<CodeLab
+  client:visible
+  id="book-3.6-lis"
+  title="LIS في O(n²)"
+  exports={['fastLIS', 'fastLIS2', 'lisSequence']}
+  starter={lab.starter}
+  tests={[
+    { name: 'أمثلة', code: 'fastLIS([]) === 0 && fastLIS2([]) === 0 && fastLIS([3, 1, 4, 1, 5]) === 3 && fastLIS2([3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5, 8, 9, 7, 9]) === 6 && fastLIS([2, 2, 2]) === 1' },
+    { name: 'تطابق المرجع', code: '(() => { const ref = (A) => { const L = A.map(() => 1); for (let i = 0; i < A.length; i++) for (let j = 0; j < i; j++) if (A[j] < A[i]) L[i] = Math.max(L[i], L[j] + 1); return Math.max(0, ...L); }; for (let t = 0; t < 200; t++) { const A = Array.from({ length: Math.floor(Math.random() * 30) }, () => Math.floor(Math.random() * 20) - 5); const r = ref(A); if (fastLIS(A) !== r || fastLIS2(A) !== r) return false; } return true; })()' },
+    { name: 'lisSequence: متزايدة، متتالية جزئية، وبالطول الصحيح', code: '(() => { for (let t = 0; t < 200; t++) { const A = Array.from({ length: Math.floor(Math.random() * 30) }, () => Math.floor(Math.random() * 20)); const s = lisSequence(A); if (s.length !== fastLIS2(A)) return false; for (let k = 1; k < s.length; k++) if (!(s[k - 1] < s[k])) return false; let p = 0; for (const x of A) if (p < s.length && x === s[p]) p++; if (p !== s.length) return false; } return true; })()' },
+    { name: 'n = 3000 بسرعة', code: '(() => { const A = Array.from({ length: 3000 }, () => Math.floor(Math.random() * 1e6)); const t = performance.now(); fastLIS2(A); return performance.now() - t < 2000; })()' },
+  ]}
+  bench={{ title: 'زمن fastLIS2 على n عنصرًا', fn: 'fastLIS2', make: '[Array.from({ length: n }, () => Math.floor(Math.random() * 1e6))]', spread: true, ns: [1000, 2000, 4000, 8000] }}
+  solution={lab.solution}
+/>
+
+<Callout type="tip" title="بعد التشغيل">
+كل مضاعفة لـ $n$ تضرب الزمن في نحو 4: $O(n^2)$. قارن بالتراجع: مع $n = 40$ فقط كان يحتاج إلى أكثر من تريليون استدعاء في أسوأ الحالات.
+</Callout>
+
+</Stage>
+
+<Stage n={6} id="summary" title="الخلاصة">
+
+<Takeaways>
+
+- **LISbigger:** $O(n^2)$ مسألة، جدول ثنائي، والترتيب **عمودًا عمودًا من اليمين** من صورة الاعتمادات.
+- **الترتيب الصالح** لا يلزم أن يكون ترتيب الاستدعاء: يكفي أن يحترم الاعتمادات.
+- **LISfirst:** جدول أحادي تنازلي، و$O(n)$ لكل خانة: $O(n^2)$ زمنًا و$O(n)$ ذاكرة.
+- **الثوابت لاحقًا:** نصف الجدول، وعمودان بدل الجدول، و$O(n \log n)$: كلها بعد أن تعمل.
+
+</Takeaways>
+
+</Stage>

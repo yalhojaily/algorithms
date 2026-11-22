@@ -1,0 +1,192 @@
+---
+section: "3.3"
+summary: "أقصر أقسام الفصل، وأوضح مثال على الفكرة. خوارزمية تقطيع النص من القسم 2.5 تستدعي IsWord عددًا أسيًا من المرات، مع أنه لا يوجد إلا n مسألة جزئية مختلفة ونحو n² كلمة مرشحة. لماذا ننفق زمنًا أسيًا لنحسب كمية متعددة الحدود؟ جدول من n + 1 خانة يملأ من اليمين يجعلها O(n²)."
+minutes: 35
+goals:
+  - تعدّ المسائل الجزئية المختلفة لـ Splittable وتقارنها بعدد الاستدعاءات في التراجع
+  - تحدد أن SplitTable[i] تعتمد على الخانات التي على يمينها فقط، فتملأ من اليمين
+  - تكتب FastSplittable وتحلل زمنها O(n²) استدعاءً لـ IsWord
+  - تعيد بناء التقطيع نفسه من الجدول
+terms:
+  - { en: distinct subproblems, ar: المسائل الجزئية المختلفة }
+  - { en: memoization table, ar: جدول التذكّر }
+  - { en: decreasing index order, ar: ترتيب الفهارس التنازلي }
+  - { en: reconstruction, ar: إعادة بناء الحل }
+---
+
+import Stage from '../../../components/book/Stage.astro';
+import ReadingGuide from '../../../components/book/ReadingGuide.astro';
+import BookPages from '../../../components/book/BookPages.astro';
+import BookExercises from '../../../components/book/BookExercises.astro';
+import Takeaways from '../../../components/book/Takeaways.astro';
+import Callout from '../../../components/Callout.astro';
+import Exercise from '../../../components/Exercise.astro';
+import QuickCheck from '../../../components/QuickCheck.tsx';
+import SplitTableLab from '../../../components/SplitTableLab.tsx';
+import CodeLab from '../../../components/CodeLab.tsx';
+import * as lab from '../../../labs/book-3-3-split.ts';
+
+<Stage n={1} id="warmup" title="تمهيد" sub="فكرة القسم قبل أي تعريف">
+
+عد إلى محاكاة القسم 2.5 وانظر إلى الأعمدة: اللاحقة نفسها تُحل عشرات المرات، ومع سلسلة من الحروف المتطابقة مئات المرات. والسؤال الذي يطرحه Erickson في هذا القسم بجملة واحدة: **لماذا ننفق زمنًا أسيًا لحساب كمية متعددة الحدود من الأشياء؟**
+
+</Stage>
+
+<Stage n={2} id="reading" title="اقرأ من الكتاب" sub="صفحات الكتاب الأصلية لهذا القسم، ومعها دليل يوجه قراءتك">
+
+<ReadingGuide pages="105–106" minutes={8}>
+
+- **التذكير بالعلاقة:** Splittable$(i)$ من القسم 2.5، و$O(2^n)$ استدعاء لـ IsWord.
+- **الفقرة المفتاح:** $n$ طريقة لاستدعاء Splittable، و$O(n^2)$ طريقة لاستدعاء IsWord. ثم السؤال.
+- **الترتيب:** كل Splittable$(i)$ تعتمد على Splittable$(j)$ مع $j \gt i$، فالتذكّر يملأ الجدول تنازليًا.
+- **Figure 3.3:** «Interpunctio verborum velox»، أي تقطيع الكلمات **السريع**. (أول الصفحة 106.)
+
+</ReadingGuide>
+
+<BookPages section="3.3" />
+
+</Stage>
+
+<Stage n={3} id="explain" title="الشرح والتجربة" sub="الأفكار نفسها بالعربية، بتفصيل، مع تجربة تفاعلية">
+
+### المسألة والعلاقة
+
+معطاة سلسلة $A[1 .. n]$ وروتين IsWord، والسؤال: هل يمكن تقطيع $A$ إلى كلمات؟ وفي القسم 2.5 عرّفنا Splittable$(i)$ = True إذا وفقط إذا أمكن تقطيع اللاحقة $A[i .. n]$، والمطلوب Splittable$(1)$:
+
+$$
+\text{Splittable}(i) =
+\begin{cases}
+\text{True} & i \gt n \\[4pt]
+\displaystyle\bigvee_{j=i}^{n} \big(\text{IsWord}(i, j) \land \text{Splittable}(j + 1)\big) & \text{otherwise}
+\end{cases}
+$$
+
+وخوارزمية التراجع المباشرة تستدعي IsWord $O(2^n)$ مرة في أسوأ الحالات.
+
+### كم شيئًا نحسب فعلًا؟
+
+لسلسلة ثابتة $A[1 .. n]$:
+
+- لا يوجد إلا **$n + 1$ طريقة** لاستدعاء Splittable$(i)$: واحدة لكل $i$ بين 1 و$n + 1$.
+- ولا يوجد إلا **$O(n^2)$ طريقة** لاستدعاء IsWord$(i, j)$: واحدة لكل زوج $1 \le i \le j \le n$.
+
+فكل ما تحسبه الخوارزمية الأسية كمية متعددة الحدود من الأجوبة، كل منها يُحسب مرات كثيرة. وهذا هو تعريف الموقف الذي تعالجه البرمجة الديناميكية.
+
+### الجدول وترتيبه
+
+كل مسألة جزئية عدد صحيح بين 1 و$n + 1$، فنحفظ Splittable في مصفوفة **SplitTable$[1 .. n + 1]$**. وكل Splittable$(i)$ تعتمد فقط على Splittable$(j)$ مع $j \gt i$: الخانات **على يمينها**. فالخوارزمية المتذكّرة تملأ الجدول بترتيب **تنازلي**. ونملؤه بهذا الترتيب عمدًا:
+
+```
+FastSplittable(A[1 .. n]):
+  SplitTable[n + 1] ← True
+  for i ← n down to 1
+    SplitTable[i] ← False
+    for j ← i to n
+      if IsWord(i, j) and SplitTable[j + 1]
+        SplitTable[i] ← True
+  return SplitTable[1]
+```
+
+لاحظ كيف تحولت العلاقة إلى كود **آليًا**: الأساس ($i \gt n$) صار السطر الأول، والـ $\bigvee$ صار حلقة على $j$ تبدأ بـ False وتصبح True إن نجح أي $j$، والاستدعاء Splittable$(j + 1)$ صار **قراءة** من الجدول. لا شيء جديد في المنطق، فقط في الترتيب.
+
+**الزمن:** الحلقتان تمران على كل زوج $(i, j)$ مع $i \le j$ مرة واحدة: $n(n+1)/2 = O(n^2)$ استدعاء لـ IsWord. تحسن **أسي** على التراجع.
+
+<SplitTableLab client:visible />
+
+### إعادة بناء التقطيع
+
+الجدول يجيب بـ True أو False. فكيف نحصل على **الكلمات** نفسها؟ أسهل طريقة: نحفظ مع كل خانة صحيحة **أي $j$ نجح**، أي أين تنتهي الكلمة الأولى في تقطيع اللاحقة. ثم نبدأ من $i = 1$ ونقفز: الكلمة الأولى $A[1 .. j_1]$، ثم من $j_1 + 1$، وهكذا. وهذا نمط سيتكرر في الفصل كله: **الجدول يحفظ القيم، ونحفظ معه القرارات** (أو نستنتجها من القيم)، ثم نمشي فيه من الجواب.
+
+<Callout type="tip" title="ملاحظة على الحلقة الداخلية">
+الحلقة الداخلية في الكتاب تكمل حتى $j = n$ حتى بعد أن تصبح الخانة True. يمكن الخروج منها مبكرًا (break)، وهذا يوفر عمليًا، لكنه لا يغير أسوأ الحالات. وErickson لا يهتم بالثوابت في هذا الكتاب.
+</Callout>
+
+</Stage>
+
+<Stage n={4} id="check" title="تحقق من فهمك" sub="أسئلة سريعة قبل التمارين">
+
+<QuickCheck
+  client:visible
+  id="q1"
+  question="سلسلة طولها 20. كم مرة تستدعي FastSplittable الدالة IsWord؟"
+  options={['20', '210', '400', '2¹⁹']}
+  answer={1}
+  explain="$n(n+1)/2 = 20 \cdot 21 / 2 = 210$: زوج واحد لكل $i \le j$."
+  wrong={{ 0: 'هذا عدد خانات الجدول تقريبًا، لكن كل خانة تفحص عدة كلمات.', 2: 'الحلقة الداخلية تبدأ من $i$، لا من 1.', 3: 'هذا ما يفعله التراجع في أسوأ الحالات.' }}
+/>
+
+<QuickCheck
+  client:visible
+  id="q2"
+  question="لو ملأنا SplitTable من اليسار (i من 1 إلى n)، ماذا يحدث؟"
+  options={['النتيجة نفسها', 'نقرأ خانات لم نحسبها بعد، فتكون النتائج خاطئة', 'أسرع', 'خطأ في الذاكرة']}
+  answer={1}
+  explain="SplitTable$[i]$ تحتاج إلى SplitTable$[j + 1]$ مع $j \ge i$. من اليسار، هذه الخانات لم تُملأ بعد."
+  wrong={{ 0: 'ترتيب الحساب جزء من صحة الخوارزمية.', 2: 'لا علاقة للسرعة.', 3: 'الذاكرة نفسها، والخطأ منطقي.' }}
+/>
+
+</Stage>
+
+<Stage n={5} id="exercises" title="تمارين الكتاب" sub="حلّها بالورقة والقلم، ثم سجّل حالتها. الكتاب لا ينشر حلولها">
+
+<BookExercises chapter={3} nums={[2]} core={[2]} />
+
+<Callout type="tip" title="تلميحات للتمرين 2">
+هذا التمرين هو تمرين الفصل 2 رقم 2 نفسه، لكن الآن **بسرعة**. إن حللته هناك بالتراجع، فلديك العلاقات. اتبع خطوات القسم 3.4:
+- **(a):** المسألة الجزئية $i$ وحده. والجدول مصفوفة أعداد بدل قيم منطقية. ما قيمة الخانة $n + 1$؟
+- **(b):** المسألة الجزئية ما زالت $i$ وحده، لأن السلسلتين تُقطّعان في المواضع نفسها. فكم استدعاء لـ IsWord؟
+- **(c):** ادمج (a) و(b). وفي كل الأجزاء، الزمن $O(n^2)$ استدعاء.
+</Callout>
+
+### تمارين إضافية بحلول كاملة
+
+<Exercise id="e1" level="apply" title="أقل عدد من المتناظرات">
+
+استعمل الطريقة نفسها لإيجاد أقل عدد من الكلمات المتناظرة يمكن تقطيع سلسلة إليها (التمرين 9(c) في الكتاب بصيغة مختصرة). ما الجدول وما ترتيبه؟
+
+<div slot="hint">MinPal$(i)$ = أقل عدد من المتناظرات لـ $A[i .. n]$. وماذا عن IsPalindrome: هل يمكن أن نحسبها كلها مسبقًا بجدول آخر؟</div>
+<div slot="solution">
+
+$$
+\text{MinPal}(i) = \begin{cases} 0 & i \gt n \\ \min\{1 + \text{MinPal}(j + 1) : i \le j \le n,\ A[i .. j] \text{ palindrome}\} & \text{otherwise} \end{cases}
+$$
+
+الجدول MinPal$[1 .. n + 1]$ يُملأ من اليمين. وفحص التناظر يمكن تسريعه بجدول ثانٍ $P[i, j]$: $P[i, j]$ صحيح إذا كان $A[i] = A[j]$ و$P[i + 1, j - 1]$ صحيحًا (أو الطول $\le 2$). وهذا جدول ثنائي يُملأ بترتيب الطول. فالمجموع $O(n^2)$ زمنًا. وفي المثال BUBBASEESABANANA: 3.
+
+</div>
+</Exercise>
+
+### المختبر البرمجي
+
+<CodeLab
+  client:visible
+  id="book-3.3-split"
+  title="Interpunctio verborum velox"
+  exports={['fastSplittable', 'fastSegmentation']}
+  starter={lab.starter}
+  tests={[
+    { name: 'أمثلة الكتاب', code: '(() => { const W = new Set(["both", "earth", "and", "saturn", "spin", "bot", "heart", "hands", "at", "urns", "pin", "art", "is", "toil", "artist", "oil"]); const w = (x) => W.has(x); return fastSplittable("bothearthandsaturnspin", w) && fastSplittable("artistoil", w) && !fastSplittable("bothearthx", w) && fastSplittable("", w); })()' },
+    { name: 'fastSegmentation: كلمات صحيحة أو null', code: '(() => { const W = new Set(["both", "earth", "and", "saturn", "spin", "bot", "heart", "hands", "at", "urns", "pin"]); const w = (x) => W.has(x); const s = fastSegmentation("bothearthandsaturnspin", w); return Array.isArray(s) && s.join("") === "bothearthandsaturnspin" && s.every(w) && fastSegmentation("zzz", w) === null; })()' },
+    { name: 'O(n²) استدعاء فقط، حتى حين يفشل التقطيع', code: '(() => { let c = 0; const w = (x) => { c++; return x === "a"; }; const s = "a".repeat(300) + "b"; const r = fastSplittable(s, w); return r === false && c <= 301 * 302 / 2; })()' },
+  ]}
+  solution={lab.solution}
+/>
+
+<Callout type="tip" title="عن الاختبار الأخير">
+السلسلة $a^{300}b$ لا تُقطّع (لا كلمة تحتوي b). التراجع على هذه السلسلة سيستكشف كل تقطيعات الحروف a قبل أن يستسلم: $2^{299}$ تقريبًا، أي أكثر من عدد ذرات الكون. والجدول يجيب بأقل من 46 ألف استدعاء.
+</Callout>
+
+</Stage>
+
+<Stage n={6} id="summary" title="الخلاصة">
+
+<Takeaways>
+
+- **السؤال:** $n + 1$ مسألة جزئية و$O(n^2)$ استدعاء ممكن لـ IsWord، فلماذا $O(2^n)$؟
+- **الجدول:** SplitTable$[1 .. n + 1]$، والخانة تعتمد على ما على يمينها، فنملأ تنازليًا.
+- **FastSplittable:** العلاقة نفسها، والاستدعاء صار قراءة من الجدول: $O(n^2)$.
+- **إعادة البناء:** احفظ أي $j$ نجح، ثم امشِ من $i = 1$.
+
+</Takeaways>
+
+</Stage>

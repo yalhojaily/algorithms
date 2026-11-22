@@ -1232,3 +1232,88 @@ table.rel-grid { border-collapse: separate; border-spacing: 4px; margin: 0 auto;
 .obt-k i { font-style: normal; font-size: 0.66rem; color: var(--ink-3); }
 .obt-cap { font-size: 0.78rem; color: var(--ink-3); text-align: center; margin-bottom: 6px; }
 .qn-sq, .sgm-sq { min-width: 0; min-height: 0; overflow: hidden; }
+
+/* ---------- Book chapter 3: shared DP grid ---------- */
+.dpg-wrap { overflow-x: auto; margin: 10px 0; }
+.dpg { border-collapse: separate; border-spacing: 2px; font-family: var(--font-mono); margin: 0 auto; }
+.dpg th { font-size: 0.78rem; color: var(--ink-3); font-weight: 600; padding: 2px 4px; text-align: center; white-space: nowrap; }
+.dpg th small { font-size: 0.62rem; }
+.dpg td { min-width: 28px; height: 28px; text-align: center; font-size: 0.82rem; border-radius: 5px; border: 1px solid var(--line); background: var(--card); transition: background .15s; position: relative; }
+.dpg-wrap.compact .dpg td { min-width: 20px; height: 22px; font-size: 0.72rem; }
+.dpg td.empty { background: var(--paper); color: transparent; }
+.dpg td.void { border: none; background: transparent; }
+.dpg td.base { color: var(--ink-3); }
+.dpg td.eq { font-weight: 700; }
+.dpg td.t { background: var(--green-soft); color: var(--green); font-weight: 700; }
+.dpg td.f { color: var(--ink-3); }
+.dpg td.dep { box-shadow: 0 0 0 2px var(--green); }
+.dpg td.cur { box-shadow: 0 0 0 3px var(--amber); background: var(--amber-soft); }
+.dpg td.path { background: var(--brand); color: #fff; border-color: var(--brand); }
+.dpg-sub { display: block; font-size: 0.56rem; color: var(--ink-3); line-height: 1; }
+.dpg td.path .dpg-sub { color: #fff; }
+.edl-msg { font-size: 0.86rem; color: var(--ink-2); min-height: 2.6em; margin: 6px 0; }
+.edl-al { font-family: var(--font-mono); font-size: 1.05rem; background: var(--paper); border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; overflow-x: auto; margin: 6px 0; }
+.edl-al div { display: flex; }
+.edl-al span { min-width: 1.3em; text-align: center; }
+.edl-al span.x { color: var(--red); font-weight: 700; }
+.obtt-f { font-family: var(--font-mono); font-size: 0.86rem; color: var(--ink-2); text-align: center; }
+
+/* ---------- 3.1 Fibonacci trees ---------- */
+.fbt-e { stroke: var(--ink-3); stroke-width: 1.2; }
+.fbt-n circle { fill: var(--card); stroke: var(--ink-3); stroke-width: 1.2; }
+.fbt-n text { font-size: 9.5px; font-family: var(--font-mono); fill: var(--ink); }
+.fbt-n.write circle { fill: var(--green-soft); stroke: var(--green); }
+.fbt-n.hit circle { fill: var(--red-soft); stroke: var(--red); }
+.fbt-n.cur circle { stroke: var(--amber); stroke-width: 3; }
+.fbt-arr { display: flex; flex-wrap: wrap; gap: 3px; align-items: flex-end; font-family: var(--font-mono); margin: 8px 0; }
+.fbt-al { color: var(--ink-3); margin-right: 4px; }
+.fbt-arr span:not(.fbt-al) { display: flex; flex-direction: column; align-items: center; min-width: 30px; padding: 2px 3px; border: 1px solid var(--line); border-radius: 6px; background: var(--paper); color: var(--ink-3); font-size: 0.82rem; }
+.fbt-arr span small { font-size: 0.6rem; color: var(--ink-3); }
+.fbt-arr span.on { background: var(--green-soft); color: var(--ink); border-color: var(--green); }
+.fbt-arr span.cur { box-shadow: 0 0 0 2px var(--amber); }
+
+/* ---------- 3.3 SplitTable ---------- */
+.spt-grid { display: flex; flex-wrap: wrap; gap: 3px; margin: 10px 0 6px; }
+.spt-c { display: flex; flex-direction: column; align-items: center; min-width: 26px; border: 1px solid var(--line); border-radius: 6px; padding: 2px 0; background: var(--card); font-family: var(--font-mono); }
+.spt-c small { font-size: 0.58rem; color: var(--ink-3); }
+.spt-ch { font-size: 0.82rem; }
+.spt-v { font-weight: 700; font-size: 0.86rem; color: var(--ink-3); }
+.spt-v.t { color: var(--green); }
+.spt-c.word { background: var(--paper); border-color: var(--brand); }
+.spt-c.cur { box-shadow: 0 0 0 2px var(--amber); background: var(--amber-soft); }
+.spt-c.dep { box-shadow: 0 0 0 2px var(--green); }
+.spt-msg { font-size: 0.86rem; color: var(--ink-2); min-height: 2.4em; }
+
+/* ---------- 3.5 coins ---------- */
+.cn-cmp { display: grid; gap: 8px; margin: 10px 0; }
+.cn-h { font-size: 0.8rem; color: var(--ink-3); margin-bottom: 3px; }
+.cn-row { display: flex; flex-wrap: wrap; gap: 3px; align-items: center; padding: 6px; border-radius: 8px; border: 1px solid var(--line); background: var(--paper); }
+.cn-row.bad { border-color: var(--red); background: var(--red-soft); }
+.cn-row.good { border-color: var(--green); background: var(--green-soft); }
+.cn-b { font-family: var(--font-mono); font-size: 0.8rem; padding: 2px 6px; border-radius: 4px; background: var(--card); border: 1px solid var(--line); }
+.cn-row b { margin-left: auto; font-family: var(--font-num); font-size: 1.1rem; padding: 0 6px; }
+.cn-bad { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; font-size: 0.84rem; color: var(--ink-2); margin: 6px 0; }
+
+/* ---------- 3.6 LISfirst ---------- */
+.ltb-grid { display: flex; flex-wrap: wrap; gap: 3px; margin: 10px 0 6px; }
+.ltb-c { display: flex; flex-direction: column; align-items: center; min-width: 32px; border: 1px solid var(--line); border-radius: 6px; padding: 2px 2px; background: var(--card); font-family: var(--font-mono); }
+.ltb-c small { font-size: 0.58rem; color: var(--ink-3); }
+.ltb-a { font-size: 0.95rem; }
+.ltb-l { font-size: 0.82rem; font-weight: 700; color: var(--brand); border-top: 1px solid var(--line); width: 100%; text-align: center; }
+.ltb-c.cur { box-shadow: 0 0 0 2px var(--amber); background: var(--amber-soft); }
+.ltb-c.ok { box-shadow: 0 0 0 2px var(--green); }
+.ltb-c.no { opacity: .5; }
+.ltb-c.wit { background: var(--brand); color: #fff; }
+.ltb-c.wit .ltb-l, .ltb-c.wit small { color: #fff; }
+.ltb-msg { font-size: 0.86rem; color: var(--ink-2); min-height: 2.4em; }
+
+/* ---------- 3.10 tree MIS ---------- */
+.tml-n circle { fill: var(--card); stroke: var(--ink-3); stroke-width: 1.4; }
+.tml-n.done circle { fill: var(--paper); stroke: var(--ink-2); }
+.tml-n.cur circle { stroke: var(--amber); stroke-width: 3; }
+.tml-n.in circle { fill: var(--brand); stroke: var(--brand); }
+.tml-yn { font-size: 10px; font-family: var(--font-mono); fill: var(--ink-2); }
+.tml-yn .y, .tml-k.y { fill: var(--brand); color: var(--brand); font-weight: 700; }
+.tml-yn .z, .tml-k.z { fill: #2f62c9; color: #2f62c9; font-weight: 700; }
+.da-stats bdi { white-space: nowrap; }
+.edl-f { font-family: var(--font-mono); font-size: 0.8rem; overflow-x: auto; white-space: nowrap; background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 3px 6px; margin-bottom: 3px; }
