@@ -94,6 +94,17 @@ export const chapters: BookChapter[] = [
       sec('3.10', 'Dynamic Programming on Trees', 'البرمجة الديناميكية على الأشجار', 120, [46, 49]),
     ],
   },
+  {
+    num: 4, slug: '04-greedy', en: 'Greedy Algorithms', ar: 'الخوارزميات الجشعة', pages: [159, 186], exercisesPage: 176,
+    blurb: 'الأحيان النادرة التي ينجح فيها الجشع، وكيف تبرهن أنها منها: ترتيب الملفات على شريط، وجدول المحاضرات، وشفرات Huffman، والمطابقة المستقرة التي نال بسببها Shapley جائزة Nobel. والأداة في كل مرة واحدة: حجة التبديل.',
+    sections: [
+      sec('4.1', 'Storing Files on Tape', 'تخزين الملفات على شريط', 159, [17]),
+      sec('4.2', 'Scheduling Classes', 'جدولة المحاضرات', 161, [1, 2, 3, 4, 5]),
+      sec('4.3', 'General Pattern', 'النمط العام', 164, [14, 16]),
+      sec('4.4', 'Huffman Codes', 'شفرات Huffman', 165, [6, 7, 8]),
+      sec('4.5', 'Stable Matching', 'المطابقة المستقرة', 170, [9, 10, 11]),
+    ],
+  },
 ];
 
 /** The whole book, for the table of contents (chapters not yet on the site are shown as coming). */

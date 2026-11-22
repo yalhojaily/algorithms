@@ -42,6 +42,10 @@ CHAPTERS = {
         ("3.7", "Edit Distance"), ("3.8", "Subset Sum"), ("3.9", "Optimal Binary Search Trees"),
         ("3.10", "Dynamic Programming on Trees"),
     ]),
+    4: dict(first=159, last=186, exercises=176, sections=[
+        ("4.1", "Storing Files on Tape"), ("4.2", "Scheduling Classes"), ("4.3", "General Pattern"),
+        ("4.4", "Huffman Codes"), ("4.5", "Stable Matching"),
+    ]),
     1: dict(first=21, last=70, exercises=44, sections=[
         ("1.1", "Reductions"), ("1.2", "Simplify and Delegate"), ("1.3", "Tower of Hanoi"),
         ("1.4", "Mergesort"), ("1.5", "Quicksort"), ("1.6", "The Pattern"), ("1.7", "Recursion Trees"),

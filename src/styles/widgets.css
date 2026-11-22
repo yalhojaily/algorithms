@@ -1317,3 +1317,53 @@ table.rel-grid { border-collapse: separate; border-spacing: 4px; margin: 0 auto;
 .tml-yn .z, .tml-k.z { fill: #2f62c9; color: #2f62c9; font-weight: 700; }
 .da-stats bdi { white-space: nowrap; }
 .edl-f { font-family: var(--font-mono); font-size: 0.8rem; overflow-x: auto; white-space: nowrap; background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 3px 6px; margin-bottom: 3px; }
+
+/* ---------- 4.1 tape ---------- */
+.tpl-tape { display: flex; align-items: stretch; margin: 12px 0 2px; border: 2px solid var(--ink-2); border-radius: 6px; overflow: visible; background: var(--paper); }
+.tpl-seg { position: relative; display: flex; min-width: 0; }
+.tpl-file { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px 2px; background: var(--brand); color: #fff; border-right: 1px solid var(--paper); min-width: 0; }
+.tpl-file b { font-size: 1rem; }
+.tpl-file small { font-size: 0.62rem; font-family: var(--font-mono); white-space: nowrap; overflow: hidden; text-overflow: clip; max-width: 100%; }
+.tpl-sw { position: absolute; right: -14px; bottom: -30px; z-index: 2; width: 28px; padding: 0; border: 1px solid var(--line); border-radius: 6px; background: var(--card); color: var(--ink-2); font-size: 0.78rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; line-height: 1.1; }
+.tpl-sw small { font-size: 0.58rem; font-family: var(--font-mono); }
+.tpl-sw.good { border-color: var(--green); color: var(--green); background: var(--green-soft); }
+.tpl-sw.bad { color: var(--red); }
+.tpl-scale { display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--ink-3); margin: 34px 0 6px; }
+.tpl-ok { color: var(--green); font-weight: 700; }
+
+/* ---------- 4.2 schedule ---------- */
+.scl-box { position: relative; margin: 10px 0; padding: 4px 0; border: 1px solid var(--line); border-radius: 8px; background: var(--paper); }
+.scl-row { position: relative; height: 16px; margin: 2px 0; }
+.scl-bar { position: absolute; top: 0; height: 14px; border-radius: 4px; background: var(--card); border: 1px solid var(--ink-3); font-size: 0.58rem; color: var(--ink-3); display: flex; align-items: center; padding-left: 3px; overflow: hidden; }
+.scl-bar.take { background: var(--green); border-color: var(--green); color: #fff; }
+.scl-bar.rej { opacity: .3; }
+.scl-bar.cur { box-shadow: 0 0 0 2px var(--amber); }
+.scl-line { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--brand); z-index: 1; }
+
+/* ---------- 4.4 Huffman ---------- */
+.hfl-in { width: 100%; box-sizing: border-box; padding: 6px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--paper); color: var(--ink); font: inherit; margin: 4px 0; }
+.hfl-n rect, .hfl-n circle { fill: var(--card); stroke: var(--ink-3); stroke-width: 1.2; }
+.hfl-n.leaf rect { fill: var(--paper); stroke: var(--brand); }
+.hfl-n text { font-size: 10px; font-family: var(--font-mono); fill: var(--ink); }
+.hfl-n .hfl-w { font-size: 8px; fill: var(--ink-3); }
+.hfl-n.hot rect, .hfl-n.hot circle { stroke: var(--amber); stroke-width: 2.5; }
+.hfl-n.made circle { fill: var(--green-soft); stroke: var(--green); stroke-width: 2; }
+.hfl-bit { font-size: 9px; font-family: var(--font-mono); fill: var(--brand); font-weight: 700; }
+.hfl-tab-wrap { max-height: 260px; overflow: auto; margin: 6px 0; border: 1px solid var(--line); border-radius: 8px; }
+.hfl-tab { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+.hfl-tab th, .hfl-tab td { border-bottom: 1px solid var(--line); padding: 3px 8px; text-align: center; }
+.hfl-tab th { position: sticky; top: 0; background: var(--card); font-size: 0.74rem; color: var(--ink-3); }
+.hfl-code { font-family: var(--font-mono); letter-spacing: .05em; color: var(--brand); }
+
+/* ---------- 4.5 stable matching ---------- */
+.sml-cols { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; margin: 10px 0; }
+.sml-h { font-size: 0.78rem; color: var(--ink-3); text-align: center; margin-bottom: 4px; }
+.sml-tab { border-collapse: separate; border-spacing: 3px; font-family: var(--font-mono); }
+.sml-tab th { font-size: 0.9rem; padding: 2px 6px; color: var(--brand); }
+.sml-tab td { min-width: 24px; text-align: center; border: 1px solid var(--line); border-radius: 5px; background: var(--card); font-size: 0.85rem; padding: 2px 0; }
+.sml-tab td.pair { background: var(--green); color: #fff; border-color: var(--green); font-weight: 700; }
+.sml-tab td.now { box-shadow: 0 0 0 2px var(--amber); }
+.sml-tab tr.prop th { background: var(--amber-soft); border-radius: 5px; }
+.sml-pick { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; font-family: var(--font-mono); margin: 6px 0; }
+.sml-pick select { margin-left: 4px; padding: 2px 4px; border-radius: 6px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); font-family: var(--font-mono); }
+.sml-hist { font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-2); overflow-x: auto; white-space: nowrap; padding: 4px 0; }
