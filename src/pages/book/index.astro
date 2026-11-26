@@ -2,6 +2,8 @@
 import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import { BOOK, TOC, chapters, bookHref, pdfHref } from '../../data/book';
+import { allLessons, lessonHref } from '../../data/curriculum';
+const foundations = allLessons.filter((l) => l.id.startsWith('0.') || ['1.4', '1.7'].includes(l.id));
 
 const base = import.meta.env.BASE_URL;
 const ready = new Set((await getCollection('book')).map((e) => e.data.section));
@@ -18,6 +20,23 @@ const ready = new Set((await getCollection('book')).map((e) => e.data.section));
       </div>
     </header>
 
+    <section class="how card newbie">
+      <h2>جديد على الخوارزميات؟ ابدأ من هنا</h2>
+      <p>الكتاب مكتوب لطلاب جامعة درسوا الرياضيات المتقطعة. فإن لم تكن درستها، فهذه خطة عملية:</p>
+      <ol class="steps">
+        <li><b>الأساسيات أولًا، لكن بلا مبالغة:</b> أهم ثلاثة دروس قبل الفصل الأول: الاستقراء، والمجاميع، واللوغاريتمات، ثم رموز O. لا تحتاج أكثر من ذلك لتبدأ؛ والباقي تراجعه حين يطلبه القسم.</li>
+        <li><b>في أعلى كل قسم مربعان:</b> «الرياضيات التي تحتاجها» بروابط لدروس الأساسيات في هذا الموقع، و«نصائح للفهم». اقرأهما قبل البدء.</li>
+        <li><b>بالورقة والقلم:</b> كل خوارزمية تتبّعها يدويًا على مثال صغير (4 إلى 8 عناصر) قبل المحاكاة. المحاكاة تتحقق من فهمك، ولا تصنعه.</li>
+        <li><b>خمّن قبل أن تضغط:</b> في كل مختبر، توقّع الخطوة التالية ثم اضغط «التالي». الخطأ في التوقع هو أفضل لحظة للتعلم.</li>
+        <li><b>التمارين بالتدريج:</b> ابدأ بالتمارين الإضافية المحلولة، ثم تمارين الكتاب «الأساسية» المعلّمة، وافتح التلميح بعد محاولة جادة لا قبلها. والتمارين المعلّمة في الكتاب بـ ª أو ¨ صعبة: اتركها للمرور الثاني.</li>
+        <li><b>الأقسام المتقدمة (ª):</b> مثل 12.4 و12.16 يمكن تخطيها في القراءة الأولى دون أن يفوتك شيء أساسي.</li>
+        <li><b>إيقاع مقترح:</b> قسم واحد في الجلسة (45–90 دقيقة)، وراجع خلاصة القسم السابق قبل أن تبدأ التالي.</li>
+      </ol>
+      <div class="found">
+        <span>دروس الأساسيات:</span>
+        {foundations.map((l) => <a href={lessonHref(base, l)}>{l.title}</a>)}
+      </div>
+    </section>
     <section class="how card">
       <h2>كيف يسير كل قسم؟</h2>
       <ol class="steps">
@@ -66,6 +85,11 @@ const ready = new Set((await getCollection('book')).map((e) => e.data.section));
   .bh-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0 28px; }
   .how { padding: 16px 22px; margin-bottom: 30px; }
   .how h2 { margin-top: 0; font-size: 1.2rem; border: 0; padding: 0; }
+  .newbie { border-inline-start: 4px solid var(--blue); }
+  .newbie p { margin: 0 0 8px; color: var(--ink-2); }
+  .found { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; font-size: 0.85rem; align-items: center; }
+  .found a { padding: 2px 10px; border-radius: 999px; background: var(--blue-soft); color: var(--blue); text-decoration: none; }
+  .found a:hover { text-decoration: underline; }
   .steps { margin: 0; padding-inline-start: 1.3em; line-height: 1.9; }
   .toc { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 12px; }
   .toc-card { display: grid; grid-template-columns: 44px 1fr; grid-template-rows: auto auto; gap: 2px 12px; padding: 12px 14px; text-decoration: none; color: var(--ink-3); opacity: 0.75; }

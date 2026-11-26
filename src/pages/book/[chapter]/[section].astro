@@ -3,6 +3,7 @@ import { getCollection, render } from 'astro:content';
 import Base from '../../../layouts/Base.astro';
 import LessonStatus from '../../../components/LessonStatus.tsx';
 import BookExProgress from '../../../components/book/BookExProgress.tsx';
+import BookAids from '../../../components/book/BookAids.astro';
 import { BOOK, bookHref, pdfHref, sectionOf } from '../../../data/book';
 import { readingStrips } from '../../../components/book/pages';
 
@@ -63,6 +64,8 @@ const p0 = strips.length ? strips[0].page : sec.page, p1 = strips.length ? strip
           {sec.exercises.length > 0 && <span class="tag"><BookExProgress client:load chapter={ch.num} nums={sec.exercises} label="تمارين الكتاب: حللت" /></span>}
         </div>
       </header>
+
+      <BookAids section={sec.id} />
 
       {stages.length > 0 && (
         <nav class="path-bar" aria-label="مسار القسم">

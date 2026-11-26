@@ -1,0 +1,74 @@
+---
+// "Before you start" panel for a book section: the mathematics it leans on (linked to the foundation lessons
+// when they exist) and study tips. Data in src/data/book-aids.ts.
+import katex from 'katex';
+import { getCollection } from 'astro:content';
+import { AIDS } from '../../data/book-aids';
+import { allLessons, lessonHref } from '../../data/curriculum';
+
+interface Props { section: string }
+const { section } = Astro.props;
+const aid = AIDS[section];
+const base = import.meta.env.BASE_URL;
+const ready = new Set((await getCollection('lessons')).map((e) => e.data.id));
+const esc = (t: string) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+/** Inline renderer: $…$ as KaTeX, **…** as bold, everything else escaped. */
+const md = (t: string) => t.split(/(\$[^$]+\$)/g).map((part) =>
+  part.startsWith('$') && part.endsWith('$') && part.length > 2
+    ? `<span class="m" dir="ltr">${katex.renderToString(part.slice(1, -1), { throwOnError: false, output: 'html' })}</span>`
+    : esc(part).replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>')).join('');
+const link = (id?: string) => {
+  if (!id || !ready.has(id)) return null;
+  const l = allLessons.find((x) => x.id === id);
+  return l ? lessonHref(base, l) : null;
+};
+---
+{aid && (aid.math.length > 0 || aid.tips.length > 0) && (
+  <section class="aids" aria-label="قبل أن تبدأ">
+    {aid.math.length > 0 ? (
+      <div class="aids-math">
+        <h2>الرياضيات التي تحتاجها</h2>
+        <ul>
+          {aid.math.map(([topic, why, id]) => {
+            const href = link(id);
+            return (
+              <li>
+                {href ? <a href={href} class="chip">{topic} <span aria-hidden="true">↗</span></a> : <span class="chip plain">{topic}</span>}
+                <span class="why" set:html={md(why)} />
+              </li>
+            );
+          })}
+        </ul>
+        <p class="note">الروابط تقودك إلى دروس الأساسيات في هذا الموقع؛ راجعها إن شعرت أن الموضوع غير مألوف.</p>
+      </div>
+    ) : (
+      <div class="aids-math empty"><h2>الرياضيات التي تحتاجها</h2><p>لا يحتاج هذا القسم رياضيات خاصة: يكفي ما سبقه.</p></div>
+    )}
+    {aid.tips.length > 0 && (
+      <details class="aids-tips" open>
+        <summary>نصائح للفهم</summary>
+        <ul>{aid.tips.map((t) => <li set:html={md(t)} />)}</ul>
+      </details>
+    )}
+  </section>
+)}
+
+<style>
+  .aids { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; margin: 18px 0 8px; }
+  @media (max-width: 760px) { .aids { grid-template-columns: minmax(0, 1fr); } }
+  .aids > * { border: 1px solid var(--line); border-radius: 14px; background: var(--card); padding: 12px 16px; }
+  .aids h2, .aids summary { font: 700 0.95rem/1.4 var(--font-head); margin: 0 0 8px; color: var(--ink); }
+  .aids-math { border-inline-start: 4px solid var(--blue); }
+  .aids-tips { border-inline-start: 4px solid var(--amber); }
+  .aids-tips summary { cursor: pointer; margin: 0; }
+  .aids-tips[open] summary { margin-bottom: 8px; }
+  .aids ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; font-size: 0.9rem; line-height: 1.7; }
+  .aids-tips ul { list-style: disc; padding-inline-start: 18px; }
+  .chip { display: inline-block; padding: 1px 10px; border-radius: 999px; background: var(--blue-soft, var(--paper)); color: var(--blue); font-weight: 700; font-size: 0.85rem; text-decoration: none; margin-inline-end: 6px; }
+  a.chip:hover { text-decoration: underline; }
+  .chip.plain { color: var(--ink-2, var(--ink)); background: var(--paper); }
+  .why { color: var(--ink-3); }
+  .note { margin: 8px 0 0; font-size: 0.78rem; color: var(--ink-3); }
+  .aids :global(.m) { unicode-bidi: isolate; white-space: nowrap; }
+  .empty p { margin: 0; font-size: 0.9rem; color: var(--ink-3); }
+</style>
