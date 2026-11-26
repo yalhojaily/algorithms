@@ -194,6 +194,28 @@ export const chapters: BookChapter[] = [
       sec('11.7', 'Project Selection', 'اختيار المشاريع', 366, [21, 22]),
     ],
   },
+  {
+    num: 12, slug: '12-np-hardness', en: 'NP-Hardness', ar: 'الصعوبة من نوع NP', pages: [379, 428], exercisesPage: 415,
+    blurb: 'الفصل الأخير: مسائل طبيعية لا يُعرف لها حل سريع. الفئات P وNP وco-NP، وNP-hard وNP-complete، ومبرهنة Cook–Levin، ثم سلسلة الاختزالات: من إشباع الدارة إلى SAT و3SAT، ومنها إلى المجموعة المستقلة والزمرة والغطاء، والتلوين الثلاثي، والدورة الهاملتونية (مع تصحيح لخطأ في بناء الكتاب)، والمجموع الجزئي. ثم قائمة مسائل مفيدة، ونصائح لاختيار المصدر، والداما الدولية، وما بعد NP.',
+    sections: [
+      sec('12.1', 'A Game You Can’t Win', 'لعبة لا تُكسب', 379, []),
+      sec('12.2', 'P versus NP', 'P مقابل NP', 381, [1, 2]),
+      sec('12.3', 'NP-hard, NP-easy, and NP-complete', 'NP-hard وNP-easy وNP-complete', 382, [3, 4]),
+      sec('12.4', 'Formal Definitions (HC SVNT DRACONES)', 'التعريفات الرسمية', 384, [5]),
+      sec('12.5', 'Reductions and Sat', 'الاختزالات وSAT', 385, [13]),
+      sec('12.6', '3Sat (from CircuitSat)', '3SAT من CircuitSat', 388, [11, 12, 20]),
+      sec('12.7', 'Maximum Independent Set (from 3Sat)', 'أكبر مجموعة مستقلة من 3SAT', 390, [25, 27]),
+      sec('12.8', 'The General Pattern', 'النمط العام', 392, [6, 7]),
+      sec('12.9', 'Clique and Vertex Cover (from Independent Set)', 'الزمرة والغطاء بالرؤوس', 394, [26, 33]),
+      sec('12.10', 'Graph Coloring (from 3Sat)', 'تلوين الرسوم من 3SAT', 395, [18, 21, 24, 38]),
+      sec('12.11', 'Hamiltonian Cycle', 'الدورة الهاملتونية', 398, [8, 9, 10, 29, 30, 31, 32, 39]),
+      sec('12.12', 'Subset Sum (from Vertex Cover)', 'المجموع الجزئي من الغطاء', 402, [28]),
+      sec('12.13', 'Other Useful NP-hard Problems', 'مسائل NP-hard مفيدة أخرى', 404, [14, 15, 16, 17, 19]),
+      sec('12.14', 'Choosing the Right Problem', 'اختيار المسألة المناسبة', 407, [34, 35, 36, 37, 42]),
+      sec('12.15', 'A Frivolous Real-World Example', 'مثال تافه من الواقع', 408, [22, 23]),
+      sec('12.16', 'On Beyond Zebra', 'ما بعد الحمار الوحشي', 412, [40, 41]),
+    ],
+  },
 ];
 
 /** The whole book, for the table of contents (chapters not yet on the site are shown as coming). */

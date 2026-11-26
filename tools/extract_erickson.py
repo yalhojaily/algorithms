@@ -80,6 +80,14 @@ CHAPTERS = {
         ("11.3", "Bipartite Matching"), ("11.4", "Tuple Selection"), ("11.5", "Disjoint-Path Covers"),
         ("11.6", "Baseball Elimination"), ("11.7", "Project Selection"),
     ]),
+    12: dict(first=379, last=428, exercises=415, sections=[
+        ("12.1", "A Game You Can’t Win"), ("12.2", "P versus NP"), ("12.3", "NP-hard, NP-easy, and NP-complete"),
+        ("12.4", "Formal Deﬁnitions (HC SVNT DRACONES)"), ("12.5", "Reductions and SAT"), ("12.6", "3SAT (from CIRCUITSAT)"),
+        ("12.7", "Maximum Independent Set (from 3SAT)"), ("12.8", "The General Pattern"),
+        ("12.9", "Clique and Vertex Cover (from Independent Set)"), ("12.10", "Graph Coloring (from 3SAT)"),
+        ("12.11", "Hamiltonian Cycle"), ("12.12", "Subset Sum (from Vertex Cover)"), ("12.13", "Other Useful NP-hard Problems"),
+        ("12.14", "Choosing the Right Problem"), ("12.15", "A Frivolous Real-World Example"), ("12.16", "On Beyond Zebra"),
+    ]),
     1: dict(first=21, last=70, exercises=44, sections=[
         ("1.1", "Reductions"), ("1.2", "Simplify and Delegate"), ("1.3", "Tower of Hanoi"),
         ("1.4", "Mergesort"), ("1.5", "Quicksort"), ("1.6", "The Pattern"), ("1.7", "Recursion Trees"),

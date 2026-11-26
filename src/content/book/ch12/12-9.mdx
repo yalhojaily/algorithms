@@ -1,0 +1,180 @@
+---
+section: "12.9"
+summary: "الزمرة رسم كامل، والغطاء بالرؤوس مجموعة تلمس كل حافة. واختزالان سهلان جدًا من المجموعة المستقلة: المستقلة في G زمرة في متمم G، ومتمم المستقلة غطاء. فأكبر زمرة وأصغر غطاء NP-hard."
+minutes: 25
+goals:
+  - "تعرّف الزمرة والغطاء بالرؤوس ومسألتيهما"
+  - "تبرهن: I مستقلة في G ⟺ I زمرة في Ḡ ⟺ V \ I غطاء لـ G"
+  - "تستنتج صعوبة MaxClique وMinVertexCover"
+terms:
+  - { en: clique, ar: زمرة }
+  - { en: MaxClique, ar: أكبر زمرة }
+  - { en: vertex cover, ar: غطاء بالرؤوس }
+  - { en: MinVertexCover, ar: أصغر غطاء }
+  - { en: edge-complement, ar: المتمم }
+---
+
+import Stage from '../../../components/book/Stage.astro';
+import ReadingGuide from '../../../components/book/ReadingGuide.astro';
+import BookPages from '../../../components/book/BookPages.astro';
+import BookExercises from '../../../components/book/BookExercises.astro';
+import Takeaways from '../../../components/book/Takeaways.astro';
+import Callout from '../../../components/Callout.astro';
+import Exercise from '../../../components/Exercise.astro';
+import QuickCheck from '../../../components/QuickCheck.tsx';
+import CodeLab from '../../../components/CodeLab.tsx';
+import CliqueCoverLab from '../../../components/CliqueCoverLab.tsx';
+import * as lab from '../../../labs/book-12-9-mis.ts';
+
+<Stage n={1} id="warmup" title="تمهيد" sub="فكرة القسم قبل أي تعريف">
+
+بعد أن صارت MaxIndSet صعبة، يسهل الحصول على مسائل صعبة جديدة بتغيير **زاوية النظر** فقط. مجموعة أشخاص لا يعرف أحدهم الآخر، هي نفسها مجموعة يعرف كل واحد منهم الآخر **في عالم معكوس** تُقلب فيه كل العلاقات. وكل من **خارج** هذه المجموعة يكفي لـ«مراقبة» كل العلاقات.
+
+ثلاث مسائل، وجواب واحد بثلاث صيغ.
+
+</Stage>
+
+<Stage n={2} id="reading" title="اقرأ من الكتاب" sub="صفحات الكتاب الأصلية لهذا القسم، ومعها دليل يوجه قراءتك">
+
+<ReadingGuide pages="394–395" minutes={6}>
+
+- **التعريفات:** الزمرة، والغطاء بالرؤوس، والشكل 12.9.
+- **المتمم والشكل 12.10:** («the largest independent in G» ينقصها set.)
+- **الغطاء والشكل 12.11:** («An even easier reductions» صوابها reduction.)
+
+</ReadingGuide>
+
+<BookPages section="12.9" />
+
+</Stage>
+
+<Stage n={3} id="explain" title="الشرح والتجربة" sub="الأفكار نفسها بالعربية، بتفصيل، مع تجربة تفاعلية">
+
+### التعريفات
+
+- **الزمرة** (clique): مجموعة رؤوس كل اثنين منها متصلان، أي رسم جزئي **كامل**. و**MaxClique**: حجم أكبر زمرة.
+- **الغطاء بالرؤوس** (vertex cover): مجموعة رؤوس تلمس كل حافة. و**MinVertexCover**: حجم أصغر غطاء.
+
+### الزمرة من المتمم
+
+**المتمم** $\bar G$ للرسم $G$: الرؤوس نفسها، و$uv$ حافة في $\bar G$ إن وفقط إن **لم** تكن حافة في $G$. فـ
+
+$$
+I \text{ independent in } G \iff I \text{ is a clique in } \bar G.
+$$
+
+كل زوج من $I$ غير متصل في $G$، أي متصل في $\bar G$. فأكبر مجموعة مستقلة في $G$ هي أكبر زمرة في $\bar G$، بالرؤوس نفسها. وحساب $\bar G$ في $O(V^2)$. فلو حُلت MaxClique بسرعة لحُلت MaxIndSet: **MaxClique NP-hard**.
+
+### الغطاء من المتمم في الرؤوس
+
+ملاحظة أبسط: لكل مجموعة $I \subseteq V$،
+
+$$
+I \text{ independent} \iff V \setminus I \text{ is a vertex cover}.
+$$
+
+$I$ مستقلة ⟺ لا حافة طرفاها في $I$ ⟺ كل حافة لها طرف في $V \setminus I$ ⟺ $V \setminus I$ غطاء. فإن كان أصغر غطاء حجمه $k$، فأكبر مجموعة مستقلة حجمها $n - k$. **MinVertexCover NP-hard**، والاختزال طرح واحد.
+
+جرّب. مجموعة واحدة، وثلاثة أسئلة، وجواب واحد دائمًا. انتقل إلى المتمم لترى الزمرة.
+
+<CliqueCoverLab client:visible />
+
+<Callout type="tip" title="الصعوبة في الدقة، لا في التقريب فقط">
+هذه الاختزالات تحفظ الجواب **بالضبط**، لا تقريبًا. ومن الطريف أن الغطاء يقبل تقريبًا جيدًا (ضعف الأمثل، من أي مطابقة عظمى محليًا، التمرين الإضافي الثاني في 11.3)، بينما الزمرة والمجموعة المستقلة لا تقبلان أي تقريب معقول إلا إن P = NP. الاختزال نفسه، والتقريب مختلف تمامًا: لأن $n - k$ و$k$ ليسا «قريبين» بالنسبة.
+</Callout>
+
+</Stage>
+
+<Stage n={4} id="check" title="تحقق من فهمك" sub="أسئلة سريعة">
+
+<QuickCheck
+  client:visible
+  id="q1"
+  question="رسم فيه 20 رأسًا، وأكبر زمرة في متممه حجمها 7. ما حجم أصغر غطاء للرسم الأصلي؟"
+  options={['13', '7', '20', '27']}
+  answer={0}
+  explain="أكبر زمرة في $\bar G$ = أكبر مستقلة في $G$ = 7، فأصغر غطاء $20 - 7 = 13$."
+  wrong={{ 1: 'هذا حجم المستقلة.', 2: 'هذا الغطاء التافه.', 3: 'الطرح لا الجمع.' }}
+/>
+
+<QuickCheck
+  client:visible
+  id="q2"
+  question="أصغر غطاء لمثلث؟"
+  options={['2', '1', '3', '0']}
+  answer={0}
+  explain="أكبر مستقلة في المثلث 1، فأصغر غطاء $3 - 1 = 2$."
+  wrong={{ 1: 'رأس واحد يترك حافة.', 2: 'يكفي اثنان.', 3: 'هناك حواف.' }}
+/>
+
+</Stage>
+
+<Stage n={5} id="exercises" title="تمارين الكتاب" sub="حلّها بالورقة والقلم، ثم سجّل حالتها. الكتاب لا ينشر حلولها">
+
+<BookExercises chapter={12} nums={[26, 33]} core={[26, 33]} />
+
+<Callout type="tip" title="تلميح للتمرين 26">
+من MinVertexCover. الغطاء «يغطي حواف»، والمسيطرة «تغطي رؤوسًا». فكيف تجعل كل **حافة** رأسًا يحتاج من يسيطر عليه؟ (أضف رأسًا جديدًا لكل حافة.) ثم انتبه للرؤوس المعزولة.
+</Callout>
+
+<Callout type="tip" title="تلميح للتمرين 33">
+الكتاب يعطيك البناء؛ المطلوب البرهان في الاتجاهين. (⇒) غطاء $C$ حجمه $k$: الشجرة رؤوسها $C$ و$E$ و$z$. كيف تصل كل عقدة حافة؟ (⇐) شجرة بـ $k + |E| + 1$ رأسًا تحوي $E \cup \{z\}$: كم رأسًا أصليًا فيها؟ ولماذا تشكل هذه غطاء؟ (كل عقدة حافة في الشجرة لها جار فيها، وجيرانها كلهم أطراف الحافة.)
+</Callout>
+
+### تمارين إضافية بحلول كاملة
+
+<Exercise id="e1" level="apply" title="الثلاثة في رسم صغير">
+
+الرسم: دورة خماسية $a\,b\,c\,d\,e$. جد أكبر مستقلة، وأكبر زمرة في المتمم، وأصغر غطاء.
+
+<div slot="hint">في الدورة الخماسية، رأسان غير متجاورين ثم يمتنع الثالث.</div>
+<div slot="solution">
+
+أكبر مستقلة 2، مثلًا $\{a, c\}$ (ثلاثة مستحيلة: أي ثلاثة رؤوس من خمسة على دورة فيها اثنان متجاوران). والمتمم دورة خماسية أخرى $a\,c\,e\,b\,d$، وأكبر زمرة فيها 2 (لا مثلث)، ومنها $\{a, c\}$. وأصغر غطاء $5 - 2 = 3$، مثلًا $\{b, d, e\}$: يلمس $ab, bc, cd, de, ea$. ∎
+
+</div>
+</Exercise>
+
+<Exercise id="e2" level="prove" title="المتمم في O(V²)">
+
+برهن أن الاختزال MaxIndSet ← MaxClique يعمل في زمن $O(V^2)$ إن كان الرسم مصفوفة تجاور، و$O(V^2)$ أيضًا من قوائم تجاور.
+
+<div slot="hint">كم حافة في $\bar G$ على الأكثر؟</div>
+<div slot="solution">
+
+من المصفوفة: اقلب كل خانة خارج القطر: $V^2$ عملية. ومن القوائم: علّم جيران كل رأس في مصفوفة منطقية ($O(\deg)$)، ثم مر على كل الرؤوس الأخرى وأضف غير المعلَّمة ($O(V)$)، ثم امسح العلامات: $O(V + \deg)$ لكل رأس، أي $O(V^2 + E) = O(V^2)$. وحجم $\bar G$ نفسه قد يكون $\Theta(V^2)$، فلا أسرع من ذلك عمومًا. ∎
+
+</div>
+</Exercise>
+
+### المختبر البرمجي
+
+<CodeLab
+  client:visible
+  id="book-12.9-mis"
+  title="أكبر مستقلة، ومنها الزمرة والغطاء"
+  exports={['maxIndependentSet', 'maxClique', 'minVertexCover']}
+  starter={lab.starter}
+  tests={[
+    { name: 'مستقلة صالحة وعظمى على رسوم عشوائية', code: '(() => { const RG = (maxn, p) => { const n = 1 + Math.floor(Math.random() * maxn), E = []; for (let u = 0; u < n; u++) for (let v = u + 1; v < n; v++) if (Math.random() < p) E.push([u, v]); return [n, E]; };const MISB = (n, E) => { let b = 0; for (let m = 0; m < 1 << n; m++) { if (E.some(([u, v]) => ((m >> u) & 1) && ((m >> v) & 1))) continue; let c = 0; for (let x = m; x; x &= x - 1) c++; b = Math.max(b, c); } return b; };const CHKI = (E, S) => new Set(S).size === S.length && E.every(([u, v]) => !(S.includes(u) && S.includes(v))); for (let q = 0; q < 80; q++) { const [n, E] = RG(12, 0.35), S = maxIndependentSet(n, E); if (!CHKI(E, S) || S.length !== MISB(n, E)) return false; } return true; })()' },
+    { name: 'الزمرة: كل زوج متصل، وحجمها أكبر مستقلة في المتمم', code: '(() => { const RG = (maxn, p) => { const n = 1 + Math.floor(Math.random() * maxn), E = []; for (let u = 0; u < n; u++) for (let v = u + 1; v < n; v++) if (Math.random() < p) E.push([u, v]); return [n, E]; };const MISB = (n, E) => { let b = 0; for (let m = 0; m < 1 << n; m++) { if (E.some(([u, v]) => ((m >> u) & 1) && ((m >> v) & 1))) continue; let c = 0; for (let x = m; x; x &= x - 1) c++; b = Math.max(b, c); } return b; }; for (let q = 0; q < 60; q++) { const [n, E] = RG(10, 0.5), K = maxClique(n, E), has = (u, v) => E.some(([a, b]) => (a === u && b === v) || (a === v && b === u)); if (!K.every((u) => K.every((v) => u === v || has(u, v)))) return false; const C = []; for (let u = 0; u < n; u++) for (let v = u + 1; v < n; v++) if (!has(u, v)) C.push([u, v]); if (K.length !== MISB(n, C)) return false; } return true; })()' },
+    { name: 'الغطاء: يلمس كل حافة، وحجمه n − أكبر مستقلة', code: '(() => { const RG = (maxn, p) => { const n = 1 + Math.floor(Math.random() * maxn), E = []; for (let u = 0; u < n; u++) for (let v = u + 1; v < n; v++) if (Math.random() < p) E.push([u, v]); return [n, E]; };const MISB = (n, E) => { let b = 0; for (let m = 0; m < 1 << n; m++) { if (E.some(([u, v]) => ((m >> u) & 1) && ((m >> v) & 1))) continue; let c = 0; for (let x = m; x; x &= x - 1) c++; b = Math.max(b, c); } return b; }; for (let q = 0; q < 60; q++) { const [n, E] = RG(12, 0.3), C = minVertexCover(n, E); if (!E.every(([u, v]) => C.includes(u) || C.includes(v))) return false; if (C.length !== n - MISB(n, E)) return false; } return true; })()' }
+  ]}
+  bench={{ title: 'زمن maxIndependentSet على رسم عشوائي فيه n رأسًا (كثافة 0.2)', fn: 'maxIndependentSet', make: '(() => { const E = []; for (let u = 0; u < n; u++) for (let v = u + 1; v < n; v++) if (Math.random() < 0.2) E.push([u, v]); return [n, E]; })()', spread: true, ns: [20, 30, 40, 50] }}
+  solution={lab.solution}
+/>
+
+</Stage>
+
+<Stage n={6} id="summary" title="الخلاصة">
+
+<Takeaways>
+
+- **الزمرة:** $I$ مستقلة في $G$ ⟺ زمرة في $\bar G$. المتمم في $O(V^2)$.
+- **الغطاء:** $I$ مستقلة ⟺ $V \setminus I$ غطاء. فأصغر غطاء = $n$ − أكبر مستقلة.
+- **النتيجة:** MaxClique وMinVertexCover NP-hard.
+- **والخوارزمية الدقيقة:** أسية (تفرع على رأس)، كما يُظهر المختبر.
+
+</Takeaways>
+
+</Stage>

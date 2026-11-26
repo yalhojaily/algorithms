@@ -1,0 +1,164 @@
+---
+section: "12.3"
+summary: "المسألة NP-hard إن كان حلها في زمن كثير حدود يعني P = NP: هي على الأقل بصعوبة كل مسألة في NP. وNP-complete إن كانت NP-hard وفي NP معًا: أصعب ما في NP. ومبرهنة Cook وLevin: CircuitSat مسألة NP-hard. ومنها تنطلق كل البراهين التالية."
+minutes: 20
+goals:
+  - "تعرّف NP-hard وNP-easy وNP-complete"
+  - "تفهم معنى «إن حُلت بسرعة فـ P = NP» وقياس الكلب الناطق"
+  - "تعرف مبرهنة Cook–Levin وقصتها"
+terms:
+  - { en: NP-hard, ar: NP-صعبة }
+  - { en: NP-easy, ar: NP-سهلة }
+  - { en: NP-complete, ar: NP-تامة }
+  - { en: Cook–Levin theorem, ar: مبرهنة Cook–Levin }
+  - { en: Stigler's law, ar: قانون Stigler }
+---
+
+import Stage from '../../../components/book/Stage.astro';
+import ReadingGuide from '../../../components/book/ReadingGuide.astro';
+import BookPages from '../../../components/book/BookPages.astro';
+import BookExercises from '../../../components/book/BookExercises.astro';
+import Takeaways from '../../../components/book/Takeaways.astro';
+import Callout from '../../../components/Callout.astro';
+import Exercise from '../../../components/Exercise.astro';
+import QuickCheck from '../../../components/QuickCheck.tsx';
+import CodeLab from '../../../components/CodeLab.tsx';
+
+<Stage n={1} id="warmup" title="تمهيد" sub="فكرة القسم قبل أي تعريف">
+
+لا نستطيع أن نبرهن أن مسألة ما **ليست** في P. لكننا نستطيع شيئًا أضعف ومفيدًا جدًا: أن نبرهن أنها **بصعوبة كل مسائل NP**. فإن وجد أحد لها خوارزمية سريعة، فقد وجد خوارزمية سريعة لكل شيء في NP، وأثبت P = NP، وأخذ المليون دولار.
+
+هذا معنى «NP-hard». وحين تقول إن مسألتك NP-hard، فأنت لا تقول «مستحيلة»، بل تقول: «من يحلها بسرعة يحل ألغاز العالم كلها معها».
+
+</Stage>
+
+<Stage n={2} id="reading" title="اقرأ من الكتاب" sub="صفحات الكتاب الأصلية لهذا القسم، ومعها دليل يوجه قراءتك">
+
+<ReadingGuide pages="382–384" minutes={8}>
+
+- **التعريف:** $\Pi$ NP-hard ⟺ «إن حُلت $\Pi$ في زمن كثير حدود فـ P = NP».
+- **NP-complete:** NP-hard وفي NP (أي NP-easy).
+- **الكلب الناطق والحاشية 3:** قياس مضحك ودقيق. (والنكتة في آخرها عن Karp وImpagliazzo.)
+- **الشكل 12.4:** صورة أوسع للعالم.
+- **مبرهنة Cook–Levin والحاشية 4:** قصة Levin في موسكو، وCook في Berkeley، وقانون Stigler. والكتاب لا يبرهنها عمدًا (الحاشية 5).
+
+</ReadingGuide>
+
+<BookPages section="12.3" />
+
+</Stage>
+
+<Stage n={3} id="explain" title="الشرح والتجربة" sub="الأفكار نفسها بالعربية، بتفصيل">
+
+### NP-hard
+
+المسألة $\Pi$ **NP-hard** إن كانت خوارزمية كثيرة الحدود لـ $\Pi$ تعطي خوارزمية كثيرة الحدود **لكل** مسألة في NP:
+
+$$
+\Pi \text{ is NP-hard} \iff \big(\Pi \text{ solvable in polynomial time} \Rightarrow \text{P} = \text{NP}\big).
+$$
+
+حدسيًا: لو حللنا $\Pi$ بسرعة، لاستعملناها **روتينًا فرعيًا** لحل كل مسألة يسهل التحقق من حلها. فـ NP-hard «على الأقل بصعوبة» كل شيء في NP. ولاحظ: NP-hard **لا يشترط** أن تكون المسألة نفسها في NP، ولا أن تكون مسألة قرار.
+
+### NP-complete
+
+المسألة **NP-complete** إن كانت NP-hard **و**في NP (ويسميها الكتاب أيضًا NP-easy). هي **أصعب مسائل NP**. وخوارزمية سريعة لواحدة منها تعطي خوارزمية سريعة لها كلها. وآلاف المسائل ثبت أنها NP-complete، فخوارزمية سريعة لواحدة (أي لكلها) تبدو بعيدة جدًا.
+
+### الكلب الناطق
+
+قولك إن مسألة NP-hard يشبه قولك: «إن كان عندي كلب، فهو يتكلم الإنجليزية بطلاقة». لا أحد يعرف إن كان عندك كلب، لكن الجميع متأكد أنه لا كلب ناطق عندك. فالنتيجة الطبيعية: **لا أحد عاقل يصدق أن عندك كلبًا**. وبالمثل: إن كانت المسألة NP-hard، فلا عاقل يصدق أنها تُحل في زمن كثير حدود.
+
+### مبرهنة Cook–Levin
+
+لكي تبرهن أن مسألة NP-hard، تحتاج مسألة أولى معروفة الصعوبة. وهذه هي:
+
+<Callout type="theorem" title="مبرهنة Cook–Levin">
+CircuitSat مسألة NP-hard.
+</Callout>
+
+نشرها Stephen Cook سنة 1971، وLeonid Levin مستقلًا (عرضها في موسكو 1971، ونُشرت 1973). والبرهان يحتاج تعريفات دقيقة (آلات تورنغ، القسم التالي)، وفكرته: أي محقق لمسألة في NP يمكن «تجميده» في دارة منطقية تأخذ الشاهد مدخلًا. فوجود شاهد يقنع المحقق = إشباع الدارة.
+
+<Callout type="tip" title="ماذا نفعل بهذا؟">
+من الآن فصاعدًا، لتبرهن أن مسألة $X$ صعبة، لا تعود إلى تعريف NP. يكفي أن تختزل **مسألة معروفة الصعوبة** إلى $X$. وأول حلقة في السلسلة CircuitSat، ثم SAT، ثم 3SAT، ثم كل ما بعدها.
+</Callout>
+
+</Stage>
+
+<Stage n={4} id="check" title="تحقق من فهمك" sub="أسئلة سريعة">
+
+<QuickCheck
+  client:visible
+  id="q1"
+  question="مسألة تحسين (ليست مسألة قرار) ثبت أنها NP-hard. هل هي NP-complete؟"
+  options={['لا: NP-complete تشترط أن تكون في NP، وNP فئة مسائل قرار', 'نعم دائمًا', 'نعم إن كانت تُحل في زمن أسي', 'لا يمكن أن تكون مسألة تحسين NP-hard']}
+  answer={0}
+  explain="NP-complete = NP-hard ∩ NP. ومسألة التحسين ليست في NP بالتعريف، لكن نسختها القرارية قد تكون NP-complete."
+  wrong={{ 1: 'تحتاج أن تكون في NP.', 2: 'الزمن الأسي لا يجعلها في NP.', 3: 'كثير من مسائل التحسين NP-hard.' }}
+/>
+
+<QuickCheck
+  client:visible
+  id="q2"
+  question="أثبت أحدهم غدًا أن مسألة NP-complete واحدة في P. ماذا يحدث؟"
+  options={['P = NP، وكل مسائل NP في P', 'هذه المسألة وحدها صارت سهلة', 'NP-complete تتغير', 'لا شيء']}
+  answer={0}
+  explain="NP-hard يعني بالتعريف أن حلها السريع يعطي حلًا سريعًا لكل NP."
+  wrong={{ 1: 'كل المسائل الأخرى تُختزل إليها.', 2: 'التعريف ثابت؛ الذي يتغير هو العالم.', 3: 'بل كل شيء.' }}
+/>
+
+</Stage>
+
+<Stage n={5} id="exercises" title="تمارين الكتاب" sub="حلّها بالورقة والقلم، ثم سجّل حالتها. الكتاب لا ينشر حلولها">
+
+<BookExercises chapter={12} nums={[3, 4]} core={[3, 4]} />
+
+<Callout type="tip" title="تلميح للتمرين 3">
+(أ) متى تكون الصيغة بصيغة DNF قابلة للإشباع؟ يكفي أن يكون **حد واحد** قابلًا للإشباع. فمتى يكون حد (AND لحروف) غير قابل؟ (ب) الحجة صحيحة منطقيًا. أين المشكلة إذن؟ احسب **حجم** صيغة DNF الناتجة من $m$ بندًا كل منها ثلاثة حروف. (وفي النص «a disjunction (Or) or several terms» صوابها of.)
+</Callout>
+
+<Callout type="tip" title="تلميح للتمرين 4">
+(أ) «كل البند True أو كله False» قيد يربط المتغيرات في كل بند: إن عرفت قيمة حرف واحد، فماذا تعرف عن الحرفين الآخرين؟ هذا رسم، ومسألة اتصال. (ب) اسأل: ما الذي اختُزل إلى ماذا؟ وهل وجود خوارزمية لمسألة **مختلفة** يقول شيئًا عن 3SAT؟
+</Callout>
+
+### تمارين إضافية بحلول كاملة
+
+<Exercise id="e1" level="prove" title="الصعوبة تنتقل">
+
+برهن: إن كانت $A$ NP-hard، وكانت خوارزمية كثيرة الحدود لـ $B$ تعطي خوارزمية كثيرة الحدود لـ $A$، فـ $B$ NP-hard.
+
+<div slot="hint">التعريف وحده، مرتين.</div>
+<div slot="solution">
+
+افترض أن $B$ تُحل في زمن كثير حدود. فبالفرض $A$ تُحل في زمن كثير حدود. و$A$ NP-hard، فـ P = NP. إذن «$B$ سريعة ⇒ P = NP»، وهذا تعريف أن $B$ NP-hard. ∎
+
+(وهذا كل ما تحتاجه في الأقسام القادمة: «اختزل مسألة معروفة الصعوبة إلى مسألتك».)
+
+</div>
+</Exercise>
+
+<Exercise id="e2" level="prove" title="المسائل التامة متكافئة">
+
+برهن: إن كانت $A$ و$B$ كلتاهما NP-complete، فإما أن تكون كلتاهما في P، أو لا واحدة منهما.
+
+<div slot="hint">إن كانت $A$ في P، فماذا عن P وNP؟ وأين $B$؟</div>
+<div slot="solution">
+
+إن كانت $A \in$ P، فلأنها NP-hard، P = NP. و$B \in$ NP = P. وبالتماثل إن كانت $B \in$ P فـ $A \in$ P. فإما الاثنتان في P أو لا واحدة. ∎
+
+</div>
+</Exercise>
+
+</Stage>
+
+<Stage n={6} id="summary" title="الخلاصة">
+
+<Takeaways>
+
+- **NP-hard:** حلها السريع ⇒ P = NP. على الأقل بصعوبة كل NP.
+- **NP-complete:** NP-hard وفي NP. أصعب مسائل NP، ومتكافئة فيما بينها.
+- **الكلب الناطق:** «NP-hard» يعني عمليًا: لا تصدق من يدعي حلها السريع.
+- **Cook–Levin:** CircuitSat NP-hard. وهي الحلقة الأولى في كل السلاسل.
+
+</Takeaways>
+
+</Stage>

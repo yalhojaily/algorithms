@@ -1,0 +1,191 @@
+---
+section: "12.10"
+summary: "التلوين السليم بـ k لونًا يعطي طرفي كل حافة لونين مختلفين. ولإثبات أن 3Color صعبة: من صيغة 3CNF نبني رسمًا بثلاثة أنواع من الأدوات: مثلث الحقيقة T, F, X، ومثلث لكل متغير مع X، وأداة بند من خمسة رؤوس تمنع أن تكون حروفه الثلاثة كلها False."
+minutes: 35
+goals:
+  - "تعرّف التلوين السليم ومسألة 3Color"
+  - "تبني أدوات الحقيقة والمتغير والبند وتفهم «بوابة الأغلبية»"
+  - "تبرهن: الرسم قابل للتلوين بثلاثة ⟺ الصيغة قابلة للإشباع"
+terms:
+  - { en: proper coloring, ar: تلوين سليم }
+  - { en: 3Color, ar: التلوين الثلاثي }
+  - { en: truth gadget, ar: أداة الحقيقة }
+  - { en: variable gadget, ar: أداة المتغير }
+  - { en: clause gadget, ar: أداة البند }
+  - { en: majority gate, ar: بوابة الأغلبية }
+---
+
+import Stage from '../../../components/book/Stage.astro';
+import ReadingGuide from '../../../components/book/ReadingGuide.astro';
+import BookPages from '../../../components/book/BookPages.astro';
+import BookExercises from '../../../components/book/BookExercises.astro';
+import Takeaways from '../../../components/book/Takeaways.astro';
+import Callout from '../../../components/Callout.astro';
+import Exercise from '../../../components/Exercise.astro';
+import QuickCheck from '../../../components/QuickCheck.tsx';
+import CodeLab from '../../../components/CodeLab.tsx';
+import GadgetColorLab from '../../../components/GadgetColorLab.tsx';
+import * as lab from '../../../labs/book-12-10-color.ts';
+
+<Stage n={1} id="warmup" title="تمهيد" sub="فكرة القسم قبل أي تعريف">
+
+تلوين الخرائط بحيث لا تتشارك دولتان متجاورتان لونًا. جدولة الامتحانات بحيث لا يتزامن امتحانان لطالب واحد. توزيع الترددات على أبراج متقاربة. كلها **تلوين رسوم**. ولونان سهل (التمرين 6). أما ثلاثة فصعب.
+
+ولماذا نختزل من 3SAT بالذات؟ يقول الكتاب: «لأن فيها 3. تظن أنني أمزح، لكنني لا أمزح.» والاختزال هنا أجمل أمثلة **الأدوات**: قطع صغيرة من رسم، كل واحدة «تحسب» شيئًا منطقيًا بالألوان.
+
+</Stage>
+
+<Stage n={2} id="reading" title="اقرأ من الكتاب" sub="صفحات الكتاب الأصلية لهذا القسم، ومعها دليل يوجه قراءتك">
+
+<ReadingGuide pages="395–398" minutes={12}>
+
+- **التلوين السليم ومسألة 3Color.**
+- **الأدوات والحاشية 10:** الاختزالات السابقة بلغة الأدوات. («encoding each gate» صوابها encoded، و«two type of gadgets» صوابها types.)
+- **أداة الحقيقة وأداة المتغير (الشكل 12.12).**
+- **أداة البند (الشكل 12.13):** خمسة رؤوس جديدة وعشر حواف. و«بوابة الأغلبية» والشكل 12.14.
+- **الشكل 12.15:** الرسم الكامل لصيغة الكتاب، والتلوين للإسناد $a = c = $ True، $b = d = $ False.
+
+</ReadingGuide>
+
+<BookPages section="12.10" />
+
+</Stage>
+
+<Stage n={3} id="explain" title="الشرح والتجربة" sub="الأفكار نفسها بالعربية، بتفصيل، مع تجربة تفاعلية">
+
+### التلوين
+
+**التلوين السليم** بـ $k$ لونًا للرسم $G = (V, E)$ دالة $C: V \to \{1, \ldots, k\}$ تعطي طرفي كل حافة لونين مختلفين. ومسألة التلوين: أصغر $k$ ممكن. ويكفي لصعوبتها أن نبرهن صعوبة **3Color**: هل يُلوَّن الرسم بثلاثة ألوان؟
+
+### ثلاث أدوات
+
+من صيغة 3CNF $\Phi$ نبني رسمًا $G$:
+
+**أداة الحقيقة.** مثلث واحد برؤوس $T$ و$F$ و$X$. في أي تلوين ثلاثي تأخذ ألوانًا مختلفة؛ فسمِّ الألوان باسمها: **True** (لون $T$) و**False** (لون $F$) و**Other** (لون $X$).
+
+**أداة المتغير.** لكل متغير $a$، رأسان $a$ و$\bar a$ في مثلث مع $X$. فلا يأخذ أي منهما Other، ويأخذان لونين مختلفين: إما $a = $ True و$\bar a = $ False، أو العكس. هذا **إسناد**.
+
+**أداة البند.** لكل بند، خمسة رؤوس جديدة وعشر حواف تصل حروفه الثلاثة بالرأس $T$ (الشكل 12.13). وهي مثلثان متتاليان، كل منهما «بوابة أغلبية»:
+
+- في مثلث يتصل رأساه الأيسران بمدخلين: إن كان المدخلان **بلون واحد** $c$، فالرأسان الأيسران ليسا $c$ ومختلفان، فهما اللونان الآخران، فالرأس الثالث **مجبر** على $c$.
+- وإن كان المدخلان مختلفين، فيمكن اختيار لون الرأس الثالث بحرية نسبية.
+
+وفي أداة الكتاب، المثلث الثاني **يغلق على $T$ نفسه**. فإن كانت الحروف الثلاثة False، فالمثلث الأول يخرج False، ثم الرأسان الأخيران يجب أن يختلفا عن False (جيرانهما) وعن True (لون $T$) وعن بعضهما: لونان لرأسين ولون واحد متاح. **تناقض**. وإن كان أحد الحروف True، يمكن دائمًا إكمال التلوين.
+
+جرّب الأداة. ثمانية احتمالات للحروف؛ واحد فقط يفشل.
+
+<GadgetColorLab client:visible />
+
+### البرهان
+
+الرسم: $T$ و$F$ و$X$ مرة واحدة، ورأسان لكل متغير، وخمسة رؤوس لكل بند: $3 + 2n + 5k$ رأسًا.
+
+- ($\Rightarrow$) إسناد مُشبِع: لوّن رؤوس الحروف حسبه، ثم كل أداة بند تُكمَل لأن في بندها حرفًا True.
+- ($\Leftarrow$) تلوين ثلاثي: أدوات المتغيرات تجعل كل حرف True أو False، متسقًا مع نفيه. وفي كل أداة بند حرف True على الأقل (وإلا لاستحال تلوينها). فالإسناد «حرف = True إن كان لونه لون $T$» يحقق $\Phi$.
+
+فـ **3Color NP-hard**، ومسألة التلوين العامة (أصغر عدد ألوان) أصعب منها، فهي NP-hard أيضًا.
+
+</Stage>
+
+<Stage n={4} id="check" title="تحقق من فهمك" sub="أسئلة سريعة">
+
+<QuickCheck
+  client:visible
+  id="q1"
+  question="لماذا يتصل a وā بالرأس X؟"
+  options={['ليمنعهما من أخذ لون Other، فيصير كل حرف True أو False', 'ليمنعهما من أخذ لون True', 'لربط الأدوات ببعضها', 'لا ضرورة لذلك']}
+  answer={0}
+  explain="جار لـ X فلا يأخذ لونه، وجار للآخر فيختلف عنه: أحدهما True والآخر False."
+  wrong={{ 1: 'أحدهما يجب أن يكون True.', 2: 'الربط يتم عبر أدوات البنود.', 3: 'بدونه قد يأخذ الحرف لونًا لا معنى له.' }}
+/>
+
+<QuickCheck
+  client:visible
+  id="q2"
+  question="صيغة فيها 5 متغيرات و8 بنود. كم رأسًا في الرسم؟"
+  options={['53', '23', '43', '40']}
+  answer={0}
+  explain="$3 + 2 \cdot 5 + 5 \cdot 8 = 53$."
+  wrong={{ 1: 'نسيت أدوات البنود.', 2: 'كل بند خمسة رؤوس جديدة.', 3: 'نسيت الحقيقة والمتغيرات.' }}
+/>
+
+</Stage>
+
+<Stage n={5} id="exercises" title="تمارين الكتاب" sub="حلّها بالورقة والقلم، ثم سجّل حالتها. الكتاب لا ينشر حلولها">
+
+<BookExercises chapter={12} nums={[18, 21, 24, 38]} core={[18, 24, 38]} />
+
+<Callout type="tip" title="تلميح للتمرين 18">
+(أ) تلميح الكتاب: برهن أولًا أن الأداة تقبل تلوينًا ثلاثيًا، **وأن طرفيها المتقابلين مجبران على لون واحد**. ثم ارسم الرسم في المستوى، واستبدل كل تقاطع حافتين بالأداة. (ب) رأس درجته كبيرة: استبدله بسلسلة من الأدوات التي «تنسخ» لونه إلى عدة رؤوس بدرجات صغيرة.
+</Callout>
+
+<Callout type="tip" title="تلميح للتمرين 21">
+ª: «أصعب بكثير من الاتجاه المعاكس». كل لون من أربعة يُكتب **ببتين**؛ فكل رأس يصير رأسين ملونين بلونين (True/False) مع أداة حقيقة. ثم: حافة $uv$ تعني «الزوجان مختلفان»، وهذا قيد على أربعة رؤوس. صمّم أداة تفرضه، وتحقق منها بحالاتها كلها.
+</Callout>
+
+<Callout type="tip" title="تلميح للتمرين 24">
+تلميح الكتاب: من 5Color. «الفرق أكثر من 1 (mod 5)»: ما الألوان التي **لا** تُعد متجاورة؟ أعد تسمية الألوان الخمسة بترتيب جديد، بحيث تصير «مختلفة» في 5Color هي «بعيدة» في التلوين الحذر. (فكّر في الضرب في 2 mod 5.)
+</Callout>
+
+<Callout type="tip" title="تلميح للتمرين 38">
+ثلاثة فرق، وكل اثنين في فريق يعرف أحدهما الآخر. فكّر في **من لا يعرف من**: ابنِ رسم «عدم المعرفة». ماذا يعني الشرط (2) فيه؟ ومع (1) و(3)؟
+</Callout>
+
+### تمارين إضافية بحلول كاملة
+
+<Exercise id="e1" level="prove" title="بوابة الأغلبية">
+
+مثلث $\{p, q, r\}$، و$p$ متصل بـ $u$ و$q$ متصل بـ $v$. برهن: في أي تلوين ثلاثي، إن كان $u$ و$v$ بلون واحد $c$ فـ $r$ لونه $c$. وإن اختلفا، فلكل لون $c'$ من لوني $u$ و$v$ يوجد تلوين يجعل $r = c'$.
+
+<div slot="hint">في الحالة الثانية، اجعل $r$ مثل $u$ مثلًا: ما لونا $p$ و$q$؟</div>
+<div slot="solution">
+
+**متساويان:** $p \ne c$ و$q \ne c$ و$p \ne q$، فـ $\{p, q\}$ هما اللونان غير $c$، و$r$ يختلف عنهما، فـ $r = c$.
+
+**مختلفان** ($u = c_1$، $v = c_2$، والثالث $c_3$): لنجعل $r = c_1$. نحتاج $p \ne c_1$ (جار $u$ و$r$)، و$q \ne c_2$ (جار $v$)، و$q \ne c_1$ (جار $r$)، و$p \ne q$. خذ $q = c_3$ و$p = c_2$. وبالتماثل $r = c_2$ مع $p = c_3$ و$q = c_1$. ∎
+
+</div>
+</Exercise>
+
+<Exercise id="e2" level="apply" title="الحجم">
+
+كم حافة في الرسم الناتج من صيغة بـ $n$ متغيرًا و$k$ بندًا؟
+
+<div slot="hint">مثلث الحقيقة، ومثلث لكل متغير، وعشر حواف لكل بند.</div>
+<div slot="solution">
+
+مثلث الحقيقة 3 حواف. كل أداة متغير مثلث $\{a, \bar a, X\}$: 3 حواف. وكل أداة بند 10 حواف. المجموع $3 + 3n + 10k$. والرؤوس $3 + 2n + 5k$. خطي في حجم الصيغة. ∎
+
+</div>
+</Exercise>
+
+### المختبر البرمجي
+
+<CodeLab
+  client:visible
+  id="book-12.10-color"
+  title="من 3CNF إلى التلوين الثلاثي"
+  exports={['satTo3Color']}
+  starter={lab.starter}
+  tests={[
+    { name: 'صيغة الكتاب: 3 + 2·4 + 5·4 = 31 رأسًا، وقابل للتلوين', code: '(() => { const BOOKF = [4, [[1, 2, 3], [2, -3, -4], [-1, 3, 4], [1, -2, -4]]];const COL3 = (n, E) => { const adj = Array.from({ length: n }, () => []); for (const [u, v] of E) { adj[u].push(v); adj[v].push(u); } const c = new Array(n).fill(-1); const go = (u) => { if (u === n) return true; for (let x = 0; x < 3; x++) if (adj[u].every((w) => c[w] !== x)) { c[u] = x; if (go(u + 1)) return true; } c[u] = -1; return false; }; return go(0); }; const r = satTo3Color(...BOOKF); return r.n === 31 && r.edges.length === 3 + 12 + 40 && COL3(r.n, r.edges); })()' },
+    { name: 'صيغة غير قابلة للإشباع: لا تلوين ثلاثي', code: '(() => { const UNSAT = [2, [[1, 1, 2], [1, 1, -2], [-1, -1, 2], [-1, -1, -2]]];const COL3 = (n, E) => { const adj = Array.from({ length: n }, () => []); for (const [u, v] of E) { adj[u].push(v); adj[v].push(u); } const c = new Array(n).fill(-1); const go = (u) => { if (u === n) return true; for (let x = 0; x < 3; x++) if (adj[u].every((w) => c[w] !== x)) { c[u] = x; if (go(u + 1)) return true; } c[u] = -1; return false; }; return go(0); }; const r = satTo3Color(...UNSAT); return !COL3(r.n, r.edges); })()' },
+    { name: 'صيغ عشوائية: قابل للتلوين ⟺ قابلة للإشباع', code: '(() => { const R3 = (maxk) => { const nv = 2 + Math.floor(Math.random() * 2), k = 1 + Math.floor(Math.random() * maxk), C = []; for (let j = 0; j < k; j++) C.push([...Array(3)].map(() => (1 + Math.floor(Math.random() * nv)) * (Math.random() < 0.5 ? 1 : -1))); return [nv, C]; };const SATB = (nv, C) => { const a = new Array(nv + 1).fill(0); const ok = () => C.every((c) => c.some((l) => a[Math.abs(l)] === 0 || (a[Math.abs(l)] > 0) === (l > 0))); const go = (v) => { if (!ok()) return false; if (v > nv) return true; for (const b of [1, -1]) { a[v] = b; if (go(v + 1)) return true; } a[v] = 0; return false; }; return go(1); };const COL3 = (n, E) => { const adj = Array.from({ length: n }, () => []); for (const [u, v] of E) { adj[u].push(v); adj[v].push(u); } const c = new Array(n).fill(-1); const go = (u) => { if (u === n) return true; for (let x = 0; x < 3; x++) if (adj[u].every((w) => c[w] !== x)) { c[u] = x; if (go(u + 1)) return true; } c[u] = -1; return false; }; return go(0); }; for (let q = 0; q < 60; q++) { const [nv, C] = R3(5), r = satTo3Color(nv, C); if (COL3(r.n, r.edges) !== SATB(nv, C)) return false; } return true; })()' }
+  ]}
+  solution={lab.solution}
+/>
+
+</Stage>
+
+<Stage n={6} id="summary" title="الخلاصة">
+
+<Takeaways>
+
+- **3Color:** هل يُلوَّن الرسم بثلاثة ألوان دون حافة بلون واحد؟
+- **الأدوات:** مثلث الحقيقة (أسماء الألوان)، ومثلث لكل متغير مع $X$ (إسناد)، وأداة بند بخمسة رؤوس (لا ثلاثة False).
+- **بوابة الأغلبية:** مدخلان متساويان يجبران المخرج.
+- **الحجم:** $3 + 2n + 5k$ رأسًا. و3Color NP-hard، فالتلوين العام كذلك.
+
+</Takeaways>
+
+</Stage>

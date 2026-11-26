@@ -1,0 +1,204 @@
+---
+section: "12.5"
+summary: "لتبرهن أن مسألة صعبة، اختزل إليها مسألة معروفة الصعوبة، لا العكس. وأول تطبيق: SAT. كل دارة تُنسخ صيغةً بمتغير لكل سلك ومعادلة لكل بوابة، والصيغة قابلة للإشباع إن وفقط إن كانت الدارة كذلك. فـ SAT مسألة NP-hard."
+minutes: 30
+goals:
+  - "تحفظ قاعدة الاتجاه: اختزل المسألة المعروفة إلى مسألتك"
+  - "تنسخ دارة إلى صيغة منطقية وتبرهن التكافؤ في الاتجاهين"
+  - "تكتب حساب الزمن T_CircuitSat(n) ≤ O(n) + T_Sat(O(n))"
+terms:
+  - { en: reduction, ar: اختزال }
+  - { en: formula satisfiability (SAT), ar: إشباع الصيغة }
+  - { en: transcription, ar: نسخ }
+  - { en: black box, ar: صندوق أسود }
+  - { en: satisfying assignment, ar: إسناد مُشبِع }
+---
+
+import Stage from '../../../components/book/Stage.astro';
+import ReadingGuide from '../../../components/book/ReadingGuide.astro';
+import BookPages from '../../../components/book/BookPages.astro';
+import BookExercises from '../../../components/book/BookExercises.astro';
+import Takeaways from '../../../components/book/Takeaways.astro';
+import Callout from '../../../components/Callout.astro';
+import Exercise from '../../../components/Exercise.astro';
+import QuickCheck from '../../../components/QuickCheck.tsx';
+import CodeLab from '../../../components/CodeLab.tsx';
+import CircuitLab from '../../../components/CircuitLab.tsx';
+import * as lab from '../../../labs/book-12-5-transcribe.ts';
+
+<Stage n={1} id="warmup" title="تمهيد" sub="فكرة القسم قبل أي تعريف">
+
+أنت تختزل منذ سنوات دون أن تسميها كذلك: تستدعي دالة فرز، تستعمل آلة حاسبة، تكتب «روتينًا مساعدًا». **الاختزال** أن تحل مسألة $A$ بافتراض أن عندك خوارزمية لمسألة $B$.
+
+والاختزال لإثبات الصعوبة يسير في اتجاه **يفاجئ** أغلب الناس. لا تحل مسألتك بمساعدة مسألة صعبة؛ بل **تحل المسألة الصعبة المعروفة بمساعدة مسألتك**. فلو كانت مسألتك سهلة، لصارت الصعبة سهلة، وهذا «ليس كذلك».
+
+</Stage>
+
+<Stage n={2} id="reading" title="اقرأ من الكتاب" sub="صفحات الكتاب الأصلية لهذا القسم، ومعها دليل يوجه قراءتك">
+
+<ReadingGuide pages="385–388" minutes={12}>
+
+- **القاعدة الموشومة:** «To prove that problem A is NP-hard, reduce a known NP-hard problem to A.» («the following rule of onto» فيها of زائدة، و«an hypothetical» صوابها a.) والحاشية 7 قواعد Monopoly الحقيقية!
+- **SAT:** صيغة منطقية عامة بكل الروابط.
+- **النسخ والشكل 12.5:** $y_j$ لكل سلك داخلي، و$z$ للمخرج، ومعادلة لكل بوابة.
+- **الاتجاهان:** («we can obtain a satisfying input the circuit» ينقصها for.)
+- **الرسم الكاريكاتوري:** صندوق التحويل الأحمر وصندوق SAT السحري «لأن عليه قوس قزح» (الحاشية 8).
+- **المعادلة:** $T_{\textsc{CircuitSat}}(n) \le O(n) + T_{\textsc{Sat}}(O(n))$.
+
+</ReadingGuide>
+
+<BookPages section="12.5" />
+
+</Stage>
+
+<Stage n={3} id="explain" title="الشرح والتجربة" sub="الأفكار نفسها بالعربية، بتفصيل، مع تجربة تفاعلية">
+
+### قاعدة الاتجاه
+
+<Callout type="warning" title="القاعدة">
+لتبرهن أن المسألة $A$ NP-hard، **اختزل مسألة معروفة الصعوبة إلى $A$**.
+</Callout>
+
+أي: صف خوارزمية سريعة تحل المسألة الصعبة المعروفة $B$، مستعملةً خوارزمية **افتراضية** سريعة لـ $A$ صندوقًا أسود. والمنطق برهان بالتناقض: لو كانت $A$ سهلة لصارت $B$ سهلة، و$B$ ليست كذلك (إلا إن P = NP). فالخوارزمية الافتراضية لـ $A$ غير موجودة.
+
+والخطأ الشائع: اختزال $A$ إلى $B$ الصعبة. هذا يقول فقط «$A$ ليست أصعب من $B$»، وهو لا يقول شيئًا عن صعوبة $A$: كل مسألة سهلة تُختزل إلى مسألة صعبة!
+
+### SAT
+
+**إشباع الصيغة** (SAT): المدخل صيغة منطقية بمتغيرات وروابط ($\wedge$، $\vee$، $\neg$، $\Rightarrow$، $\Leftrightarrow$، …)، مثل
+
+$$
+(a \vee b \vee c \vee \bar d) \Leftrightarrow \big((b \wedge \bar c) \vee (\bar a \Rightarrow d) \vee (c \ne a \wedge b)\big),
+$$
+
+والسؤال: هل يوجد إسناد قيم للمتغيرات يجعلها True؟ ولنبرهن أن SAT NP-hard، نختزل إليها المسألة الوحيدة المعروفة صعوبتها حتى الآن: CircuitSat.
+
+### النسخ
+
+لتكن $K$ دارة. أعطِ كل سلك داخلي متغيرًا جديدًا $y_j$، وسلك المخرج $z$. ثم اكتب **معادلة لكل بوابة**، واربطها كلها بـ AND، وأضف في الآخر $\wedge\, z$. لدارة الكتاب:
+
+$$
+(y_1 = x_1 \wedge x_4) \wedge (y_2 = \overline{x_4}) \wedge \cdots \wedge (z = y_4 \wedge y_7 \wedge y_6) \wedge z.
+$$
+
+والادعاء: **$K$ قابلة للإشباع إن وفقط إن كانت $\Phi$ كذلك.**
+
+- ($\Rightarrow$) مدخل يضيء المصباح: احسب كل البوابات، وأعطِ كل $y_j$ قيمة سلكه. فكل معادلة صحيحة، و$z$ صحيح.
+- ($\Leftarrow$) إسناد يحقق $\Phi$: تجاهل $y_j$ و$z$، وخذ قيم $x_i$. المعادلات الصحيحة تجبر كل $y_j$ على قيمة سلكه الحقيقية، فـ $z$ هو مخرج الدارة فعلًا، وهو True.
+
+والتحويل **خطي**، وحجم $\Phi$ ثابت مضروب في حجم $K$.
+
+جرّب. لكل وضع للمفاتيح، كل معادلة صحيحة حين تأخذ $y_j$ قيم أسلاكها. فالصيغة كلها صحيحة بالضبط حين يضيء المصباح.
+
+<CircuitLab client:visible mode="sat" />
+
+### الاستنتاج
+
+افترض خوارزمية سحرية لـ SAT. فهذه خوارزمية لـ CircuitSat:
+
+```
+CircuitSat(K):
+  transcribe K into a boolean formula Φ
+  return Sat(Φ)        ⟨⟨????MAGIC????⟩⟩
+```
+
+وزمنها
+
+$$
+T_{\textsc{CircuitSat}}(n) \le O(n) + T_{\textsc{Sat}}(O(n)).
+$$
+
+إن كان $T_{\textsc{Sat}}$ كثير حدود، فـ $T_{\textsc{CircuitSat}}$ كثير حدود، فـ P = NP. إذن **SAT مسألة NP-hard**. (وهي في NP أيضًا: الإسناد شاهد. فهي NP-complete.)
+
+</Stage>
+
+<Stage n={4} id="check" title="تحقق من فهمك" sub="أسئلة سريعة">
+
+<QuickCheck
+  client:visible
+  id="q1"
+  question="طالب يريد أن يبرهن أن مسألته X صعبة، فكتب خوارزمية تحل X باستدعاء SAT. ماذا برهن؟"
+  options={['أن X ليست أصعب من SAT، لا أكثر', 'أن X NP-hard', 'أن X في P', 'أن SAT سهلة']}
+  answer={0}
+  explain="الاتجاه معكوس. هذا اختزال X إلى SAT: يعطي حدًا أعلى لصعوبة X، لا أدنى."
+  wrong={{ 1: 'الاتجاه خطأ.', 2: 'SAT ليست في P على ما نعرف.', 3: 'لا علاقة.' }}
+/>
+
+<QuickCheck
+  client:visible
+  id="q2"
+  question="في اتجاه «⇐»، لماذا يكفي أن نتجاهل y_j وz؟"
+  options={['لأن المعادلات تجبر كل y_j على قيمة سلكه، فـ z هو المخرج الحقيقي', 'لأن y_j لا تؤثر في شيء', 'لأن الإسناد يحقق الدارة دائمًا', 'لا يكفي']}
+  answer={0}
+  explain="$(y_j = \ldots)$ صحيحة تعني أن $y_j$ يساوي ما تحسبه البوابة، بالاستقراء من المدخلات."
+  wrong={{ 1: 'هي التي تنقل القيم.', 2: 'فقط إسناد يحقق $\Phi$.', 3: 'يكفي، بسبب المعادلات.' }}
+/>
+
+</Stage>
+
+<Stage n={5} id="exercises" title="تمارين الكتاب" sub="حلّها بالورقة والقلم، ثم سجّل حالتها. الكتاب لا ينشر حلولها">
+
+<BookExercises chapter={12} nums={[13]} core={[13]} />
+
+<Callout type="tip" title="تلميح للتمرين 13">
+اكتب True = 1 وFalse = 0. ماذا يصير البند «XOR لحروف» حين تكتبه بهذه الأرقام؟ (وماذا يصير الحرف المنفي؟) أي فرع من الرياضيات يحل **أنظمة** من هذا النوع؟ وتلميح الكتاب جاد: اختر طريقًا واحدًا.
+</Callout>
+
+### تمارين إضافية بحلول كاملة
+
+<Exercise id="e1" level="apply" title="نسخ دارة صغيرة">
+
+دارة: $y_1 = x_1 \vee x_2$، $y_2 = \overline{x_1}$، $z = y_1 \wedge y_2 \wedge x_3$. اكتب $\Phi$، وجد كل إسناداتها المُشبِعة، وتحقق أن عددها يساوي عدد مدخلات الدارة المُشبِعة.
+
+<div slot="hint">$z$ يحتاج $x_1 = $ False و$x_3 = $ True، ثم $y_1$ يحتاج $x_2$.</div>
+<div slot="solution">
+
+$\Phi = (y_1 = x_1 \vee x_2) \wedge (y_2 = \overline{x_1}) \wedge (z = y_1 \wedge y_2 \wedge x_3) \wedge z$.
+
+$z$ True يجبر $y_1 = y_2 = x_3 = $ True. و$y_2 = $ True يجبر $x_1 = $ False. و$y_1 = $ True مع $x_1 = $ False يجبر $x_2 = $ True. فإسناد واحد: $x = (F, T, T)$، $y_1 = y_2 = z = $ True. والدارة لها مدخل مُشبِع واحد: $(F, T, T)$. والعددان متساويان لأن قيم $y$ و$z$ **محددة تمامًا** بقيم $x$. ∎
+
+</div>
+</Exercise>
+
+<Exercise id="e2" level="prove" title="SAT في NP">
+
+برهن أن SAT في NP، فهي NP-complete.
+
+<div slot="hint">الشاهد، وزمن التحقق بدلالة حجم الصيغة.</div>
+<div slot="solution">
+
+الشاهد إسناد قيم لكل المتغيرات، وطوله لا يتجاوز عدد المتغيرات، أي لا يتجاوز حجم الصيغة. والتحقق: قيّم الصيغة من الداخل إلى الخارج (أو بشجرتها النحوية) في زمن خطي في حجمها. فـ SAT في NP، ومع NP-hard هي NP-complete. ∎
+
+</div>
+</Exercise>
+
+### المختبر البرمجي
+
+<CodeLab
+  client:visible
+  id="book-12.5-transcribe"
+  title="نسخ دارة إلى صيغة"
+  exports={['transcribe', 'evalFormula']}
+  starter={lab.starter}
+  tests={[
+    { name: 'evalFormula على أمثلة', code: '(() => { const a = [true, false]; return evalFormula(["iff", ["var", 0], ["not", ["var", 1]]], a) === true && evalFormula(["and", ["var", 0], ["var", 1]], a) === false && evalFormula(["or", ["var", 1], ["not", ["var", 0]]], a) === false; })()' },
+    { name: 'دارة الكتاب: الصيغة صحيحة مع قيم الأسلاك', code: '(() => { const BOOKC = [5, [["and", 0, 3], ["not", 3], ["and", 2, 6], ["or", 5, 1], ["not", 1], ["not", 4], ["or", 7, 9], ["and", 8, 11, 10]]];const EV = (n, G, x) => { const w = x.slice(); for (const [op, ...ins] of G) { const v = ins.map((i) => w[i]); w.push(op === "and" ? v.every(Boolean) : op === "or" ? v.some(Boolean) : !v[0]); } return w; };const FEV = (F, a) => { const [op, ...r] = F; if (op === "var") return a[r[0]]; if (op === "not") return !FEV(r[0], a); if (op === "and") return r.every((G) => FEV(G, a)); if (op === "or") return r.some((G) => FEV(G, a)); if (op === "iff") return FEV(r[0], a) === FEV(r[1], a); throw 0; }; const F = transcribe(...BOOKC); for (let m = 0; m < 32; m++) { const x = [...Array(5)].map((_, i) => !!((m >> i) & 1)), w = EV(...BOOKC, x); if (FEV(F, w) !== w[12]) return false; } return true; })()' },
+    { name: 'دارات عشوائية: Φ قابلة للإشباع إن وفقط إن كانت الدارة كذلك', code: '(() => { const EV = (n, G, x) => { const w = x.slice(); for (const [op, ...ins] of G) { const v = ins.map((i) => w[i]); w.push(op === "and" ? v.every(Boolean) : op === "or" ? v.some(Boolean) : !v[0]); } return w; };const CS = (n, G) => { for (let m = 0; m < 1 << n; m++) { const x = [...Array(n)].map((_, i) => !!((m >> i) & 1)); const w = EV(n, G, x); if (w[w.length - 1]) return true; } return false; };const RC = () => { const n = 1 + Math.floor(Math.random() * 4), G = [], m = 1 + Math.floor(Math.random() * 5); for (let g = 0; g < m; g++) { const W = n + g, p = () => Math.floor(Math.random() * W), r = Math.random(); G.push(r < 0.3 ? ["not", p()] : [r < 0.65 ? "and" : "or", p(), p(), ...(Math.random() < 0.3 ? [p()] : [])]); } return [n, G]; };const FEV = (F, a) => { const [op, ...r] = F; if (op === "var") return a[r[0]]; if (op === "not") return !FEV(r[0], a); if (op === "and") return r.every((G) => FEV(G, a)); if (op === "or") return r.some((G) => FEV(G, a)); if (op === "iff") return FEV(r[0], a) === FEV(r[1], a); throw 0; };const FSAT = (F, nv) => { for (let m = 0; m < 1 << nv; m++) if (FEV(F, [...Array(nv)].map((_, i) => !!((m >> i) & 1)))) return true; return false; }; for (let q = 0; q < 100; q++) { const [n, G] = RC(), F = transcribe(n, G); if (FSAT(F, n + G.length) !== CS(n, G)) return false; } return true; })()' }
+  ]}
+  solution={lab.solution}
+/>
+
+</Stage>
+
+<Stage n={6} id="summary" title="الخلاصة">
+
+<Takeaways>
+
+- **القاعدة:** اختزل المسألة المعروفة الصعوبة **إلى** مسألتك.
+- **النسخ:** متغير لكل سلك، ومعادلة لكل بوابة، و$\wedge\, z$ في الآخر. تحويل خطي.
+- **التكافؤ:** الاتجاهان، لأن المعادلات تجبر قيم الأسلاك.
+- **النتيجة:** SAT NP-hard، وفي NP، فهي NP-complete.
+
+</Takeaways>
+
+</Stage>

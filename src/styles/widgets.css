@@ -1552,3 +1552,33 @@ table.bb-t tr.rr td { background: var(--red-soft); }
 .pj-verdict.ok { border-color: var(--green); background: var(--green-soft); }
 .pj-verdict.bad { border-color: var(--red); background: var(--red-soft); }
 .edl-msg bdi { white-space: nowrap; }
+
+/* ---------- NP-hardness (book chapter 12) ---------- */
+.cl-svg { display: block; width: 100%; max-width: 520px; margin: 0 auto 10px; height: auto; }
+.cl-w { fill: none; stroke: var(--ink-3); stroke-width: 1.6; opacity: 0.55; }
+.cl-w.on { stroke: var(--amber); stroke-width: 2.6; opacity: 1; }
+.cl-gate rect { fill: var(--paper); stroke: var(--ink-3); stroke-width: 1.4; }
+.cl-gate.on rect { fill: var(--amber-soft); stroke: var(--amber); }
+.cl-gate text { font-size: 9px; font-family: var(--font-mono); fill: var(--ink); text-anchor: middle; font-weight: 700; }
+.cl-lab { font-size: 10px; font-family: var(--font-mono); fill: var(--brand); }
+.cl-sw { cursor: pointer; }
+.cl-sw rect { fill: var(--paper); stroke: var(--ink-3); }
+.cl-sw circle { fill: var(--ink-3); transition: cx 0.15s; }
+.cl-sw.on rect { fill: var(--amber-soft); stroke: var(--amber); }
+.cl-sw.on circle { fill: var(--amber); }
+.cl-sw text { font-size: 11px; font-family: var(--font-mono); fill: var(--ink); }
+.cl-bulb circle { fill: var(--paper); stroke: var(--ink-3); stroke-width: 1.5; }
+.cl-bulb.on circle { fill: #ffe066; stroke: var(--amber); stroke-width: 2.5; filter: drop-shadow(0 0 6px #ffd43b); }
+.cl-bulb text { font-size: 13px; text-anchor: middle; opacity: 0.35; }
+.cl-bulb.on text { opacity: 1; }
+.cl-eqs { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; font-family: var(--font-mono); font-size: 0.8rem; }
+.cl-eqs > span { padding: 2px 8px; border-radius: 7px; border: 1px solid var(--line); background: var(--paper); }
+.cl-eqs > span.ok { border-color: var(--green); background: var(--green-soft); }
+.cl-eqs > span.bad { border-color: var(--red); background: var(--red-soft); }
+.cl-eqs small { color: var(--ink-3); }
+.cl-eqs .edl-msg { flex-basis: 100%; font-family: inherit; }
+.cl-cnf { max-height: 260px; overflow-y: auto; padding: 4px; border: 1px solid var(--line); border-radius: 10px; }
+table.ss-t td, table.ss-t th { font-family: var(--font-mono); }
+table.ss-t tr.on td, table.ss-t tr.on th { background: var(--green-soft); font-weight: 700; }
+table.ss-t tr.sum td, table.ss-t tr.sum th { background: var(--paper); font-weight: 700; border-top: 2px solid var(--ink-3); }
+table.ss-t td.ss-dec { color: var(--ink-3); }

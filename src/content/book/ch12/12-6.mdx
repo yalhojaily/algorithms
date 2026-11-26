@@ -1,0 +1,203 @@
+---
+section: "12.6"
+summary: "الصيغة بصيغة CNF عطف بنود، كل بند فصل حروف. و3SAT: كل بند ثلاثة حروف بالضبط. والاختزال من CircuitSat (Tseitin 1966) على مراحل: بوابات ثنائية، ثم معادلة لكل بوابة، ثم كل معادلة بنود، ثم حشو البنود القصيرة بمتغيرات جديدة. الحجم يكبر بعامل ثابت فقط."
+minutes: 35
+goals:
+  - "تعرّف CNF و3CNF و3SAT"
+  - "تنفذ مراحل Tseitin الأربع وتبرهن صحة كل مرحلة"
+  - "تفهم لماذا يكفي أن يكبر الحجم بعامل ثابت (أو حتى كثير حدود)"
+terms:
+  - { en: conjunctive normal form (CNF), ar: الصيغة العطفية القياسية }
+  - { en: clause, ar: بند }
+  - { en: literal, ar: حرف }
+  - { en: 3SAT, ar: 3SAT }
+  - { en: Tseitin's transformation, ar: تحويل Tseitin }
+  - { en: padding variable, ar: متغير حشو }
+---
+
+import Stage from '../../../components/book/Stage.astro';
+import ReadingGuide from '../../../components/book/ReadingGuide.astro';
+import BookPages from '../../../components/book/BookPages.astro';
+import BookExercises from '../../../components/book/BookExercises.astro';
+import Takeaways from '../../../components/book/Takeaways.astro';
+import Callout from '../../../components/Callout.astro';
+import Exercise from '../../../components/Exercise.astro';
+import QuickCheck from '../../../components/QuickCheck.tsx';
+import CodeLab from '../../../components/CodeLab.tsx';
+import CircuitLab from '../../../components/CircuitLab.tsx';
+import * as lab from '../../../labs/book-12-6-tseitin.ts';
+
+<Stage n={1} id="warmup" title="تمهيد" sub="فكرة القسم قبل أي تعريف">
+
+SAT صعبة، لكنها **فوضوية**: صيغة بأي روابط وأي تداخل. ولإثبات صعوبة مسائل أخرى نريد مسألة صعبة **مرتبة جدًا**، لها بنية منتظمة تسهل ترجمتها إلى رسوم وأعداد وألعاب. وأفضل مرشح: 3SAT. بنود، كل بند ثلاثة حروف، ولا شيء آخر.
+
+وليس واضحًا مسبقًا أن هذه القيود لا تجعل المسألة أسهل. (2SAT مثلًا تُحل في زمن خطي! التمرين 6.) فلنبرهن أنها تبقى صعبة، مباشرة من CircuitSat.
+
+</Stage>
+
+<Stage n={2} id="reading" title="اقرأ من الكتاب" sub="صفحات الكتاب الأصلية لهذا القسم، ومعها دليل يوجه قراءتك">
+
+<ReadingGuide pages="388–390" minutes={12}>
+
+- **CNF و3CNF:** البند، والحرف، والمثال الذي ليس 3CNF.
+- **الشكل 12.6:** الاختزال من CircuitSat إلى 3SAT.
+- **Tseitin (1966):** قبل Cook وLevin بخمس سنوات.
+- **المراحل الأربع:** بوابات ثنائية، ثم $\Phi_1$، ثم $\Phi_2$ (CNF)، ثم $\Phi_3$ (3CNF). وبرهان كل مرحلة سطر.
+- **الصيغة الكاملة لدارة الكتاب:** «Yikes!». ولاحظ أن البوابة الثلاثية $z = y_4 \wedge y_7 \wedge y_6$ صارت $y_8$ و$y_9$، و20 متغير حشو $z_1, \ldots, z_{20}$. (في المختبر سمينا آخر بوابة $z$ ومتغيرات الحشو $p_i$.)
+- **حجة الحجم:** حتى $n^{374}$ كان سيكفي.
+
+</ReadingGuide>
+
+<BookPages section="12.6" />
+
+</Stage>
+
+<Stage n={3} id="explain" title="الشرح والتجربة" sub="الأفكار نفسها بالعربية، بتفصيل، مع تجربة تفاعلية">
+
+### CNF و3SAT
+
+**الحرف** (literal) متغير أو نفيه. و**البند** (clause) فصل (OR) حروف. والصيغة بصيغة **CNF** (conjunctive normal form) عطف (AND) بنود:
+
+$$
+(a \vee b \vee c \vee d) \wedge (b \vee \bar c \vee \bar d) \wedge (\bar a \vee c \vee d) \wedge (a \vee \bar b).
+$$
+
+و**3CNF**: كل بند فيه **ثلاثة حروف بالضبط** (المثال أعلاه ليس 3CNF: بند بأربعة وبند باثنين). و**3SAT**: هل صيغة 3CNF قابلة للإشباع؟
+
+### المراحل الأربع
+
+من دارة $K$ نبني صيغة 3CNF مكافئة في قابلية الإشباع. ومع كل مرحلة برهانها:
+
+**1. بوابات ثنائية.** كل بوابة AND أو OR بـ $k > 2$ مدخلًا تصير شجرة من $k - 1$ بوابة ثنائية. الدارة الجديدة $K'$ **مكافئة منطقيًا** لـ $K$.
+
+**2. معادلة لكل بوابة** $\Phi_1$، كما في القسم السابق.
+
+**3. كل معادلة تصير بنودًا** $\Phi_2$. ثلاثة أنواع فقط من المعادلات:
+
+$$
+\begin{aligned}
+a = b \wedge c &\;\longmapsto\; (a \vee \bar b \vee \bar c) \wedge (\bar a \vee b) \wedge (\bar a \vee c) \\
+a = b \vee c &\;\longmapsto\; (\bar a \vee b \vee c) \wedge (a \vee \bar b) \wedge (a \vee \bar c) \\
+a = \bar b &\;\longmapsto\; (a \vee b) \wedge (\bar a \vee \bar b)
+\end{aligned}
+$$
+
+كل سطر **تكافؤ منطقي** (تحقق منه بجدول صدق، التمرين الإضافي الأول). فـ $\Phi_1$ و$\Phi_2$ لهما الإسنادات المُشبِعة نفسها.
+
+**4. حشو إلى ثلاثة حروف** $\Phi_3$. البند بحرفين يصير بندين بمتغير جديد $x$، والبند الأخير بحرف واحد ($z$) يصير أربعة بمتغيرين جديدين:
+
+$$
+\begin{aligned}
+a \vee b &\;\longmapsto\; (a \vee b \vee x) \wedge (a \vee b \vee \bar x) \\
+z &\;\longmapsto\; (z \vee x \vee y) \wedge (z \vee \bar x \vee y) \wedge (z \vee x \vee \bar y) \wedge (z \vee \bar x \vee \bar y)
+\end{aligned}
+$$
+
+البندان معًا يقولان $a \vee b$، أيًا كان $x$: إن كان $a \vee b$ خاطئًا، فأحدهما خاطئ. فإسناد يحقق $\Phi_2$ يمتد بأي قيم للمتغيرات الجديدة، وإسناد يحقق $\Phi_3$ يحقق $\Phi_2$ بتجاهلها.
+
+### الحجم
+
+يبدو الناتج أكبر بكثير («Yikes!»)، لكنه أكبر **بعامل ثابت**: $K'$ فيها أسلاك ضعف $K$ على الأكثر، وكل بوابة ثنائية تصير خمسة بنود على الأكثر. والتحويل خطي. فـ **3SAT مسألة NP-hard**. (ولو كان الحجم $n^{374}$ لبقي الاختزال صحيحًا: كثير الحدود من كثير الحدود كثير حدود.)
+
+جرّب. كل البنود صحيحة حين يضيء المصباح ونأخذ قيم الأسلاك. أطفئه، وانظر أي البنود تفشل.
+
+<CircuitLab client:visible mode="cnf" />
+
+</Stage>
+
+<Stage n={4} id="check" title="تحقق من فهمك" sub="أسئلة سريعة">
+
+<QuickCheck
+  client:visible
+  id="q1"
+  question="لماذا يكافئ (a ∨ b ∨ x) ∧ (a ∨ b ∨ ¬x) البندَ a ∨ b، مهما كانت قيمة x؟"
+  options={['إن كان a ∨ b صحيحًا فالبندان صحيحان، وإن كان خاطئًا فأحدهما خاطئ (حسب x)', 'لأن x ونفيه يلغيان بعضهما فيختفيان من الصيغة', 'لأن x يجب أن يكون True', 'ليسا متكافئين']}
+  answer={0}
+  explain="فإسناد يحقق $a \vee b$ يمتد بأي قيمة لـ $x$، وإسناد يحقق البندين يحقق $a \vee b$. وهذا كل ما تحتاجه المرحلة 4."
+  wrong={{ 1: 'المتغير لا «يختفي»، والحجة بالحالات.', 2: 'أي قيمة تصلح.', 3: 'هما متكافئان بالمعنى المطلوب.' }}
+/>
+
+<QuickCheck
+  client:visible
+  id="q2"
+  question="بوابة AND بعشرة مدخلات. كم بوابة ثنائية تصير؟"
+  options={['9', '10', '5', '45']}
+  answer={0}
+  explain="شجرة بعشر أوراق فيها 9 عقد داخلية."
+  wrong={{ 1: 'كل بوابة ثنائية تدمج اثنين في واحد.', 2: 'هذا ارتفاع شجرة متوازنة تقريبًا، لا عددها.', 3: 'لا حاجة لكل الأزواج.' }}
+/>
+
+</Stage>
+
+<Stage n={5} id="exercises" title="تمارين الكتاب" sub="حلّها بالورقة والقلم، ثم سجّل حالتها. الكتاب لا ينشر حلولها">
+
+<BookExercises chapter={12} nums={[11, 12, 20]} core={[11, 20]} />
+
+<Callout type="tip" title="تلميح للتمرين 11">
+(أ) متغير يظهر في بنود كثيرة: استبدل ظهوراته بنسخ جديدة، واربط النسخ ببنود تجبرها على التساوي. كم بندًا تحتاج لتقول «$x_1 = x_2 = \cdots = x_m$» بحيث يظهر كل متغير قليلًا؟ (فكّر في دورة استلزامات.) (ب) تلميح الكتاب: من (أ)، ثم احشُ البنود القصيرة دون أن تتجاوز أربعة ظهورات. (ج) ª: متغير في بندين فقط: إن ظهر بالإشارة نفسها في الاثنين، فماذا تفعل به؟ وإن ظهر بإشارتين؟ (د) ª: رسم ثنائي بين البنود والمتغيرات، ومطابقة (الفصل 11)، وشرط Hall.
+</Callout>
+
+<Callout type="tip" title="تلميح للتمرين 12">
+(أ) NotAllEqual: لاحظ أن قلب كل المتغيرات يحفظ أي إسناد صالح. أضف متغيرًا جديدًا واحدًا مشتركًا لكل البنود، وفكّر ماذا يعني أن يكون False. (ب) 1-in-3: ابنِ لكل بند من 3SAT أداة صغيرة من بنود 1-in-3 بمتغيرات جديدة. جرّب على الورق: ما الذي يجبره «واحد بالضبط» في بندين يتشاركان متغيرًا؟
+</Callout>
+
+<Callout type="tip" title="تلميح للتمرين 20">
+(أ) من ثلاثة إلى أربعة: الحشو كما في المرحلة 4. (ب) من أربعة إلى ثلاثة: بند طويل يُقسم إلى بندين بمتغير جديد يربطهما، وتحقق من الاتجاهين.
+</Callout>
+
+### تمارين إضافية بحلول كاملة
+
+<Exercise id="e1" level="apply" title="جدول الصدق لبوابة AND">
+
+تحقق بجدول صدق أن $(a = b \wedge c) \iff (a \vee \bar b \vee \bar c) \wedge (\bar a \vee b) \wedge (\bar a \vee c)$.
+
+<div slot="hint">ثمانية صفوف. البند الأول يقول «$b \wedge c \Rightarrow a$»، والآخران «$a \Rightarrow b$» و«$a \Rightarrow c$».</div>
+<div slot="solution">
+
+البند الأول $\equiv (b \wedge c \Rightarrow a)$، والثاني $\equiv (a \Rightarrow b)$، والثالث $\equiv (a \Rightarrow c)$. الأخيران معًا $\equiv (a \Rightarrow b \wedge c)$. فالثلاثة معًا $\equiv (a \Leftrightarrow b \wedge c)$. وبجدول صدق: الصفوف التي تحقق الثلاثة هي $(a, b, c) \in \{(F,F,F), (F,F,T), (F,T,F), (T,T,T)\}$، وهي بالضبط التي فيها $a = b \wedge c$. ∎
+
+</div>
+</Exercise>
+
+<Exercise id="e2" level="apply" title="حجم 3CNF">
+
+دارة فيها $g$ بوابة AND/OR ثنائية و$h$ بوابة NOT. كم بندًا في $\Phi_3$؟ وكم متغير حشو؟
+
+<div slot="hint">AND/OR: بند ثلاثي وبندان ثنائيان. NOT: بندان ثنائيان. والمخرج: بند واحد.</div>
+<div slot="solution">
+
+كل AND/OR: بند ثلاثي (يبقى) وبندان ثنائيان (كل منهما يصير بندين بمتغير حشو): $1 + 4 = 5$ بنود و2 متغيرا حشو. كل NOT: بندان ثنائيان: 4 بنود و2 متغيرا حشو. والمخرج: 4 بنود ومتغيرا حشو. المجموع: $5g + 4h + 4$ بندًا، و$2g + 2h + 2$ متغير حشو. لدارة الكتاب بعد الثنائية: $g = 6$ (منها $y_8$ و$y_9$)، $h = 3$: $30 + 12 + 4 = 46$ بندًا، و$12 + 6 + 2 = 20$ متغير حشو، كما في الكتاب والمختبر. ∎
+
+</div>
+</Exercise>
+
+### المختبر البرمجي
+
+<CodeLab
+  client:visible
+  id="book-12.6-tseitin"
+  title="Tseitin: من دارة إلى 3CNF"
+  exports={['toThreeCNF']}
+  starter={lab.starter}
+  tests={[
+    { name: 'دارة الكتاب: ثلاثة حروف في كل بند، وقابلة للإشباع', code: '(() => { const BOOKC = [5, [["and", 0, 3], ["not", 3], ["and", 2, 6], ["or", 5, 1], ["not", 1], ["not", 4], ["or", 7, 9], ["and", 8, 11, 10]]];const SATB = (nv, C) => { const a = new Array(nv + 1).fill(0); const ok = () => C.every((c) => c.some((l) => a[Math.abs(l)] === 0 || (a[Math.abs(l)] > 0) === (l > 0))); const go = (v) => { if (!ok()) return false; if (v > nv) return true; for (const b of [1, -1]) { a[v] = b; if (go(v + 1)) return true; } a[v] = 0; return false; }; return go(1); }; const r = toThreeCNF(...BOOKC); return r.clauses.length > 0 && r.clauses.every((c) => c.length === 3 && c.every((l) => l !== 0 && Math.abs(l) <= r.nVars)) && SATB(r.nVars, r.clauses); })()' },
+    { name: 'دارة غير قابلة للإشباع ← صيغة غير قابلة', code: '(() => { const SATB = (nv, C) => { const a = new Array(nv + 1).fill(0); const ok = () => C.every((c) => c.some((l) => a[Math.abs(l)] === 0 || (a[Math.abs(l)] > 0) === (l > 0))); const go = (v) => { if (!ok()) return false; if (v > nv) return true; for (const b of [1, -1]) { a[v] = b; if (go(v + 1)) return true; } a[v] = 0; return false; }; return go(1); }; const r = toThreeCNF(1, [["not", 0], ["and", 0, 1]]); return r.clauses.every((c) => c.length === 3) && !SATB(r.nVars, r.clauses); })()' },
+    { name: 'دارات عشوائية: الإشباع نفسه', code: '(() => { const EV = (n, G, x) => { const w = x.slice(); for (const [op, ...ins] of G) { const v = ins.map((i) => w[i]); w.push(op === "and" ? v.every(Boolean) : op === "or" ? v.some(Boolean) : !v[0]); } return w; };const CS = (n, G) => { for (let m = 0; m < 1 << n; m++) { const x = [...Array(n)].map((_, i) => !!((m >> i) & 1)); const w = EV(n, G, x); if (w[w.length - 1]) return true; } return false; };const RC = () => { const n = 1 + Math.floor(Math.random() * 4), G = [], m = 1 + Math.floor(Math.random() * 5); for (let g = 0; g < m; g++) { const W = n + g, p = () => Math.floor(Math.random() * W), r = Math.random(); G.push(r < 0.3 ? ["not", p()] : [r < 0.65 ? "and" : "or", p(), p(), ...(Math.random() < 0.3 ? [p()] : [])]); } return [n, G]; };const SATB = (nv, C) => { const a = new Array(nv + 1).fill(0); const ok = () => C.every((c) => c.some((l) => a[Math.abs(l)] === 0 || (a[Math.abs(l)] > 0) === (l > 0))); const go = (v) => { if (!ok()) return false; if (v > nv) return true; for (const b of [1, -1]) { a[v] = b; if (go(v + 1)) return true; } a[v] = 0; return false; }; return go(1); }; for (let q = 0; q < 80; q++) { const [n, G] = RC(), r = toThreeCNF(n, G); if (!r.clauses.every((c) => c.length === 3)) return false; if (SATB(r.nVars, r.clauses) !== CS(n, G)) return false; } return true; })()' }
+  ]}
+  solution={lab.solution}
+/>
+
+</Stage>
+
+<Stage n={6} id="summary" title="الخلاصة">
+
+<Takeaways>
+
+- **3SAT:** CNF بثلاثة حروف في كل بند. مرتبة، فتسهل الاختزالات منها.
+- **Tseitin:** بوابات ثنائية ← معادلة لكل بوابة ← بنود (تكافؤ منطقي) ← حشو بمتغيرات جديدة.
+- **كل مرحلة:** الإسنادات المُشبِعة تنتقل في الاتجاهين.
+- **الحجم:** عامل ثابت، والزمن خطي. فـ 3SAT NP-hard.
+
+</Takeaways>
+
+</Stage>

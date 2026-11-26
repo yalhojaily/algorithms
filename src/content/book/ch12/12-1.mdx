@@ -1,0 +1,169 @@
+---
+section: "12.1"
+summary: "بائع غامض يعرض صندوقًا فيه مفاتيح ومصباح، وفي داخله دارة منطقية. السؤال: هل يوجد وضع للمفاتيح يضيء المصباح؟ حساب المخرج لوضع واحد سهل، لكن لا أحد يعرف طريقة أسرع جوهريًا من تجربة الأوضاع كلها، 2^n وضعًا. هذه مسألة إشباع الدارة CircuitSat، وهي نقطة البداية لكل الفصل."
+minutes: 25
+goals:
+  - "تعرّف الدارة المنطقية ومسألة CircuitSat"
+  - "تميز بين حساب المخرج لمدخل واحد (سهل) والبحث عن مدخل يضيء المصباح (لا يُعرف له حل سريع)"
+  - "تفهم حجة الخصم: من يرى الصندوق من الخارج فقط يحتاج كل الأوضاع"
+terms:
+  - { en: boolean circuit, ar: دارة منطقية }
+  - { en: gate, ar: بوابة }
+  - { en: circuit satisfiability (CircuitSat), ar: إشباع الدارة }
+  - { en: brute force, ar: القوة الغاشمة }
+  - { en: adversary, ar: الخصم }
+---
+
+import Stage from '../../../components/book/Stage.astro';
+import ReadingGuide from '../../../components/book/ReadingGuide.astro';
+import BookPages from '../../../components/book/BookPages.astro';
+import BookExercises from '../../../components/book/BookExercises.astro';
+import Takeaways from '../../../components/book/Takeaways.astro';
+import Callout from '../../../components/Callout.astro';
+import Exercise from '../../../components/Exercise.astro';
+import QuickCheck from '../../../components/QuickCheck.tsx';
+import CodeLab from '../../../components/CodeLab.tsx';
+import CircuitLab from '../../../components/CircuitLab.tsx';
+import * as lab from '../../../labs/book-12-1-circuit.ts';
+
+<Stage n={1} id="warmup" title="تمهيد" sub="فكرة القسم قبل أي تعريف">
+
+كل ما بنيناه في الكتاب حتى الآن خوارزميات **سريعة**: أقصر المسارات، وأشجار التغطية، وأكبر التدفقات، كلها في زمن كثير حدود. وهذا الفصل الأخير عن الوجه الآخر: مسائل طبيعية جدًا، بسيطة الصياغة، **لا يعرف أحد** كيف يحلها بسرعة، ويعتقد الجميع تقريبًا أنها لا تُحل بسرعة أبدًا.
+
+والقصة تبدأ بلعبة. صندوق أسود عليه مفاتيح ومصباح. والسؤال بسيط: هل يمكن إضاءة المصباح؟ الجائزة مبلغ خيالي، والخسارة روحك. هل تقبل؟
+
+</Stage>
+
+<Stage n={2} id="reading" title="اقرأ من الكتاب" sub="صفحات الكتاب الأصلية لهذا القسم، ومعها دليل يوجه قراءتك">
+
+<ReadingGuide pages="379–381" minutes={8}>
+
+- **أربعة أمثال:** T. S. Eliot عن أرسطو، وTanenbaum عن المعايير (الكتاب يكتب اسمه «Tannenbaum» بنونين، والصواب بنون واحدة)، وDirk Gently، وShimon Peres.
+- **القصة:** البائع، والصندوق، والشكلان 12.1 و12.2 (البوابات ودارة مثال). والجائزة «one million one hundred billion dollars» تصير بعد سطور «the hundred billion bucks»: مزاح، لا خطأ يهم.
+- **حجة الخصم:** لماذا لا تستطيع الجواب دون تجربة كل الأوضاع؟
+- **المخطط الكامل:** حتى لو أعطاك الخصم الدارة نفسها، يبقى السؤال صعبًا. وهذه مسألة CircuitSat.
+
+</ReadingGuide>
+
+<BookPages section="12.1" />
+
+</Stage>
+
+<Stage n={3} id="explain" title="الشرح والتجربة" sub="الأفكار نفسها بالعربية، بتفصيل، مع تجربة تفاعلية">
+
+### الدارة المنطقية
+
+**الدارة المنطقية** (boolean circuit) أسلاك وبوابات. لكل مفتاح سلك مدخل يحمل True أو False، وكل بوابة تحسب قيمة جديدة من أسلاك داخلة إليها:
+
+- **AND** تخرج True إن كانت كل مدخلاتها True.
+- **OR** تخرج True إن كان أحد مدخلاتها على الأقل True.
+- **NOT** تقلب مدخلها الوحيد.
+
+ولا دورات: كل سلك يُحسب من أسلاك قبله، وآخر بوابة تقود المصباح. فحساب المخرج لوضع معين من المفاتيح سهل: احسب الأسلاك بترتيب طوبولوجي (القسم 6.3)، في زمن **خطي** في حجم الدارة.
+
+### حجة الخصم
+
+لنفترض أن الصندوق مغلق، وأنك لا ترى إلا المصباح. الخصم الماكر لم يوصل شيئًا. إن قلت «يمكن إضاءته» فتح الصندوق وأراك أنه فارغ. وإن قلت «لا يمكن» قبل أن تجرب الأوضاع كلها، **صنع في اللحظة نفسها** دارة تضيء المصباح في وضع واحد لم تجربه، ثم أداره إلى ذلك الوضع. فالجواب المضمون يحتاج تجربة الأوضاع الـ $2^n$ كلها.
+
+### حتى مع المخطط
+
+ثم يعطيك الخصم **مخطط الدارة كاملًا**. الآن تستطيع أن تحلل البنية، لا أن تجرب فقط. ومع ذلك: هذه مسألة **إشباع الدارة** (circuit satisfiability، أو CircuitSat):
+
+> المدخل دارة منطقية. والسؤال: هل يوجد وضع للمدخلات يجعل المخرج True؟
+
+لا يعرف أحد خوارزمية أسرع جوهريًا من تجربة $2^n$ وضعًا. ولم يبرهن أحد أنها غير موجودة أيضًا. لكن «لأغراض عملية، من الآمن أن نفترض» ذلك، كما يقول الكتاب، بالقدر نفسه الذي نفترض به غياب «وحيد القرن المضاد للجاذبية».
+
+جرّب الصندوق. حرّك المفاتيح، وراقب الأسلاك. ثم جرّب العد الثنائي إعدادًا بعد إعداد، أو الأوضاع الـ32 دفعة واحدة.
+
+<CircuitLab client:visible mode="game" />
+
+<Callout type="tip" title="سهل التحقق، صعب الإيجاد">
+لاحظ عدم التماثل: إن أعطاك أحد وضعًا يضيء المصباح، تتحقق منه في زمن خطي. أما **إيجاده** فلا تعرف له إلا القوة الغاشمة. هذا الفرق بين «التحقق» و«الإيجاد» هو موضوع القسم التالي كله.
+</Callout>
+
+</Stage>
+
+<Stage n={4} id="check" title="تحقق من فهمك" sub="أسئلة سريعة">
+
+<QuickCheck
+  client:visible
+  id="q1"
+  question="دارة فيها 40 مفتاحًا و10000 بوابة. أي هذه سريع؟"
+  options={['حساب المخرج لوضع معين من المفاتيح', 'معرفة هل يوجد وضع يضيء المصباح', 'عدّ الأوضاع التي تضيء المصباح', 'كلها سريعة']}
+  answer={0}
+  explain="الحساب لوضع واحد خطي. أما البحث فلا يُعرف له إلا $2^{40}$ تقريبًا."
+  wrong={{ 1: 'هذه CircuitSat نفسها.', 2: 'العد أصعب من السؤال بنعم أو لا.', 3: 'الثاني والثالث لا يُعرف لهما حل سريع.' }}
+/>
+
+<QuickCheck
+  client:visible
+  id="q2"
+  question="لماذا لم يبرهن أحد أن CircuitSat يحتاج زمنًا أسيًا؟"
+  options={['لأن ذلك يكافئ برهان P ≠ NP، وهو مفتوح', 'لأن حجة الخصم تبرهنه', 'لأنه برهن وانتهى', 'لأن المسألة في P']}
+  answer={0}
+  explain="حجة الخصم تعمل فقط حين ترى الصندوق من الخارج. مع المخطط، قد توجد خوارزمية ذكية لم تُكتشف."
+  wrong={{ 1: 'حجة الخصم للصندوق المغلق فقط.', 2: 'لم يُبرهن.', 3: 'لا يُعرف ذلك.' }}
+/>
+
+</Stage>
+
+<Stage n={5} id="exercises" title="التمارين" sub="لا تمارين من الكتاب لهذا القسم؛ تمارين إضافية بحلول كاملة ومختبر برمجي">
+
+تمارين الكتاب في آخر الفصل، وكلها عن الأقسام التالية. فهنا تمارين إضافية فقط.
+
+<Exercise id="e1" level="apply" title="دارة الكتاب">
+
+في دارة الشكل 12.5: $y_1 = x_1 \wedge x_4$، $y_2 = \overline{x_4}$، $y_3 = x_3 \wedge y_2$، $y_4 = y_1 \vee x_2$، $y_5 = \overline{x_2}$، $y_6 = \overline{x_5}$، $y_7 = y_3 \vee y_5$، $z = y_4 \wedge y_7 \wedge y_6$. صف كل الأوضاع التي تضيء المصباح.
+
+<div slot="hint">$z$ يحتاج الثلاثة. $y_6$ يعني $x_5$ = False. ثم افصل حسب $x_2$.</div>
+<div slot="solution">
+
+$y_6$ يجبر $x_5 = $ False. وإن كان $x_2 = $ True: $y_4 = $ True، و$y_5 = $ False، فـ $y_7 = y_3$ يحتاج $x_3 = $ True و$x_4 = $ False، و$x_1$ حر: وضعان. وإن كان $x_2 = $ False: $y_5 = $ True فـ $y_7 = $ True، و$y_4 = y_1$ يحتاج $x_1 = x_4 = $ True، و$x_3$ حر: وضعان. المجموع **4** أوضاع من 32 (وهو ما يعرضه المختبر). ∎
+
+</div>
+</Exercise>
+
+<Exercise id="e2" level="prove" title="حجة الخصم بدقة">
+
+خوارزمية لا ترى إلا المصباح: تختار وضعًا، فترى أمضاء أم لا، ثم تختار التالي حسب ما رأت. برهن أن كل خوارزمية من هذا النوع تجيب «لا يمكن» بشكل صحيح تحتاج $2^n$ تجربة على الأقل في أسوأ حال.
+
+<div slot="hint">خصم يجيب «مطفأ» دائمًا. إن توقفت الخوارزمية قبل تجربة كل الأوضاع، فماذا يستطيع أن يفعل بالوضع الذي لم تجربه؟</div>
+<div slot="solution">
+
+ليجب الخصم «مطفأ» على كل تجربة. إن أعلنت الخوارزمية «لا يمكن» بعد أقل من $2^n$ تجربة، فهناك وضع $\sigma$ لم تجربه. الدارة التي تضيء المصباح عند $\sigma$ وحده (AND لكل المدخلات أو نفيها حسب $\sigma$) متسقة مع كل ما رأته الخوارزمية، لكن جوابها لها خاطئ. والدارة الفارغة متسقة أيضًا، وجوابها لها صحيح. فالخوارزمية لا تميز بين الحالتين، فتخطئ في إحداهما. إذن تحتاج $2^n$ تجربة. ∎
+
+</div>
+</Exercise>
+
+### المختبر البرمجي
+
+<CodeLab
+  client:visible
+  id="book-12.1-circuit"
+  title="حساب الدارة، وإشباعها بالقوة الغاشمة"
+  exports={['evalCircuit', 'circuitSat']}
+  starter={lab.starter}
+  tests={[
+    { name: 'دارة الكتاب: 4 أوضاع تضيء المصباح', code: '(() => { const BOOKC = [5, [["and", 0, 3], ["not", 3], ["and", 2, 6], ["or", 5, 1], ["not", 1], ["not", 4], ["or", 7, 9], ["and", 8, 11, 10]]]; let c = 0; for (let m = 0; m < 32; m++) { const x = [...Array(5)].map((_, i) => !!((m >> i) & 1)); const w = evalCircuit(...BOOKC, x); if (w.length !== 13) return false; if (w[12]) c++; } return c === 4; })()' },
+    { name: 'circuitSat يعيد وضعًا صحيحًا أو null', code: '(() => { const BOOKC = [5, [["and", 0, 3], ["not", 3], ["and", 2, 6], ["or", 5, 1], ["not", 1], ["not", 4], ["or", 7, 9], ["and", 8, 11, 10]]]; const x = circuitSat(...BOOKC); return x !== null && evalCircuit(...BOOKC, x)[12] === true && circuitSat(1, [["not", 0], ["and", 0, 1]]) === null; })()' },
+    { name: 'دارات عشوائية: تطابق المرجع', code: '(() => { const EV = (n, G, x) => { const w = x.slice(); for (const [op, ...ins] of G) { const v = ins.map((i) => w[i]); w.push(op === "and" ? v.every(Boolean) : op === "or" ? v.some(Boolean) : !v[0]); } return w; };const CS = (n, G) => { for (let m = 0; m < 1 << n; m++) { const x = [...Array(n)].map((_, i) => !!((m >> i) & 1)); const w = EV(n, G, x); if (w[w.length - 1]) return true; } return false; };const RC = () => { const n = 1 + Math.floor(Math.random() * 4), G = [], m = 1 + Math.floor(Math.random() * 5); for (let g = 0; g < m; g++) { const W = n + g, p = () => Math.floor(Math.random() * W), r = Math.random(); G.push(r < 0.3 ? ["not", p()] : [r < 0.65 ? "and" : "or", p(), p(), ...(Math.random() < 0.3 ? [p()] : [])]); } return [n, G]; }; for (let q = 0; q < 200; q++) { const [n, G] = RC(); const x = circuitSat(n, G); if ((x !== null) !== CS(n, G)) return false; if (x) { const w = EV(n, G, x); if (!w[w.length - 1]) return false; } const y = [...Array(n)].map(() => Math.random() < 0.5); if (JSON.stringify(evalCircuit(n, G, y)) !== JSON.stringify(EV(n, G, y))) return false; } return true; })()' }
+  ]}
+  bench={{ title: 'زمن circuitSat على دارة غير قابلة للإشباع بـ n مدخلًا', fn: 'circuitSat', make: '(() => { const G = [["and", 0, 1]]; for (let i = 2; i < n; i++) G.push(["and", n + G.length - 1, i]); G.push(["not", 0]); G.push(["and", n + G.length - 2, n + G.length - 1]); return [n, G]; })()', spread: true, ns: [10, 12, 14, 16] }}
+  solution={lab.solution}
+/>
+
+</Stage>
+
+<Stage n={6} id="summary" title="الخلاصة">
+
+<Takeaways>
+
+- **الدارة:** أسلاك وبوابات AND وOR وNOT بلا دورات. المخرج لوضع واحد في زمن خطي.
+- **CircuitSat:** هل يوجد وضع يجعل المخرج True؟ لا يُعرف أسرع من $2^n$ تقريبًا.
+- **الخصم:** من يرى الصندوق من الخارج فقط يحتاج $2^n$ تجربة فعلًا. ومع المخطط، الصعوبة اعتقاد لا برهان.
+- **التحقق أسهل من الإيجاد:** فكرة القسم التالي.
+
+</Takeaways>
+
+</Stage>
+

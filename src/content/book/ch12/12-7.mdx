@@ -1,0 +1,180 @@
+---
+section: "12.7"
+summary: "المجموعة المستقلة رؤوس لا حافة بينها. ولإثبات أن أكبر مجموعة مستقلة NP-hard، نبني من صيغة 3CNF رسمًا: مثلث لكل بند، وحافة بين كل حرف ونفيه. فللرسم مجموعة مستقلة حجمها عدد البنود k إن وفقط إن كانت الصيغة قابلة للإشباع."
+minutes: 35
+goals:
+  - "تعرّف المجموعة المستقلة ومسألة MaxIndSet"
+  - "تبني الرسم من صيغة 3CNF وتبرهن الاتجاهين"
+  - "ترى أدوات البند (المثلثات) وأدوات المتغير (حواف النفي)"
+terms:
+  - { en: independent set, ar: مجموعة مستقلة }
+  - { en: MaxIndSet, ar: أكبر مجموعة مستقلة }
+  - { en: clause gadget, ar: أداة البند }
+  - { en: negation edge, ar: حافة النفي }
+  - { en: gadget, ar: أداة }
+---
+
+import Stage from '../../../components/book/Stage.astro';
+import ReadingGuide from '../../../components/book/ReadingGuide.astro';
+import BookPages from '../../../components/book/BookPages.astro';
+import BookExercises from '../../../components/book/BookExercises.astro';
+import Takeaways from '../../../components/book/Takeaways.astro';
+import Callout from '../../../components/Callout.astro';
+import Exercise from '../../../components/Exercise.astro';
+import QuickCheck from '../../../components/QuickCheck.tsx';
+import CodeLab from '../../../components/CodeLab.tsx';
+import IndSetLab from '../../../components/IndSetLab.tsx';
+import * as lab from '../../../labs/book-12-7-indset.ts';
+
+<Stage n={1} id="warmup" title="تمهيد" sub="فكرة القسم قبل أي تعريف">
+
+حتى الآن كل المسائل الصعبة منطقية: دارات وصيغ. والآن القفزة الأهم: من المنطق إلى **الرسوم**. ستبني من كل صيغة رسمًا، بحيث يصير سؤال «هل الصيغة قابلة للإشباع؟» سؤالًا عن الرسم: «هل فيه مجموعة رؤوس كبيرة لا تتجاور؟»
+
+والفكرة البسيطة: كل بند يحتاج **حرفًا واحدًا صحيحًا** على الأقل. فاختر من كل بند حرفًا، بشرط ألا تختار حرفًا ونفيه معًا. هذا كل شيء.
+
+</Stage>
+
+<Stage n={2} id="reading" title="اقرأ من الكتاب" sub="صفحات الكتاب الأصلية لهذا القسم، ومعها دليل يوجه قراءتك">
+
+<ReadingGuide pages="390–392" minutes={10}>
+
+- **الرسوم البسيطة غير الموزونة:** والمسألة عن حجم أكبر أو أصغر رسم جزئي بخاصية ما.
+- **MaxIndSet والشكل 12.7:** المقارنة بـ $k$.
+- **البناء:** $3k$ رأسًا، حافة بين حروف البند نفسه، وبين كل متغير ونفيه.
+- **الشكل 12.8:** الرسم للصيغة $(a \vee b \vee c) \wedge (b \vee \bar c \vee \bar d) \wedge (\bar a \vee c \vee d) \wedge (a \vee \bar b \vee \bar d)$، ومجموعة مستقلة حجمها 4.
+- **الاتجاهان:** وجملة «which is ridiculous!».
+
+</ReadingGuide>
+
+<BookPages section="12.7" />
+
+</Stage>
+
+<Stage n={3} id="explain" title="الشرح والتجربة" sub="الأفكار نفسها بالعربية، بتفصيل، مع تجربة تفاعلية">
+
+### المسألة
+
+في رسم $G$، **المجموعة المستقلة** (independent set) مجموعة رؤوس لا حافة بين أي اثنين منها. و**MaxIndSet**: ما حجم أكبر مجموعة مستقلة؟ (ونسختها القرارية: هل فيها مجموعة مستقلة حجمها $k$؟)
+
+### البناء
+
+لتكن $\Phi$ صيغة 3CNF فيها $k$ بندًا. ابنِ $G$:
+
+- **رأس لكل حرف** في $\Phi$ (لكل ظهور، لا لكل متغير): $3k$ رأسًا.
+- **حافة بين حرفين في البند نفسه**: كل بند يصير **مثلثًا** (أداة البند).
+- **حافة بين كل حرف ونفيه** في بنود مختلفة: $a$ و$\bar a$ (أداة المتغير).
+
+والمجموعة المستقلة تأخذ **رأسًا واحدًا على الأكثر من كل مثلث**، فأكبر مجموعة مستقلة حجمها $\le k$.
+
+<Callout type="theorem" title="الادعاء">
+في $G$ مجموعة مستقلة حجمها $k$ بالضبط إن وفقط إن كانت $\Phi$ قابلة للإشباع.
+</Callout>
+
+**($\Rightarrow$ من الإسناد إلى المجموعة).** ثبّت إسنادًا مُشبِعًا. كل بند فيه حرف True واحد على الأقل؛ اختر واحدًا من كل بند. فـ $S$ فيها $k$ رأسًا، رأس من كل مثلث، فلا حافة مثلث بينها. وكل حروفها True، فلا تحوي حرفًا ونفيه، فلا حافة نفي. إذن $S$ مستقلة.
+
+**($\Leftarrow$ من المجموعة إلى الإسناد).** $S$ مستقلة بحجم $k$: رأس من كل مثلث. اجعل كل حرف في $S$ True. هذا **متسق**: لا حرف ونفيه معًا، لأن بينهما حافة. والمتغيرات التي لا تظهر في $S$ أعطها أي قيمة. فكل بند فيه حرف True (رأسه في $S$)، و$\Phi$ محققة.
+
+والبناء في زمن كثير حدود حتى بالقوة الغاشمة. فلو حُلت MaxIndSet بسرعة، لحُلت 3SAT بسرعة: ابنِ $G$، وقارن أكبر مجموعة مستقلة بـ $k$. وهذا يعني P = NP، «وهذا سخيف!». إذن **MaxIndSet مسألة NP-hard**.
+
+جرّب على صيغة الكتاب. اختر إسنادًا وابنِ منه مجموعة، أو انقر الرؤوس بنفسك، وحاول أن تصل إلى 4.
+
+<IndSetLab client:visible />
+
+<Callout type="tip" title="الأدوات">
+هذا أول اختزال بـ **أدوات** (gadgets): المثلث أداة البند («اختر حرفًا واحدًا»)، وحافة النفي أداة المتغير («لا تناقض»). كل اختزال صعب تقريبًا يُبنى هكذا: قطع صغيرة، كل واحدة تفرض قيدًا واحدًا من المسألة الأصلية بلغة المسألة الجديدة.
+</Callout>
+
+</Stage>
+
+<Stage n={4} id="check" title="تحقق من فهمك" sub="أسئلة سريعة">
+
+<QuickCheck
+  client:visible
+  id="q1"
+  question="صيغة فيها 6 بنود. كم رأسًا في الرسم، وما أقصى حجم ممكن لمجموعة مستقلة فيه؟"
+  options={['18 رأسًا، و6 على الأكثر', '6 رؤوس، و6', '18 رأسًا، و18', 'حسب عدد المتغيرات']}
+  answer={0}
+  explain="$3k = 18$، ورأس واحد على الأكثر من كل مثلث."
+  wrong={{ 1: 'رأس لكل حرف، لا لكل بند.', 2: 'المثلثات تمنع ذلك.', 3: 'العدد يعتمد على البنود فقط.' }}
+/>
+
+<QuickCheck
+  client:visible
+  id="q2"
+  question="في اتجاه «⇐»، متغير x لا يظهر هو ولا نفيه في S. ماذا نعطيه؟"
+  options={['أي قيمة', 'True دائمًا', 'False دائمًا', 'الإسناد يفشل']}
+  answer={0}
+  explain="كل بند محقق بحرف من $S$ أصلًا، فقيمة x لا تؤثر."
+  wrong={{ 1: 'أي قيمة تصلح.', 2: 'أي قيمة تصلح.', 3: 'لا يفشل.' }}
+/>
+
+</Stage>
+
+<Stage n={5} id="exercises" title="تمارين الكتاب" sub="حلّها بالورقة والقلم، ثم سجّل حالتها. الكتاب لا ينشر حلولها">
+
+<BookExercises chapter={12} nums={[25, 27]} core={[25, 27]} />
+
+<Callout type="tip" title="تلميح للتمرين 25">
+كلها من MaxIndSet. (أ) «نصف مستقلة» تسمح بجار واحد داخل $S$. كيف تعدّل الرسم بحيث تجبر أي مجموعة كبيرة نصف مستقلة على أن تكون مستقلة في الأصل؟ (فكّر في نسخ الرؤوس أو الحواف.) (ب) و(ج) الرقم 374 ثابت: كيف «تستهلك» السماح بـ374 حافة أو 374 جارًا بأدوات صغيرة لا تؤثر في الجواب الحقيقي؟ (وفي نص (ب) «if if» مكررة.)
+</Callout>
+
+<Callout type="tip" title="تلميح للتمرين 27">
+خالٍ من المثلثات أضعف من مستقل. فما الرسم الذي تكون فيه المجموعة الخالية من المثلثات هي نفسها المستقلة تقريبًا؟ جرّب أن تستبدل كل حافة بشيء يجعل «حافة داخل $S$» تكلف مثلثًا.
+</Callout>
+
+### تمارين إضافية بحلول كاملة
+
+<Exercise id="e1" level="apply" title="صيغة غير قابلة للإشباع">
+
+الصيغة $(a \vee a \vee b) \wedge (a \vee a \vee \bar b) \wedge (\bar a \vee \bar a \vee b) \wedge (\bar a \vee \bar a \vee \bar b)$ غير قابلة للإشباع. ابنِ رسمها، وبرهن مباشرة أن لا مجموعة مستقلة حجمها 4.
+
+<div slot="hint">أي حرف تختار من كل مثلث؟ والمثلث الأول والثاني فيهما $a$؛ الثالث والرابع فيهما $\bar a$.</div>
+<div slot="solution">
+
+مجموعة بحجم 4 تأخذ رأسًا من كل مثلث. من المثلثين 1 و2: إن أخذت $a$ من أي منهما، فلا تأخذ $\bar a$ من 3 و4، فتأخذ منهما $b$ و$\bar b$ (البند 3 له $b$ والبند 4 له $\bar b$)، وبينهما حافة نفي. وإن لم تأخذ $a$ من 1 ولا من 2، فتأخذ $b$ من 1 و$\bar b$ من 2، وبينهما حافة. في الحالتين حافة داخل $S$. فلا مجموعة مستقلة حجمها 4، كما يقول الادعاء. ∎
+
+</div>
+</Exercise>
+
+<Exercise id="e2" level="prove" title="القرار والتحسين">
+
+برهن: إن أمكن حل نسخة القرار («هل في $G$ مجموعة مستقلة حجمها $\ge k$؟») في زمن كثير حدود، أمكن حساب **حجم** أكبر مجموعة مستقلة في زمن كثير حدود، والعكس.
+
+<div slot="hint">جرّب $k = 1, 2, \ldots, V$.</div>
+<div slot="solution">
+
+(القرار ⇒ الحجم) اسأل لكل $k$ من $V$ إلى 1؛ أول نعم هو الحجم. $V$ استدعاء، كل منه كثير حدود. (أو بحث ثنائي بـ $O(\log V)$ استدعاء.) (الحجم ⇒ القرار) احسب الحجم وقارنه بـ $k$. ∎
+
+</div>
+</Exercise>
+
+### المختبر البرمجي
+
+<CodeLab
+  client:visible
+  id="book-12.7-indset"
+  title="من 3CNF إلى رسم المجموعة المستقلة"
+  exports={['satToIndSet']}
+  starter={lab.starter}
+  tests={[
+    { name: 'صيغة الكتاب: 12 رأسًا وk = 4، وأكبر مجموعة مستقلة 4', code: '(() => { const BOOKF = [4, [[1, 2, 3], [2, -3, -4], [-1, 3, 4], [1, -2, -4]]];const MISB = (n, E) => { let b = 0; for (let m = 0; m < 1 << n; m++) { if (E.some(([u, v]) => ((m >> u) & 1) && ((m >> v) & 1))) continue; let c = 0; for (let x = m; x; x &= x - 1) c++; b = Math.max(b, c); } return b; }; const r = satToIndSet(BOOKF[1]); return r.n === 12 && r.k === 4 && MISB(r.n, r.edges) === 4; })()' },
+    { name: 'صيغة غير قابلة للإشباع: أقل من k', code: '(() => { const UNSAT = [2, [[1, 1, 2], [1, 1, -2], [-1, -1, 2], [-1, -1, -2]]];const MISB = (n, E) => { let b = 0; for (let m = 0; m < 1 << n; m++) { if (E.some(([u, v]) => ((m >> u) & 1) && ((m >> v) & 1))) continue; let c = 0; for (let x = m; x; x &= x - 1) c++; b = Math.max(b, c); } return b; }; const r = satToIndSet(UNSAT[1]); return MISB(r.n, r.edges) < r.k; })()' },
+    { name: 'صيغ عشوائية: مستقلة بحجم k ⟺ قابلة للإشباع', code: '(() => { const R3 = (maxk) => { const nv = 2 + Math.floor(Math.random() * 2), k = 1 + Math.floor(Math.random() * maxk), C = []; for (let j = 0; j < k; j++) C.push([...Array(3)].map(() => (1 + Math.floor(Math.random() * nv)) * (Math.random() < 0.5 ? 1 : -1))); return [nv, C]; };const SATB = (nv, C) => { const a = new Array(nv + 1).fill(0); const ok = () => C.every((c) => c.some((l) => a[Math.abs(l)] === 0 || (a[Math.abs(l)] > 0) === (l > 0))); const go = (v) => { if (!ok()) return false; if (v > nv) return true; for (const b of [1, -1]) { a[v] = b; if (go(v + 1)) return true; } a[v] = 0; return false; }; return go(1); };const MISB = (n, E) => { let b = 0; for (let m = 0; m < 1 << n; m++) { if (E.some(([u, v]) => ((m >> u) & 1) && ((m >> v) & 1))) continue; let c = 0; for (let x = m; x; x &= x - 1) c++; b = Math.max(b, c); } return b; }; for (let q = 0; q < 80; q++) { const [nv, C] = R3(4), r = satToIndSet(C); if ((MISB(r.n, r.edges) === r.k) !== SATB(nv, C)) return false; } return true; })()' }
+  ]}
+  solution={lab.solution}
+/>
+
+</Stage>
+
+<Stage n={6} id="summary" title="الخلاصة">
+
+<Takeaways>
+
+- **المسألة:** أكبر مجموعة رؤوس بلا حواف بينها.
+- **الرسم:** مثلث لكل بند، وحافة بين كل حرف ونفيه. $3k$ رأسًا.
+- **الادعاء:** مجموعة مستقلة حجمها $k$ ⟺ $\Phi$ قابلة للإشباع.
+- **النتيجة:** MaxIndSet NP-hard. والطريقة: أدوات للبنود وأدوات للمتغيرات.
+
+</Takeaways>
+
+</Stage>

@@ -1,0 +1,166 @@
+---
+section: "12.16"
+summary: "ما بعد NP: سلسلة طويلة من فئات التعقيد. PSPACE (ذاكرة كثيرة الحدود) ومسألتها النموذجية QBF والألعاب ذات اللاعبين، وEXP والشطرنج المعمم، ثم NEXP وEXPSPACE وما بعدها، حتى ELEMENTARY ومسائل خارجها. والمبرهن قليل: كل فئة محتواة تمامًا في التي بعدها بثلاث خطوات، فـ P ≠ EXP، أما P ≠ PSPACE فمفتوح."
+minutes: 20
+goals:
+  - "تعرف الفئات الأكبر من NP: PSPACE وEXP وNEXP وEXPSPACE وELEMENTARY"
+  - "تفهم QBF كلعبة بين لاعبين ولماذا الألعاب PSPACE-hard أو EXP-hard"
+  - "تعرف ما المبرهن وما المفتوح في سلسلة الاحتواءات"
+terms:
+  - { en: PSPACE, ar: PSPACE }
+  - { en: EXP / EXPTIME, ar: EXP }
+  - { en: quantified boolean formula (QBF), ar: صيغة منطقية مكممة }
+  - { en: NFA totality, ar: شمولية الآلة غير الحتمية }
+  - { en: ELEMENTARY, ar: الفئة الأولية }
+---
+
+import Stage from '../../../components/book/Stage.astro';
+import ReadingGuide from '../../../components/book/ReadingGuide.astro';
+import BookPages from '../../../components/book/BookPages.astro';
+import BookExercises from '../../../components/book/BookExercises.astro';
+import Takeaways from '../../../components/book/Takeaways.astro';
+import Callout from '../../../components/Callout.astro';
+import Exercise from '../../../components/Exercise.astro';
+import QuickCheck from '../../../components/QuickCheck.tsx';
+import CodeLab from '../../../components/CodeLab.tsx';
+
+<Stage n={1} id="warmup" title="تمهيد" sub="فكرة القسم قبل أي تعريف">
+
+العنوان من كتاب Dr. Seuss «On Beyond Zebra!»: طفل يقرر أن الأبجدية لا تنتهي عند Z، فيخترع حروفًا بعدها. وكذلك الصعوبة لا تنتهي عند NP. هناك مسائل **أصعب** بكثير، ولها فئات بأسماء، وأحيانًا نعرف يقينًا أنها أصعب.
+
+</Stage>
+
+<Stage n={2} id="reading" title="اقرأ من الكتاب" sub="صفحات الكتاب الأصلية لهذا القسم، ومعها دليل يوجه قراءتك">
+
+<ReadingGuide pages="412–415" minutes={12}>
+
+- **PSPACE وPSPACE-hard.**
+- **QBF:** الصيغة المكممة، والنسخة المقيدة (تناوب، و3CNF)، ولعبة أليس وبوب. والحاشية 28 عن كتاب Demaine وHearn.
+- **NFA totality** ومسائل التعابير المنتظمة (التمرينان 40 و41).
+- **EXP والشطرنج:** قاعدة الخمسين نقلة تحدد إن كان الشطرنج $n \times n$ في PSPACE أو EXP-hard. («there no obvious way» ينقصها is.)
+- **Excelsior!:** NEXP وEXPSPACE والأسيات المضاعفة. («can be solve» صوابها solved.)
+- **ما هو مبرهن:** كل فئة محتواة تمامًا في التي بعدها بثلاث خطوات.
+- **ELEMENTARY:** («a function the form» ينقصها of)، والتعابير المنتظمة المعممة خارجها.
+
+</ReadingGuide>
+
+<BookPages section="12.16" />
+
+</Stage>
+
+<Stage n={3} id="explain" title="الشرح" sub="الأفكار نفسها بالعربية">
+
+### PSPACE
+
+**PSPACE**: مسائل القرار التي تُحل بذاكرة كثيرة الحدود (ولو بزمن أسي). وNP فيها (التمرين الإضافي الأول). ويُعتقد أن NP ≠ PSPACE، لكن لا أحد يبرهن حتى P ≠ PSPACE. و**PSPACE-hard** كما NP-hard، لكن مع كل مسائل PSPACE، باختزال Karp.
+
+**QBF** هي المسألة النموذجية: صيغة منطقية فيها مكممات $\exists$ و$\forall$ بلا متغيرات حرة: هل هي صحيحة؟ وSAT حالتها الخاصة بمكممات $\exists$ فقط. وتبقى PSPACE-hard حتى لو كانت المكممات كلها في البداية، متناوبة، والصيغة 3CNF:
+
+$$
+\exists a : \forall b : \exists c : \forall d : (a \vee b \vee c) \wedge (b \vee \bar c \vee \bar d) \wedge (\bar a \vee c \vee d) \wedge (a \vee \bar b \vee \bar d).
+$$
+
+وهذه **لعبة**: أليس تختار $x_1$، وبوب $x_2$، وهكذا بالتناوب. أليس تريد الصيغة True، وبوب False. من يفوز باللعب المثالي؟ لذلك ليس غريبًا أن معظم الألعاب ذات اللاعبين (XO وreversi وcheckers وgo والشطرنج وmancala، معممة إلى لوحات كبيرة) PSPACE-hard. والفرق عن NP: الشاهد هنا **استراتيجية** تجيب عن كل ردود الخصم، أي شجرة لا مسار.
+
+ومسألة أخرى نموذجية: **NFA totality**: هل تقبل آلة منتهية غير حتمية **كل** السلاسل؟ وكذلك تكافؤ آلتين، وتصغير الآلة. أما للآلات الحتمية فكلها سهلة.
+
+### EXP
+
+**EXP**: ما يُحل في زمن $2^{n^c}$. وPSPACE فيها. ويُعتقد أن PSPACE ⊊ EXP، ولا أحد يبرهن حتى NP ≠ EXP. لكننا **نعرف** P ≠ EXP: لا مسألة EXP-hard في P.
+
+والحد بين PSPACE وEXP دقيق. الشطرنج $n \times n$: إن أعلنّا التعادل بعد (مثلًا) $n^3$ نقلة بلا أكل، فكل مباراة قصيرة كثيرة الحدود، ونحاكي كل المباريات بذاكرة كثيرة الحدود: PSPACE. وإن ألغينا قاعدة الخمسين نقلة، فقد تطول المباراة أسيًا، ولا طريقة واضحة لكشف تكرار الوضع بذاكرة قليلة: هذه النسخة **EXP-hard**.
+
+### وما بعدها
+
+**NEXP** (زمن أسي غير حتمي: شاهد يُتحقق منه في زمن أسي)، و**EXPSPACE** (ذاكرة أسية). مثال: تكافؤ تعبيرين منتظمين مع عملية التقاطع EXPSPACE-hard. ثم الأسيات المضاعفة (EEXP، NEEXP، EEXPSPACE)، والثلاثية، وهكذا:
+
+$$
+\text{P} \subseteq \text{NP} \subseteq \text{PSPACE} \subseteq \text{EXP} \subseteq \text{NEXP} \subseteq \text{EXPSPACE} \subseteq \text{EEXP} \subseteq \cdots
+$$
+
+يعتقد المختصون أن **كل** احتواء صارم. والمبرهن فقط: كل فئة محتواة تمامًا في **التي بعدها بثلاث خطوات**. فنعرف P ≠ EXP وPSPACE ≠ EXPSPACE، لا P ≠ PSPACE ولا NP ≠ EXP.
+
+وحد السلسلة كلها **ELEMENTARY**: ما يُحل بزمن أو ذاكرة $2 \uparrow^k n$ لثابت $k$ (برج أسس ارتفاعه $k$). وليست كل مسألة قابلة للحل «أولية»: تكافؤ **التعابير المنتظمة المعممة** (مع النفي) قابل للحسم بتحويلها إلى آلات، لكن كل طبقة نفي قد تضاعف الحالات أسيًا، فالزمن $2 \uparrow^{\Theta(n)} 2$، ولا يمكن أفضل جوهريًا.
+
+<Callout type="tip" title="وراء ذلك">
+وأبعد من كل هذه الفئات مسائل **لا تُحسم أبدًا** بأي خوارزمية، كمسألة التوقف (Turing، 1936). الكتاب لا يدخلها، لكنها الحد الأخير للخريطة.
+</Callout>
+
+</Stage>
+
+<Stage n={4} id="check" title="تحقق من فهمك" sub="أسئلة سريعة">
+
+<QuickCheck
+  client:visible
+  id="q1"
+  question="أي هذه مبرهن؟"
+  options={['P ≠ EXP', 'P ≠ PSPACE', 'NP ≠ PSPACE', 'NP ≠ EXP']}
+  answer={0}
+  explain="الفئة محتواة تمامًا في التي بعدها بثلاث خطوات: P، NP، PSPACE، **EXP**. والبقية مفتوحة."
+  wrong={{ 1: 'مفتوح.', 2: 'مفتوح.', 3: 'مفتوح، مع أنه يبدو قريبًا.' }}
+/>
+
+<QuickCheck
+  client:visible
+  id="q2"
+  question="لماذا لا يكفي «شاهد قصير» لإثبات أن أليس تفوز في لعبة QBF؟"
+  options={['لأن الشاهد يجب أن يجيب عن كل ردود بوب: شجرة استراتيجية قد تكون أسية', 'لأن اللعبة عشوائية', 'لأن QBF في P', 'يكفي دائمًا']}
+  answer={0}
+  explain="الاستراتيجية الرابحة شجرة، لا مسار. وهذا ما يرفع الألعاب إلى PSPACE."
+  wrong={{ 1: 'اللعبة حتمية.', 2: 'QBF PSPACE-hard.', 3: 'لا.' }}
+/>
+
+</Stage>
+
+<Stage n={5} id="exercises" title="تمارين الكتاب" sub="حلّها بالورقة والقلم، ثم سجّل حالتها. الكتاب لا ينشر حلولها">
+
+<BookExercises chapter={12} nums={[40, 41]} core={[]} />
+
+<Callout type="tip" title="تلميح للتمرين 40">
+¨: كلها من SAT أو 3SAT. ابنِ آلة (أو تعبيرًا) **ترفض** السلسلة $x_1 x_2 \cdots x_n$ بالضبط حين يكون إسنادًا مُشبِعًا: لكل بند، فرع غير حتمي يقبل السلاسل التي **تخالف** ذلك البند. (أ) و(ج) هكذا مباشرة. (ب) و(د) الآلة بلا دورات أو التعبير بلا نجمة: لا يقبل إلا سلاسل محدودة الطول، فأقصر سلسلة مرفوضة طولها $n$ ⟺ الصيغة قابلة للإشباع (تحتاج أن تقبل كل السلاسل الأقصر).
+</Callout>
+
+<Callout type="tip" title="تلميح للتمرين 41">
+(أ) هل يوجد مسار من حالة البداية إلى حالة قبول في رسم الحالات؟ (ب) بالاستقراء على التعبير: متى يطابق شيئًا؟ (ج) المتمم منتظم، لكن **حجم** آلته: التحويل من NFA إلى DFA ثم قلب حالات القبول قد يكلف $2^n$ حالة. ولماذا لا يصح قلب حالات القبول في NFA مباشرة؟
+</Callout>
+
+### تمارين إضافية بحلول كاملة
+
+<Exercise id="e1" level="prove" title="NP ⊆ PSPACE">
+
+برهن أن كل مسألة في NP تُحل بذاكرة كثيرة الحدود.
+
+<div slot="hint">جرّب كل الشواهد، وأعد استعمال الذاكرة.</div>
+<div slot="solution">
+
+لتكن $A$ في NP بمحقق يعمل في زمن $p(n)$ وشاهد طوله $\le q(n)$. عدّ كل السلاسل الثنائية بطول $\le q(n)$ بعدّاد واحد ($q(n)$ بتًا)، وشغّل المحقق على كل واحدة. المحقق في زمن $p(n)$ لا يستعمل أكثر من $p(n)$ ذاكرة، وتُمسح بين المحاولات. فالذاكرة الكلية $O(q(n) + p(n))$: كثيرة الحدود. والزمن أسي، وهذا مسموح. ∎
+
+</div>
+</Exercise>
+
+<Exercise id="e2" level="apply" title="لعبة كصيغة مكممة">
+
+لعبة: أليس تختار $x_1$، ثم بوب $x_2$، ثم أليس $x_3$، وتفوز أليس إن كانت $(x_1 \vee x_2) \wedge (\bar x_2 \vee x_3) \wedge (x_1 \vee \bar x_3)$ صحيحة. اكتب سؤال «هل تفوز أليس؟» كصيغة مكممة، وأجب عنه.
+
+<div slot="hint">$\exists x_1\, \forall x_2\, \exists x_3$.</div>
+<div slot="solution">
+
+السؤال: $\exists x_1\, \forall x_2\, \exists x_3\, \Phi$. لتختر أليس $x_1 = $ True: البند الأول والثالث صحيحان. يبقى $\bar x_2 \vee x_3$: إن اختار بوب $x_2 = $ True فأليس تختار $x_3 = $ True؛ وإن اختار False فالبند صحيح. فأليس تفوز دائمًا: الصيغة صحيحة. ∎
+
+</div>
+</Exercise>
+
+</Stage>
+
+<Stage n={6} id="summary" title="الخلاصة">
+
+<Takeaways>
+
+- **PSPACE:** ذاكرة كثيرة الحدود. QBF، والألعاب ذات اللاعبين، وشمولية NFA.
+- **EXP:** زمن أسي. والشطرنج المعمم EXP-hard أو في PSPACE حسب قاعدة الخمسين نقلة.
+- **السلسلة:** P ⊆ NP ⊆ PSPACE ⊆ EXP ⊆ NEXP ⊆ EXPSPACE ⊆ …، والمبرهن: الاحتواء صارم كل ثلاث خطوات (P ≠ EXP).
+- **ELEMENTARY:** حد السلسلة، وهناك مسائل قابلة للحسم خارجها.
+
+</Takeaways>
+
+</Stage>

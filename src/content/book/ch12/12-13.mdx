@@ -1,0 +1,164 @@
+---
+section: "12.13"
+summary: "قائمة عمل من المسائل NP-hard المفيدة مصدرًا للاختزال: صيغ منطقية بقيود مختلفة، ومسائل رسوم (زمر، أغطية، مسارات، تلوين، أشجار Steiner)، ومسائل أعداد (Partition وSubsetSum و3Partition وSetCover)، وألعاب وألغاز. كلما بدت مسألتك جديدة، فالأرجح أن واحدة من هذه قريبة منها."
+minutes: 20
+goals:
+  - "تعرف قائمة واسعة من المسائل NP-hard ومن أين تُختزل"
+  - "تميز بين النسخ السهلة والصعبة من مسائل متشابهة (2SAT مقابل 3SAT، أويلر مقابل هاملتون)"
+  - "تعرف أن الألعاب والألغاز الشائعة مصدر غني للصعوبة"
+terms:
+  - { en: Planar3Sat, ar: Planar3Sat }
+  - { en: Partition / 3Partition, ar: التقسيم / التقسيم الثلاثي }
+  - { en: SetCover / HittingSet, ar: غطاء المجموعات / المجموعة الضاربة }
+  - { en: Steiner tree, ar: شجرة Steiner }
+  - { en: strongly NP-hard, ar: NP-hard قوية }
+---
+
+import Stage from '../../../components/book/Stage.astro';
+import ReadingGuide from '../../../components/book/ReadingGuide.astro';
+import BookPages from '../../../components/book/BookPages.astro';
+import BookExercises from '../../../components/book/BookExercises.astro';
+import Takeaways from '../../../components/book/Takeaways.astro';
+import Callout from '../../../components/Callout.astro';
+import Exercise from '../../../components/Exercise.astro';
+import QuickCheck from '../../../components/QuickCheck.tsx';
+import CodeLab from '../../../components/CodeLab.tsx';
+
+<Stage n={1} id="warmup" title="تمهيد" sub="فكرة القسم قبل أي تعريف">
+
+حين تواجه مسألة جديدة وتشك أنها صعبة، أول سؤال عملي: **من أي مسألة معروفة أختزل؟** والجواب يعتمد على مخزونك. Garey وJohnson جمعا مئات المسائل في كتاب واحد (1979) صار مرجعًا كلاسيكيًا. وهذا القسم نسخة مختصرة: مسائل يكثر استعمالها مصدرًا للاختزال، مع الاختزال المعتاد لكل منها.
+
+</Stage>
+
+<Stage n={2} id="reading" title="اقرأ من الكتاب" sub="صفحات الكتاب الأصلية لهذا القسم، ومعها دليل يوجه قراءتك">
+
+<ReadingGuide pages="404–407" minutes={12}>
+
+- **المنطق:** PlanarCircuitSat (التمرين 19)، و1-in-3Sat وNotAllEqual3Sat (التمرين 12)، وPlanar3Sat (والحاشية 14: PlanarNotAllEqual3Sat سهلة!)، وMax2Sat.
+- **التغطية والتقسيم:** X3M (التغطية التامة بثلاثيات)، وPartition (ضعيفة)، و3Partition (قوية)، وSetCover وHittingSet.
+- **الرسوم:** LongestPath، وSteinerTree (التمرين 33)، وMaxCut.
+- **الحاشيتان 11 و13:** «I've got a little list» (من Gilbert وSullivan)، وورقة Karp سنة 1972 بـ 21 مسألة.
+- **الألعاب:** Minesweeper وSudoku وTetris وKlondike وPac-Man وSuper Mario وCandy Crush و2048 وTrainyard ومكعب روبيك وCookie Clicker، ومن أين اختُزلت كل منها. («utlimately» صوابها ultimately. أما «Classic Nintendo games Are» في الحاشية 20 فهو عنوان الورقة الأصلي، لا خطأ.)
+
+</ReadingGuide>
+
+<BookPages section="12.13" />
+
+</Stage>
+
+<Stage n={3} id="explain" title="الشرح" sub="الأفكار نفسها بالعربية">
+
+### منطق
+
+- **PlanarCircuitSat:** دارة تُرسم في المستوى بلا تقاطع أسلاك. من CircuitSat، باستبدال كل تقاطع بأداة صغيرة من البوابات (التمرين 19).
+- **1-in-3Sat:** حرف صحيح **واحد بالضبط** في كل بند. و**NotAllEqual3Sat:** حرف صحيح وحرف خاطئ على الأقل في كل بند. كلاهما من 3SAT (التمرين 12).
+- **Planar3Sat:** 3SAT حين يكون الرسم الثنائي «بند–متغير» مستويًا. من PlanarCircuitSat. ومصدر ممتاز للمسائل الهندسية. (والمدهش: PlanarNotAllEqual3Sat سهلة.)
+- **Max2Sat:** أكبر عدد بنود محققة من صيغة 2CNF. من 3SAT «مع أن فيها 2». بينما **2SAT** نفسها (هل تتحقق كل البنود؟) سهلة (التمرين 6).
+
+### تغطية وتقسيم وأعداد
+
+- **X3M** (Exact3DimensionalMatching): هل في مجموعة من الثلاثيات مجموعة جزئية **منفصلة** تغطي كل العناصر بالضبط؟ من 3SAT، «لأن فيها 3».
+- **Partition:** تقسيم الأعداد إلى مجموعتين بمجموع متساوٍ. من SubsetSum باختزال بسيط (التمرين الإضافي الأول). **ضعيفة** مثلها.
+- **3Partition:** $3n$ عددًا إلى $n$ ثلاثيات بمجموع متساوٍ. من X3M. ومختلفة جدًا عن Partition رغم الاسم: **قوية**، تبقى صعبة حتى لو لم يتجاوز كل عدد $n^3$. مصدر ذهبي لمسائل الجدولة والتعبئة.
+- **SetCover:** أقل عدد من المجموعات يغطي كل العناصر، تعمم VertexCover وX3M. و**HittingSet:** أقل عدد من العناصر يمس كل مجموعة، تعمم VertexCover.
+
+### رسوم
+
+- **LongestPath:** أطول مسار بسيط من $u$ إلى $v$. تعمم المسار الهاملتوني (التمرين الإضافي الثاني). وأقصر مسار، بالطبع، سهل.
+- **SteinerTree:** أخف شجرة جزئية تحوي كل الرؤوس المعلمة. إن عُلمت كل الرؤوس فهي شجرة التغطية الصغرى، وإن عُلم رأسان فهي أقصر مسار؛ وعمومًا صعبة، من VertexCover (التمرين 33).
+- **MaxCut:** مجموعة $S$ تعظم عدد الحواف التي لها طرف واحد فيها (أي أكبر رسم جزئي ثنائي). من Max2Sat. (وأصغر قطع، الفصل 10، سهل!)
+
+### ألعاب وألغاز
+
+«إن لم تكن اللعبة أو اللغز NP-hard على الأقل، فليست ممتعة». أمثلة الكتاب، ومصدر كل منها: Minesweeper (من CircuitSat)، وSudoku (من 3SAT في النهاية)، وTetris (من 3Partition)، وKlondike (من 3SAT)، وPac-Man (من HamCycle)، وSuper Mario Brothers (من 3SAT)، وCandy Crush (من نسخة من 3SAT)، و2048 (من 3SAT)، وTrainyard (من DominatingSet، التمرين 26)، وأقصر حل لمكعب روبيك $n \times n \times n$، وCookie Clicker (من Partition أو 3Partition).
+
+</Stage>
+
+<Stage n={4} id="check" title="تحقق من فهمك" sub="أسئلة سريعة">
+
+<QuickCheck
+  client:visible
+  id="q1"
+  question="أي هذه سهلة (في P)؟"
+  options={['2SAT', 'Max2Sat', 'MaxCut', '3Partition']}
+  answer={0}
+  explain="2SAT تُحل بالاستلزامات والمكونات المتصلة بقوة. أما Max2Sat فصعبة رغم الشبه."
+  wrong={{ 1: 'التعظيم يجعلها صعبة.', 2: 'صعبة؛ أصغر قطع هو السهل.', 3: 'صعبة قويًا.' }}
+/>
+
+<QuickCheck
+  client:visible
+  id="q2"
+  question="تريد إثبات صعوبة مسألة جدولة مهام بأطوال صغيرة على آلات. أي مصدر أنسب؟"
+  options={['3Partition، لأنها صعبة حتى بأعداد صغيرة', 'SubsetSum', 'Partition', 'MaxClique']}
+  answer={0}
+  explain="الأعداد الصغيرة تحتاج صعوبة **قوية**؛ SubsetSum وPartition ضعيفتان."
+  wrong={{ 1: 'ضعيفة: تُحل لو كانت الأعداد صغيرة.', 2: 'ضعيفة أيضًا.', 3: 'ليست مسألة أعداد.' }}
+/>
+
+</Stage>
+
+<Stage n={5} id="exercises" title="تمارين الكتاب" sub="حلّها بالورقة والقلم، ثم سجّل حالتها. الكتاب لا ينشر حلولها">
+
+<BookExercises chapter={12} nums={[14, 15, 16, 17, 19]} core={[14, 16, 19]} />
+
+<Callout type="tip" title="تلميح للتمرين 14">
+«اثنان على الأقل من ثلاثة» يكافئ شرطًا على **كل زوج** من حروف البند. أي شرط؟ وماذا تصير الصيغة كلها؟ (وفي النص «er clause» صوابها per.)
+</Callout>
+
+<Callout type="tip" title="تلميح للتمرين 15">
+لكل $X$ و$Y$ مجموعة: هل «عدد الحروف الصحيحة في كل بند ينتمي إلى $X$» أسهل من 3SAT أم مثلها؟ لاحظ التماثل: قلب كل المتغيرات يحول العدد $j$ إلى $3 - j$. وبعض الحالات صارت تمارين قبلها (12 و14)، وبعضها تافه (كل إسناد يصلح، أو لا يصلح شيء)، وبعضها خطي (XOR، التمرين 13).
+</Callout>
+
+<Callout type="tip" title="تلميح للتمرين 16">
+كلها من مسائل تعرفها، بحيلة **الحشو**: الأعداد 17 و23 و42 و374 و473 و31337 ثوابت. (أ) من HamPath: أضف 17 رأسًا لا يمكن أن يمر بها مسار. (ب) من HamPath أيضًا: علّق على كل رأس أوراقًا جديدة تستهلك درجته حتى يبقى له جاران فقط في الشجرة. (ج) ما الشجرة الممتدة بورقتين؟ (د) و(هـ) من MaxIndSet: كيف تجعل «374 حافة مسموحة» لا تفيد شيئًا؟ (و) من 3Color: كيف تجعل كل حافة «سيئة» تكلف أكثر من 31337؟
+</Callout>
+
+<Callout type="tip" title="تلميح للتمرين 17">
+شجرة التغطية الصغرى سهلة؛ القيد الإضافي يجعلها صعبة. وفي معظم الأجزاء المصدر واحد: **المسار الهاملتوني**. (أ) ما الشجرة الممتدة التي قطرها $V - 1$؟ (د) و(هـ) ما الشجرة التي فيها ورقتان فقط، أو كل درجاتها $\le 2$؟ (ج) إن كانت $S$ رأسين فقط؟ (ب) شجرة البحث بالعمق: متى تكون مسارًا واحدًا؟ واجعل الأوزان كلها متساوية في (ب) و(د) و(هـ).
+</Callout>
+
+<Callout type="tip" title="تلميح للتمرين 19">
+PlanarCircuitSat: ارسم الدارة في المستوى، واستبدل كل **تقاطع سلكين** بأداة صغيرة من بوابات لا تتقاطع أسلاكها، تخرج القيمتين في الجهتين المقابلتين. فكّر في XOR: $a \oplus (a \oplus b) = b$.
+</Callout>
+
+### تمارين إضافية بحلول كاملة
+
+<Exercise id="e1" level="prove" title="Partition من SubsetSum">
+
+برهن أن Partition NP-hard باختزال من SubsetSum.
+
+<div slot="hint">أضف عددًا أو عددين يجعلان «نصف المجموع» مساويًا لـ $T$.</div>
+<div slot="solution">
+
+من $(X, T)$ مع $S = \sum X$: أضف العددين $a = S + T$ و$b = 2S - T$ (نفترض $T \le S$، وإلا فالجواب لا مباشرة). المجموع الكلي $4S$، والنصف $2S$. ولا يقع $a$ و$b$ في جهة واحدة، لأن $a + b = 3S > 2S$. فالجهة التي فيها $b$ تحتاج من $X$ مجموعًا $2S - (2S - T) = T$. فيوجد تقسيم ⟺ يوجد مجموع جزئي $= T$. والتحويل خطي. ∎
+
+</div>
+</Exercise>
+
+<Exercise id="e2" level="prove" title="LongestPath">
+
+برهن أن «هل في الرسم مسار بسيط طوله $\ge k$ حافة؟» NP-hard.
+
+<div slot="hint">ما المسار البسيط الذي طوله $V - 1$؟</div>
+<div slot="solution">
+
+من HamPath: لرسم $G$، اسأل عن مسار بسيط طوله $\ge V - 1$. المسار البسيط يزور كل رأس مرة على الأكثر، فطوله $\le V - 1$، ويساويه بالضبط حين يزور كل الرؤوس، أي حين يكون هاملتونيًا. ∎
+
+</div>
+</Exercise>
+
+</Stage>
+
+<Stage n={6} id="summary" title="الخلاصة">
+
+<Takeaways>
+
+- **منطق:** PlanarCircuitSat و1-in-3Sat وNAE وPlanar3Sat وMax2Sat صعبة؛ 2SAT سهلة.
+- **تغطية وأعداد:** X3M وSetCover وHittingSet؛ Partition ضعيفة، و3Partition قوية.
+- **رسوم:** LongestPath وSteinerTree وMaxCut.
+- **ألعاب:** معظم الألغاز المعممة صعبة، ولكل منها مصدر من القائمة.
+
+</Takeaways>
+
+</Stage>
