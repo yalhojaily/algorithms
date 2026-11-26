@@ -75,6 +75,11 @@ CHAPTERS = {
         ("10.4", "Ford and Fulkerson’s augmenting-path algorithm"), ("10.5", "Combining and Decomposing Flows"),
         ("10.6", "Edmonds and Karp’s Algorithms"), ("10.7", "Further Progress"),
     ]),
+    11: dict(first=353, last=378, exercises=368, sections=[
+        ("11.1", "Edge-Disjoint Paths"), ("11.2", "Vertex Capacities and Vertex-Disjoint Paths"),
+        ("11.3", "Bipartite Matching"), ("11.4", "Tuple Selection"), ("11.5", "Disjoint-Path Covers"),
+        ("11.6", "Baseball Elimination"), ("11.7", "Project Selection"),
+    ]),
     1: dict(first=21, last=70, exercises=44, sections=[
         ("1.1", "Reductions"), ("1.2", "Simplify and Delegate"), ("1.3", "Tower of Hanoi"),
         ("1.4", "Mergesort"), ("1.5", "Quicksort"), ("1.6", "The Pattern"), ("1.7", "Recursion Trees"),

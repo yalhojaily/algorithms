@@ -181,6 +181,19 @@ export const chapters: BookChapter[] = [
       sec('10.7', 'Further Progress', 'ما بعد ذلك', 343, [8, 16, 19]),
     ],
   },
+  {
+    num: 11, slug: '11-flow-apps', en: 'Applications of Flows and Cuts', ar: 'تطبيقات التدفق والقطع', pages: [353, 378], exercisesPage: 368,
+    blurb: 'سبع مسائل هي أكبر تدفق أو أصغر قطع متنكرًا: مسارات منفصلة الحواف والرؤوس (بشطر الرؤوس)، وأكبر مطابقة ثنائية بالمسارات المتناوبة، واختيار الصفوف وجدولة الاختبارات، وأصغر غطاء بمسارات منفصلة، والإقصاء في دوري البيسبول، واختيار المشاريع بأصغر قطع. والطريقة واحدة: صغ شبكة، وبرهن التكافؤ في اتجاهين، واقرأ الجواب.',
+    sections: [
+      sec('11.1', 'Edge-Disjoint Paths', 'المسارات منفصلة الحواف', 353, [1, 3]),
+      sec('11.2', 'Vertex Capacities and Vertex-Disjoint Paths', 'سعات الرؤوس والمسارات منفصلة الرؤوس', 354, [2, 4, 5, 19]),
+      sec('11.3', 'Bipartite Matching', 'المطابقة الثنائية', 355, [6, 7, 8, 9]),
+      sec('11.4', 'Tuple Selection', 'اختيار الصفوف', 357, [12, 13, 14, 15, 17]),
+      sec('11.5', 'Disjoint-Path Covers', 'الغطاء بمسارات منفصلة', 360, [10, 11, 18, 20]),
+      sec('11.6', 'Baseball Elimination', 'الإقصاء في البيسبول', 363, [16]),
+      sec('11.7', 'Project Selection', 'اختيار المشاريع', 366, [21, 22]),
+    ],
+  },
 ];
 
 /** The whole book, for the table of contents (chapters not yet on the site are shown as coming). */

@@ -1506,3 +1506,49 @@ table.apm-mat td.term { background: var(--violet-soft); }
 /* ---------- Flows (book chapter 10) ---------- */
 .fe-e { display: inline-flex; align-items: center; gap: 4px; border: 1px solid var(--line); border-radius: 8px; padding: 2px 4px; background: var(--paper); font-family: var(--font-mono); font-size: 0.82rem; }
 .fe-e button { width: 22px; height: 22px; padding: 0; border: 1px solid var(--line); border-radius: 6px; background: var(--card); cursor: pointer; }
+
+/* ---------- Applications of flows (book chapter 11) ---------- */
+.gv-e.dir.pc1 path { stroke: var(--brand); stroke-width: 3; opacity: 1; }
+.gv-e.dir.pc1 polygon { fill: var(--brand); opacity: 1; }
+.gv-e.dir.pc2 path { stroke: var(--blue); stroke-width: 3; opacity: 1; }
+.gv-e.dir.pc2 polygon { fill: var(--blue); opacity: 1; }
+.gv-e.dir.pc3 path { stroke: var(--green); stroke-width: 3; opacity: 1; }
+.gv-e.dir.pc3 polygon { fill: var(--green); opacity: 1; }
+.gv-e.dir.pc4 path { stroke: var(--violet); stroke-width: 3; opacity: 1; }
+.gv-e.dir.pc4 polygon { fill: var(--violet); opacity: 1; }
+.gv-e.dir.cut path { stroke: var(--ink); stroke-width: 2.6; opacity: 1; stroke-dasharray: 5 3; }
+.gv-e.dir.cut polygon { fill: var(--ink); opacity: 1; }
+.gv-e.dir.broken path { stroke: var(--red); stroke-width: 2.6; opacity: 1; stroke-dasharray: 5 3; }
+.gv-e.dir.broken polygon { fill: var(--red); opacity: 1; }
+.gv-e.pc1 line { stroke: var(--brand); stroke-width: 3.5; opacity: 1; }
+.gv-e.pc2 line { stroke: var(--blue); stroke-width: 3.5; opacity: 1; }
+.gv-e.pc3 line { stroke: var(--green); stroke-width: 3.5; opacity: 1; }
+.gv-e.pc4 line { stroke: var(--violet); stroke-width: 3.5; opacity: 1; }
+.gv-e.alt line { stroke: var(--amber); stroke-width: 3.5; opacity: 1; stroke-dasharray: 6 3; }
+.gv-e.mm line { stroke: var(--ink); stroke-width: 3.5; opacity: 1; }
+.dp-paths { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; font-family: var(--font-mono); font-size: 0.84rem; }
+.dp-paths span { padding: 3px 10px; border-radius: 8px; border-inline-start: 4px solid; background: var(--paper); }
+.dp-paths .pc1 { border-color: var(--brand); } .dp-paths .pc2 { border-color: var(--blue); }
+.dp-paths .pc3 { border-color: var(--green); } .dp-paths .pc4 { border-color: var(--violet); }
+.xm-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin-bottom: 12px; }
+.xm-box { border: 1px solid var(--line); border-radius: 10px; background: var(--paper); padding: 8px 10px; font-size: 0.84rem; }
+.xm-box h4 { margin: 0 0 6px; font-size: 0.86rem; color: var(--brand); }
+table.xm-t { border-collapse: collapse; font-size: 0.82rem; width: 100%; }
+table.xm-t th, table.xm-t td { border: 1px solid var(--line); padding: 3px 6px; text-align: center; }
+table.xm-t th { background: var(--card); color: var(--ink-3); font-weight: 600; }
+table.xm-t td.bad { background: var(--red-soft); color: var(--red); font-weight: 700; }
+.xm-av { width: 30px; height: 26px; border: 1px solid var(--line); border-radius: 6px; background: var(--card); cursor: pointer; font-weight: 700; }
+.xm-av.on { background: var(--green-soft); border-color: var(--green); color: var(--green); }
+.xm-ctl { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 0.86rem; margin-bottom: 10px; }
+.xm-ctl input[type=range] { width: 140px; direction: ltr; }
+.xm-wrap { overflow-x: auto; }
+.bb-pick { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+table.bb-t { border-collapse: collapse; margin: 0 auto 12px; font-size: 0.82rem; font-family: var(--font-mono); }
+table.bb-t th, table.bb-t td { border: 1px solid var(--line); padding: 3px 7px; text-align: center; }
+table.bb-t th { background: var(--paper); color: var(--ink-3); }
+table.bb-t tr.me td { background: var(--amber-soft); font-weight: 700; }
+table.bb-t tr.rr td { background: var(--red-soft); }
+.pj-verdict { font-size: 0.9rem; padding: 6px 10px; border-radius: 8px; margin-bottom: 10px; border: 1px solid var(--line); background: var(--paper); }
+.pj-verdict.ok { border-color: var(--green); background: var(--green-soft); }
+.pj-verdict.bad { border-color: var(--red); background: var(--red-soft); }
+.edl-msg bdi { white-space: nowrap; }

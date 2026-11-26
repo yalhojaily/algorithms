@@ -1,0 +1,220 @@
+---
+section: "11.7"
+summary: "آخر تطبيق، وهو عن القطوع لا التدفقات: مشاريع لكل منها ربح أو كلفة، وبعضها يحتاج غيره. أي مجموعة مغلقة تحت الحاجة تعطي أكبر ربح؟ أضف s إلى كل مشروع رابح، وكل مشروع خاسر إلى t، وسعة ∞ لكل حاجة. فكل قطع منتهٍ اختيار صالح، وربحه P ناقص سعة القطع. فأكبر ربح من أصغر قطع."
+minutes: 35
+goals:
+  - "تصوغ اختيار المشاريع كتقسيم إلى S (نختار) وT (نرفض)"
+  - "تفرض الشروط المسبقة بحواف سعتها ∞"
+  - "تبرهن أن ربح S هو P − ‖S, T‖ بتعريف yield وcost"
+terms:
+  - { en: project selection, ar: اختيار المشاريع }
+  - { en: prerequisite, ar: شرط مسبق }
+  - { en: closure, ar: مجموعة مغلقة }
+  - { en: profit / cost, ar: ربح / كلفة }
+  - { en: infinite capacity, ar: سعة لا نهائية }
+---
+
+import Stage from '../../../components/book/Stage.astro';
+import ReadingGuide from '../../../components/book/ReadingGuide.astro';
+import BookPages from '../../../components/book/BookPages.astro';
+import BookExercises from '../../../components/book/BookExercises.astro';
+import Takeaways from '../../../components/book/Takeaways.astro';
+import Callout from '../../../components/Callout.astro';
+import Exercise from '../../../components/Exercise.astro';
+import QuickCheck from '../../../components/QuickCheck.tsx';
+import CodeLab from '../../../components/CodeLab.tsx';
+import ProjectLab from '../../../components/ProjectLab.tsx';
+import * as lab from '../../../labs/book-11-7-projects.ts';
+
+<Stage n={1} id="warmup" title="تمهيد" sub="فكرة القسم قبل أي تعريف">
+
+كل التطبيقات السابقة كانت عن **التدفق**: مسارات، مطابقات، صفوف. أما هذا فعن **القطع**: تقسيم الأشياء إلى فريقين.
+
+شركة أمامها ثمانية مشاريع. بعضها مربح، وبعضها كلفة خالصة (بنية تحتية، ترخيص، تدريب). والمربحة لا تُنجز إلا بعد غيرها: لا تطبيق بلا خادم، ولا خادم بلا ترخيص. أي المشاريع تختار لتكسب أكثر؟ قسّم المشاريع إلى ما تختاره (**S**elect) وما ترفضه (**T**urn down). هذا قطع. والسؤال: كيف نجعل **أصغر** قطع هو **أكبر** ربح، ونمنع القطوع التي تكسر شرطًا مسبقًا؟
+
+</Stage>
+
+<Stage n={2} id="reading" title="اقرأ من الكتاب" sub="صفحات الكتاب الأصلية لهذا القسم، ومعها دليل يوجه قراءتك">
+
+<ReadingGuide pages="366–368" minutes={12}>
+
+- **المسألة:** dag للحاجات، وربح $\text{\textdollar}(v)$ قد يكون سالبًا. («Chapter 6.4» يقصد القسم 6.4.) وانتبه: «that includes all its dependents» خطأ في الكلمة، فالجملة التالية تشرح أن المقصود ما **يحتاجه** كل مشروع، أي dependencies لا dependents.
+- **الشكل 11.8:** ثمانية مشاريع، أربعة رابحة وأربعة خاسرة.
+- **الأسئلة الثلاثة:** كيف نفرض الحاجات؟ كيف نحول التعظيم إلى تصغير؟ وكيف نحول الأرباح السالبة إلى سعات موجبة؟ («our task to partition» ينقصها is.)
+- **البناء:** $s \to v$ و$u \to t$ و∞. («this is a valid input to the maximum cut problem» صوابها minimum cut.)
+- **الشكل 11.9 والبرهان:** $\mathit{cost}$ و$\mathit{yield}$ و$\mathit{profit}$، ثم سطر واحد.
+
+</ReadingGuide>
+
+<BookPages section="11.7" />
+
+</Stage>
+
+<Stage n={3} id="explain" title="الشرح والتجربة" sub="الأفكار نفسها بالعربية، بتفصيل، مع تجربة تفاعلية">
+
+### المسألة
+
+$n$ مشروعًا، وdag $G$ رؤوسه المشاريع، وحافة $u \to v$ تعني «$u$ يحتاج $v$» (لا يُنجز $u$ قبل $v$). ولكل مشروع $v$ ربح $\text{\textdollar}(v)$، والسالب كلفة. والمجموعة $X$ **صالحة** إن كانت مغلقة تحت الحاجة: كل ما يحتاجه مشروع في $X$ هو في $X$. المطلوب: مجموعة صالحة بأكبر ربح $\sum_{v \in X} \text{\textdollar}(v)$. (وإن كانت كل الأرباح سالبة، فالجواب: لا تفعل شيئًا.)
+
+### الشبكة
+
+أضف $s$ و$t$:
+
+- $s \to v$ بسعة $\text{\textdollar}(v)$ لكل مشروع **رابح**.
+- $u \to t$ بسعة $-\text{\textdollar}(u)$ لكل مشروع **خاسر**.
+- $u \to v$ بسعة **∞** لكل حاجة.
+
+كل السعات موجبة. والفكرة في كل حافة: القطع $(S, T)$ هو الاختيار، $S$ ما نختاره (مع $s$) و$T$ ما نرفضه (مع $t$). فـ:
+
+- **∞ تفرض الحاجات.** إن اخترت $u$ ($u \in S$) ورفضت ما يحتاجه $v$ ($v \in T$)، فالحافة $u \to v$ تعبر القطع وسعته ∞. فالقطع **منتهٍ إن وفقط إن كان الاختيار صالحًا**.
+- **$s \to v$ ثمن ترك ربح.** تعبر القطع حين يكون $v$ رابحًا في $T$: ربح ضاع.
+- **$u \to t$ ثمن دفع كلفة.** تعبر حين يكون $u$ خاسرًا في $S$: كلفة دُفعت.
+
+### البرهان: الربح = P − السعة
+
+ليكن $P = \sum_{\text{\textdollar}(v) > 0} \text{\textdollar}(v)$ مجموع الأرباح الموجبة كلها. ولأي مجموعة $X$:
+
+$$
+\mathit{cost}(X) = \sum_{\substack{u \in X \\ \text{\textdollar}(u) < 0}} -\text{\textdollar}(u),
+\qquad
+\mathit{yield}(X) = \sum_{\substack{v \in X \\ \text{\textdollar}(v) > 0}} \text{\textdollar}(v),
+\qquad
+\mathit{profit}(X) = \mathit{yield}(X) - \mathit{cost}(X).
+$$
+
+بالتعريف $P = \mathit{yield}(V) = \mathit{yield}(S) + \mathit{yield}(T)$. والقطع منتهٍ، فالحواف العابرة من نوعين فقط: $s \to v$ مع $v \in T$ رابح، و$u \to t$ مع $u \in S$ خاسر. فـ
+
+$$
+\|S, T\| = \mathit{yield}(T) + \mathit{cost}(S),
+$$
+
+ومنه مباشرة:
+
+$$
+P - \|S, T\| = \mathit{yield}(S) - \mathit{cost}(S) = \mathit{profit}(S).
+$$
+
+$P$ ثابت، فـ**أصغر** قطع = **أكبر** ربح. والبناء $O(V + E)$، والقطع الأصغر بـ Orlin في $O(VE)$.
+
+جرّب. ثمانية مشاريع بأرباح الكتاب (وحاجات من عندنا). اختر بنفسك، وحاول أن تصل إلى أكبر ربح. ثم انظر إلى الشبكة: القطع الأصغر يحدد الاختيار نفسه.
+
+<ProjectLab client:visible />
+
+<Callout type="tip" title="الحافة ∞ أداة تصميم">
+في البيسبول، ∞ قالت «لا قيد هنا». وفي اختيار المشاريع قالت شيئًا أقوى: «**هذا التقسيم ممنوع**». كل قيد من شكل «إن كان $u$ في $S$ فـ $v$ في $S$» يُفرض بحافة $u \to v$ سعتها ∞. وهذه الحيلة أساس تطبيقات كثيرة للقطع الأصغر: تقسيم الصور، والتعدين المكشوف (أي كتل الأرض تُحفر)، وتوزيع المهام على معالجين.
+</Callout>
+
+### خاتمة الفصل
+
+سبعة تطبيقات، وطريقة واحدة: **صغ المسألة شبكة، وبرهن التكافؤ في اتجاهين، واقرأ الجواب من أكبر تدفق أو أصغر قطع.** والتكامل خلف كل شيء: Ford–Fulkerson يعطي تدفقًا صحيحًا، فتتحول الأرقام إلى مسارات ومطابقات وجداول. وحين تقرأ مسألة جديدة، اسأل: ما الذي «يتدفق»؟ وما الذي «يُقطع»؟
+
+</Stage>
+
+<Stage n={4} id="check" title="تحقق من فهمك" sub="أسئلة سريعة">
+
+<QuickCheck
+  client:visible
+  id="q1"
+  question="P = 15، وأصغر قطع سعته 13. ما أكبر ربح؟"
+  options={['2', '13', '15', '28']}
+  answer={0}
+  explain="$\mathit{profit}(S) = P - \|S, T\| = 15 - 13 = 2$. وهذا مثال الشكل 11.9."
+  wrong={{ 1: 'هذه السعة لا الربح.', 2: 'هذا مجموع الأرباح الموجبة كلها؛ لا يمكن أخذها كلها بلا كلفة.', 3: 'الطرح لا الجمع.' }}
+/>
+
+<QuickCheck
+  client:visible
+  id="q2"
+  question="لو عكسنا حواف ∞ (من v إلى u بدل u → v)، فماذا نحسب؟"
+  options={['مجموعات مغلقة تحت «يحتاجه» بدل «يحتاج»: إن اخترت v فاختر كل ما يحتاجه', 'الشيء نفسه', 'أكبر قطع', 'لا شيء: القطع يصير ∞ دائمًا']}
+  answer={0}
+  explain="الحافة $x \to y$ بسعة ∞ تعني «إن كان $x \in S$ فـ $y \in S$». فاتجاهها يحدد معنى القيد."
+  wrong={{ 1: 'الاتجاه يغير القيد.', 2: 'ما زلنا نصغّر.', 3: 'القطع $\{s\}$ منتهٍ دائمًا.' }}
+/>
+
+</Stage>
+
+<Stage n={5} id="exercises" title="تمارين الكتاب" sub="حلّها بالورقة والقلم، ثم سجّل حالتها. الكتاب لا ينشر حلولها">
+
+القسم 11.7 بلا تمارين خاصة به في الكتاب. فهنا آخر تمرينين في الفصل، وهما صعبان (ª)، ويجمعان أفكار الفصل كله.
+
+<BookExercises chapter={11} nums={[21, 22]} core={[]} />
+
+<Callout type="tip" title="تلميح للتمرين 21">
+القيود الثلاثة كلها على رؤوس $L$ وحدها، والمطابقة نفسها مسألة تدفق. فالسؤال في كل جزء: كيف تُكتب القيود الجديدة بسعات **قبل** أن يصل التدفق إلى $L$؟ (أ) و(ب): القيد على كل نافذة من رأسين متتاليين، والنوافذ متداخلة. جرّب أن تمرر «الحق في المطابقة» عبر سلسلة من رؤوس مساعدة. (ج): الرأسان $\ell_i$ و$\ell_{n-i+1}$ إما مطابقان معًا أو لا: كيف تجعل وحدة التدفق إلى أحدهما تفرض وحدة إلى الآخر؟ وإن لم تجد بناءً مباشرًا، فكّر في التدفق مع حدود دنيا (الفصل 10، التمرين 12).
+</Callout>
+
+<Callout type="tip" title="تلميح للتمرين 22">
+برمجة ديناميكية على **أزواج** العقد: ليكن $\mathit{LCS}(a, b)$ حجم أكبر شجرة مشتركة جذرها يطابق $a$ في $A$ و$b$ في $B$. فكيف تجمع الأبناء؟ كل ابن لـ $a$ يُقرن بابن واحد على الأكثر لـ $b$، والعكس، والهدف تعظيم مجموع القيم. هذه **مطابقة ثنائية بأوزان** (الحاشية 2 في القسم 11.4 تسميها «مسألة التعيين»). فكيف تحلها بالتدفقات، أو بخوارزمية مخصصة؟
+</Callout>
+
+### تمارين إضافية بحلول كاملة
+
+<Exercise id="e1" level="apply" title="ثلاثة مشاريع">
+
+$x$ ربحه 5 ويحتاج $y$، و$y$ كلفته 3، و$z$ ربحه 1 ويحتاج $y$. ارسم الشبكة، واكتب سعة كل قطع منتهٍ، وجد الأفضل.
+
+<div slot="hint">المجموعات الصالحة: $\varnothing$، $\{y\}$، $\{x, y\}$، $\{y, z\}$، $\{x, y, z\}$.</div>
+<div slot="solution">
+
+الشبكة: $s \to x$ (5)، $s \to z$ (1)، $y \to t$ (3)، $x \to y$ (∞)، $z \to y$ (∞). و$P = 6$.
+
+| $S \setminus \{s\}$ | الحواف العابرة | السعة | الربح $6 -$ السعة |
+|---|---|---|---|
+| $\varnothing$ | $s \to x$، $s \to z$ | 6 | 0 |
+| $\{y\}$ | $s \to x$، $s \to z$، $y \to t$ | 9 | −3 |
+| $\{x, y\}$ | $s \to z$، $y \to t$ | 4 | 2 |
+| $\{y, z\}$ | $s \to x$، $y \to t$ | 8 | −2 |
+| $\{x, y, z\}$ | $y \to t$ | 3 | **3** |
+
+أصغر قطع سعته 3، والأفضل اختيار الثلاثة بربح $5 + 1 - 3 = 3$. لاحظ: $z$ وحده لا يغطي كلفة $y$، لكنه يضيف 1 حين يكون $y$ مدفوعًا أصلًا. ∎
+
+</div>
+</Exercise>
+
+<Exercise id="e2" level="prove" title="لماذا تكفي القطوع المنتهية؟">
+
+برهن أن أصغر قطع في $G'$ سعته منتهية دائمًا، فيعطي اختيارًا صالحًا. ثم برهن أن **كل** اختيار صالح $X$ يعطي قطعًا سعته $P - \mathit{profit}(X)$.
+
+<div slot="hint">القطع $(\{s\}, V \cup \{t\})$. وللثاني: $S = X \cup \{s\}$.</div>
+<div slot="solution">
+
+القطع $(\{s\}, \text{الباقي})$ تعبره حواف $s$ وحدها، وسعته $P < \infty$. فأصغر قطع سعته ≤ $P$، منتهية، فلا تعبره حافة ∞، فالمجموعة $S \setminus \{s\}$ مغلقة تحت الحاجة: صالحة.
+
+ولاختيار صالح $X$، خذ $S = X \cup \{s\}$. لا حافة ∞ تعبر، لأن كل ما يحتاجه عنصر من $X$ في $X$. فالسعة $\mathit{yield}(T) + \mathit{cost}(S) = (P - \mathit{yield}(X)) + \mathit{cost}(X) = P - \mathit{profit}(X)$. فكل اختيار صالح قطع، وكل قطع منتهٍ اختيار صالح، والتقابل يحفظ «الربح = $P$ − السعة». ∎
+
+</div>
+</Exercise>
+
+### المختبر البرمجي
+
+<CodeLab
+  client:visible
+  id="book-11.7-projects"
+  title="أفضل مجموعة مشاريع بأصغر قطع"
+  exports={['bestProjects']}
+  starter={lab.starter}
+  tests={[
+    { name: 'المثال في المختبر: ربح 7', code: '(() => { const PR = [[4, 6, 2, 3, -2, -3, -5, -8], "pa qa qb rb wc wd dc".split(" ").map((e) => ["pqrwabcd".indexOf(e[0]), "pqrwabcd".indexOf(e[1])])];const VAL = (profit, E, sel) => Array.isArray(sel) && sel.length === profit.length && E.every(([u, v]) => !sel[u] || sel[v]);const GAIN = (profit, sel) => profit.reduce((a, w, v) => a + (sel[v] ? w : 0), 0); const sel = bestProjects(...PR); return VAL(...PR, sel) && GAIN(PR[0], sel) === 7; })()' },
+    { name: 'كل الأرباح سالبة: لا تفعل شيئًا', code: '(() => { const sel = bestProjects([-1, -4, -2], [[0, 1]]); return sel.every((x) => !x); })()' },
+    { name: 'حالات عشوائية: صالحة، وربحها الأكبر', code: '(() => { const RP = () => { const n = 1 + Math.floor(Math.random() * 9), profit = Array.from({ length: n }, () => Math.floor(Math.random() * 19) - 9), E = []; for (let u = 0; u < n; u++) for (let v = 0; v < n; v++) if (u !== v && Math.random() < 0.2) E.push([u, v]); return [profit, E]; };const VAL = (profit, E, sel) => Array.isArray(sel) && sel.length === profit.length && E.every(([u, v]) => !sel[u] || sel[v]);const GAIN = (profit, sel) => profit.reduce((a, w, v) => a + (sel[v] ? w : 0), 0);const BRP = (profit, E) => { const n = profit.length; let best = -Infinity; for (let m = 0; m < 1 << n; m++) { const sel = profit.map((_, v) => !!((m >> v) & 1)); if (E.every(([u, v]) => !sel[u] || sel[v])) best = Math.max(best, GAIN(profit, sel)); } return best; }; for (let q = 0; q < 120; q++) { const [p, E] = RP(), sel = bestProjects(p, E); if (!VAL(p, E, sel) || GAIN(p, sel) !== BRP(p, E)) return false; } return true; })()' }
+  ]}
+  bench={{ title: 'زمن bestProjects مع n مشروعًا ونحو 2n حاجة', fn: 'bestProjects', make: '(() => { const profit = Array.from({ length: n }, () => Math.floor(Math.random() * 41) - 20), E = []; for (let u = 0; u < n; u++) for (let j = 0; j < 2; j++) { const v = Math.floor(Math.random() * n); if (v !== u) E.push([u, v]); } return [profit, E]; })()', spread: true, ns: [20, 40, 80, 160] }}
+  solution={lab.solution}
+/>
+
+</Stage>
+
+<Stage n={6} id="summary" title="الخلاصة">
+
+<Takeaways>
+
+- **المسألة:** أكبر ربح لمجموعة مغلقة تحت الحاجة.
+- **الشبكة:** $s \to$ رابح (ربحه)، خاسر $\to t$ (كلفته)، وكل حاجة ∞.
+- **∞:** القطع منتهٍ إن وفقط إن كان الاختيار صالحًا.
+- **المساواة:** $\|S, T\| = \mathit{yield}(T) + \mathit{cost}(S)$، فالربح $P - \|S, T\|$، وأصغر قطع = أكبر ربح.
+- **الفصل كله:** صغ شبكة، برهن الاتجاهين، اقرأ الجواب. والتكامل يحول الأرقام إلى بُنى.
+
+</Takeaways>
+
+</Stage>
