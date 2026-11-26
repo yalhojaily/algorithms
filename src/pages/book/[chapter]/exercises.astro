@@ -16,7 +16,7 @@ const groups = [...new Set(chapterPages(ch.num).exercises.map((e) => e.group))];
 ---
 <Base title={`تمارين الفصل ${ch.num} · كتاب Erickson`}>
   <div class="container exp">
-    <nav class="crumbs"><a href={`${base.replace(/\/$/, '')}/book/`}>الكتاب</a><span>‹</span><a href={bookHref(base, ch)}>الفصل {ch.num}: {ch.ar}</a><span>‹</span><span>التمارين</span></nav>
+    <nav class="crumbs"><a href={`${base.replace(/\/$/, '')}/book/`}>كتاب إريكسون</a><span>‹</span><a href={bookHref(base, ch)}>الفصل {ch.num}: {ch.ar}</a><span>‹</span><span>التمارين</span></nav>
     <h1>تمارين الفصل {ch.num} <span class="en">Exercises</span></h1>
     <p class="lead">تمارين Erickson في نهاية الفصل كما هي في الكتاب. الكتاب لا ينشر حلولها، فحلها بالورقة والقلم، وسجّل لكل تمرين: حللته، أو أعود إليه. <BookExProgress client:load chapter={ch.num} nums={nums} /></p>
     <div class="map card">
