@@ -70,6 +70,11 @@ CHAPTERS = {
         ("9.4", "Johnson’s Algorithm"), ("9.5", "Dynamic Programming"), ("9.6", "Divide and Conquer"),
         ("9.7", "Funny Matrix Multiplication"), ("9.8", "(Kleene-Roy-)Floyd-Warshall(-Ingerman)"),
     ]),
+    10: dict(first=327, last=352, exercises=344, sections=[
+        ("10.1", "Flows"), ("10.2", "Cuts"), ("10.3", "The Maxﬂow-Mincut Theorem"),
+        ("10.4", "Ford and Fulkerson’s augmenting-path algorithm"), ("10.5", "Combining and Decomposing Flows"),
+        ("10.6", "Edmonds and Karp’s Algorithms"), ("10.7", "Further Progress"),
+    ]),
     1: dict(first=21, last=70, exercises=44, sections=[
         ("1.1", "Reductions"), ("1.2", "Simplify and Delegate"), ("1.3", "Tower of Hanoi"),
         ("1.4", "Mergesort"), ("1.5", "Quicksort"), ("1.6", "The Pattern"), ("1.7", "Recursion Trees"),

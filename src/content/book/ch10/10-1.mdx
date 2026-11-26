@@ -1,0 +1,174 @@
+---
+section: "10.1"
+summary: "قصة البداية: تقرير عسكري سري عن شبكة السكك الحديدية بين الاتحاد السوفييتي وأوروبا الشرقية. ثم التعريف: التدفق (s, t) دالة على الحواف تحفظ ما يدخل كل رأس وما يخرج منه، إلا s وt. وقيمته صافي ما يخرج من s، وهو نفسه صافي ما يدخل t. ويكون ممكنًا إن لم يتجاوز سعة أي حافة، والمسألة: أكبر تدفق ممكن."
+minutes: 30
+goals:
+  - "تعرّف التدفق (s, t) وقيد الحفظ وقيمة التدفق |f|"
+  - "تبرهن أن |f| تساوي صافي ما يدخل t"
+  - "تعرّف التدفق الممكن، والإشباع والتجنب، ومسألة أكبر تدفق"
+terms:
+  - { en: flow network, ar: شبكة تدفق }
+  - { en: (s, t)-flow, ar: تدفق (s, t) }
+  - { en: conservation constraint, ar: قيد الحفظ }
+  - { en: value of a flow, ar: قيمة التدفق }
+  - { en: capacity, ar: سعة }
+  - { en: feasible flow, ar: تدفق ممكن }
+  - { en: saturate / avoid, ar: يشبع / يتجنب }
+---
+
+import Stage from '../../../components/book/Stage.astro';
+import ReadingGuide from '../../../components/book/ReadingGuide.astro';
+import BookPages from '../../../components/book/BookPages.astro';
+import BookExercises from '../../../components/book/BookExercises.astro';
+import Takeaways from '../../../components/book/Takeaways.astro';
+import Callout from '../../../components/Callout.astro';
+import Exercise from '../../../components/Exercise.astro';
+import QuickCheck from '../../../components/QuickCheck.tsx';
+import CodeLab from '../../../components/CodeLab.tsx';
+import FlowEditLab from '../../../components/FlowEditLab.tsx';
+import * as lab from '../../../labs/book-10-1-flow.ts';
+
+<Stage n={1} id="warmup" title="تمهيد" sub="فكرة القسم قبل أي تعريف">
+
+في منتصف الخمسينيات، كتب باحث في القوات الجوية الأمريكية (Theodore Harris) وجنرال متقاعد (Frank Ross) تقريرًا سريًا عن شبكة السكك الحديدية التي تربط الاتحاد السوفييتي بدول أوروبا الشرقية. 44 منطقة، و105 وصلات، ولكل وصلة معدل ما يمكن شحنه عليها. وبالتجربة والخطأ تقريبًا، حسبا أمرين: أكبر كمية يمكن نقلها من روسيا إلى أوروبا، وأرخص طريقة لتعطيل الشبكة بنسف وصلات. وسمّيا الثاني «عنق الزجاجة». ولم يُرفع السر عن التقرير إلا سنة 1999.
+
+هاتان المسألتان، **أكبر تدفق** و**أصغر قطع**، موضوع الفصل. والمدهش، كما سترى في القسم 10.3، أن جوابهما **الرقم نفسه** دائمًا.
+
+</Stage>
+
+<Stage n={2} id="reading" title="اقرأ من الكتاب" sub="صفحات الكتاب الأصلية لهذا القسم، ومعها دليل يوجه قراءتك">
+
+<ReadingGuide pages="327–329" minutes={12}>
+
+- **ثلاثة أمثال:** قانون Mentat الأول من Dune، وCsíkszentmihályi عن «التدفق» النفسي، وMorpheus: «هناك فرق بين أن تعرف الطريق وأن تمشيه».
+- **قصة Harris وRoss والحاشية 1:** والشكل 10.1 خريطتهما الأصلية. (و«This one of the first» ينقصها is.)
+- **التعريف:** قيد الحفظ عند كل رأس إلا $s$ و$t$، و$f(u \to v) = 0$ إن لم تكن الحافة.
+- **$\partial f(v)$:** رمز لصافي ما يخرج من $v$. (و«$\partial f(v) = 0$ or every vertex» يقصد for.)
+- **الشكل 10.2:** تدفق ممكن قيمته 10، وكل حافة «تدفق/سعة».
+
+</ReadingGuide>
+
+<BookPages section="10.1" />
+
+</Stage>
+
+<Stage n={3} id="explain" title="الشرح والتجربة" sub="الأفكار نفسها بالعربية، بتفصيل، مع تجربة تفاعلية">
+
+### التدفق
+
+المدخل رسم موجه $G = (V, E)$ ورأسان مميزان: **المصدر** $s$ و**الهدف** $t$. و**التدفق (s, t)** (flow) دالة $f: E \to \mathbb{R}$ تحقق **قيد الحفظ** (conservation) عند كل رأس $v$ إلا ربما $s$ و$t$:
+
+$$
+\sum_u f(u \to v) = \sum_w f(v \to w).
+$$
+
+أي: كل ما يدخل $v$ يخرج منه. لا شيء يُخزن، ولا شيء يُخلق. (وللتبسيط: $f(u \to v) = 0$ إن لم تكن $u \to v$ حافة.)
+
+و**قيمة** التدفق $|f|$ صافي ما يخرج من المصدر:
+
+$$
+|f| := \sum_w f(s \to w) - \sum_u f(u \to s).
+$$
+
+### القيمة تصل كاملة إلى $t$
+
+ليكن $\partial f(v)$ صافي ما يخرج من $v$. قيد الحفظ يقول $\partial f(v) = 0$ لكل رأس إلا $s$ و$t$، فـ $\sum_v \partial f(v) = \partial f(s) + \partial f(t)$. ومن جهة أخرى، كل تدفق يخرج من رأس يدخل رأسًا آخر، فكل حافة تُحسب مرة موجبة ومرة سالبة: $\sum_v \partial f(v) = 0$. إذن:
+
+$$
+|f| = \partial f(s) = -\partial f(t).
+$$
+
+ما يخرج من $s$ يصل كله إلى $t$.
+
+### السعات والتدفق الممكن
+
+والآن دالة ثانية $c: E \to \mathbb{R}_{\ge 0}$ تعطي كل حافة **سعة** غير سالبة. والتدفق **ممكن** (feasible) إن كان $0 \le f(e) \le c(e)$ لكل حافة. ويقال إن $f$ **يشبع** (saturates) الحافة $e$ إن كان $f(e) = c(e)$، و**يتجنبها** (avoids) إن كان $f(e) = 0$.
+
+و**مسألة أكبر تدفق**: جد تدفقًا ممكنًا قيمته أكبر ما يمكن.
+
+جرّب. التدفق في البداية ممكن، قيمته 10. غيّره حافةً حافة، وراقب قيد الحفظ عند كل رأس. هل تجد تدفقًا أكبر؟
+
+<FlowEditLab client:visible />
+
+<Callout type="tip" title="لماذا «تدفق» وليس «مسارات»؟">
+قد تظن أن التدفق مجموعة شاحنات تمشي كل واحدة في مسار. وهذا صحيح (القسم 10.5 يبرهنه)، لكن التعريف لا يذكر مسارات أصلًا. هو أرقام على الحواف وقيد محلي عند كل رأس. وهذه المحلية هي ما يجعل التدفقات سهلة الحساب والجمع.
+</Callout>
+
+</Stage>
+
+<Stage n={4} id="check" title="تحقق من فهمك" sub="أسئلة سريعة">
+
+<QuickCheck
+  client:visible
+  id="q1"
+  question="تدفق ممكن، يخرج من s ما مجموعه 15، ويدخل s ما مجموعه 3. كم يدخل t صافيًا؟"
+  options={['15', '12', '18', 'لا نعرف']}
+  answer={1}
+  explain="$|f| = 15 - 3 = 12 = -\partial f(t)$."
+  wrong={{ 0: 'هذا ما يخرج من $s$ قبل طرح ما يدخله.', 2: 'الجمع خطأ.', 3: 'قيد الحفظ يحدده.' }}
+/>
+
+<QuickCheck
+  client:visible
+  id="q2"
+  question="أي هذه ليس شرطًا في التدفق الممكن؟"
+  options={['f(e) ≥ 0', 'f(e) ≤ c(e)', 'الحفظ عند كل رأس إلا s وt', 'f يشبع كل حافة تخرج من s']}
+  answer={3}
+  explain="الإشباع خاصية قد تكون أو لا تكون. الشروط الثلاثة الأولى هي التعريف."
+  wrong={{ 0: 'شرط.', 1: 'شرط.', 2: 'شرط.' }}
+/>
+
+</Stage>
+
+<Stage n={5} id="exercises" title="تمارين الكتاب" sub="حلّها بالورقة والقلم، ثم سجّل حالتها. الكتاب لا ينشر حلولها">
+
+<BookExercises chapter={10} nums={[12]} core={[12]} />
+
+<Callout type="tip" title="تلميح للتمرين 12">
+الآن **طلبات** دنيا بدل سعات عليا. (أ) تلميح الكتاب: جد تدفقًا **غير صفري على كل حافة** ثم كبّره. كيف تجد تدفقًا يمر بحافة معينة $u \to v$؟ (مسار $s \leadsto u \to v \leadsto t$؛ لكن هل هو موجود دائمًا؟ ماذا عن الحواف التي لا تقع على أي مسار من $s$ إلى $t$؟) ثم اجمع التدفقات، فالجمع تدفق. (ب) من تدفق ممكن كبير $f$، كم يمكن أن «تسحب» منه؟ صغها أكبر تدفق في شبكة سعاتها $f - d$، لكن من $t$ إلى $s$. (ج) «Do minimum flows correspond to maximum cuts?» نعم، بتعريف مناسب لسعة القطع.
+</Callout>
+
+### تمارين إضافية بحلول كاملة
+
+<Exercise id="e1" level="prove" title="الصفر وأضعافه">
+
+برهن: إن كان $f$ تدفقًا (s, t) و$\alpha$ عددًا حقيقيًا، فـ $\alpha f$ تدفق قيمته $\alpha |f|$. وإن كان $f$ ممكنًا و$0 \le \alpha \le 1$، فـ $\alpha f$ ممكن.
+
+<div slot="hint">قيد الحفظ معادلة خطية.</div>
+<div slot="solution">
+
+عند كل رأس داخلي: $\sum_u \alpha f(u \to v) = \alpha \sum_u f(u \to v) = \alpha \sum_w f(v \to w) = \sum_w \alpha f(v \to w)$. فالحفظ محفوظ، والقيمة تُضرب في $\alpha$ بالحجة نفسها. وإن كان $0 \le f(e) \le c(e)$ و$0 \le \alpha \le 1$، فـ $0 \le \alpha f(e) \le f(e) \le c(e)$. ∎
+
+</div>
+</Exercise>
+
+### المختبر البرمجي
+
+<CodeLab
+  client:visible
+  id="book-10.1-flow"
+  title="قيمة التدفق وإمكانه"
+  exports={['flowValue', 'isFeasibleFlow']}
+  starter={lab.starter}
+  tests={[
+    { name: 'تدفق المختبر الأول', code: '(() => { const FN = [6, "sa sb ba ac cb bd dc ct dt".split(" ").map((e, k) => ["sabcdt".indexOf(e[0]), "sabcdt".indexOf(e[1]), [16, 13, 4, 12, 9, 14, 7, 20, 4][k]])]; return flowValue(...FN, [8, 2, 0, 8, 0, 2, 0, 8, 2]) === 10 && isFeasibleFlow(...FN, [8, 2, 0, 8, 0, 2, 0, 8, 2]); })()' },
+    { name: 'حفظ مكسور، أو سعة متجاوزة', code: '(() => { const FN = [6, "sa sb ba ac cb bd dc ct dt".split(" ").map((e, k) => ["sabcdt".indexOf(e[0]), "sabcdt".indexOf(e[1]), [16, 13, 4, 12, 9, 14, 7, 20, 4][k]])]; return !isFeasibleFlow(...FN, [8, 2, 0, 9, 0, 2, 0, 8, 2]) && !isFeasibleFlow(...FN, [17, 2, 0, 17, 0, 2, 0, 17, 2]) && !isFeasibleFlow(...FN, [0, 0, 0, 0, 0, 0, 0, 0, -1]); })()' },
+    { name: 'حافة داخلة إلى s', code: 'flowValue(3, [[0, 1, 5], [1, 0, 5], [1, 2, 5]], [4, 1, 3]) === 3 && isFeasibleFlow(3, [[0, 1, 5], [1, 0, 5], [1, 2, 5]], [4, 1, 3])' }
+  ]}
+  solution={lab.solution}
+/>
+
+</Stage>
+
+<Stage n={6} id="summary" title="الخلاصة">
+
+<Takeaways>
+
+- **التدفق:** دالة على الحواف، ما يدخل كل رأس يخرج منه (إلا $s$ و$t$).
+- **القيمة:** $|f|$ صافي ما يخرج من $s$ = صافي ما يدخل $t$.
+- **ممكن:** $0 \le f \le c$. ويشبع الحافة إن $f = c$، ويتجنبها إن $f = 0$.
+- **المسألة:** أكبر تدفق ممكن.
+
+</Takeaways>
+
+</Stage>

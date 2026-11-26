@@ -1,0 +1,182 @@
+---
+section: "10.5"
+summary: "التدفقات تُجمع: أي تركيبة خطية من تدفقات تدفق. والعكس أعمق: كل تدفق غير سالب مجموع موزون لمسارات من s إلى t ودورات موجهة، عددها لا يتجاوز E، والبرهان Ford–Fulkerson معكوسة. ومنها: كل شبكة لها أكبر تدفق بلا دورات، وتحليل في O(VE)، وحد أدنى Ω(VE) لكل خوارزمية تبني التدفق مسارًا مسارًا."
+minutes: 40
+goals:
+  - "تعرف أن التركيبة الخطية للتدفقات تدفق"
+  - "تعرّف تدفق المسار وتدفق الدورة"
+  - "تبرهن مبرهنة تحليل التدفق، أولًا للدوران ثم لأي تدفق"
+  - "تستنتج أكبر تدفق بلا دورات، وخوارزمية التحليل O(VE)، والحد الأدنى Ω(VE)"
+terms:
+  - { en: flow decomposition, ar: تحليل التدفق }
+  - { en: path flow / cycle flow, ar: تدفق مسار / تدفق دورة }
+  - { en: circulation, ar: دوران }
+  - { en: acyclic flow, ar: تدفق بلا دورات }
+---
+
+import Stage from '../../../components/book/Stage.astro';
+import ReadingGuide from '../../../components/book/ReadingGuide.astro';
+import BookPages from '../../../components/book/BookPages.astro';
+import BookExercises from '../../../components/book/BookExercises.astro';
+import Takeaways from '../../../components/book/Takeaways.astro';
+import Callout from '../../../components/Callout.astro';
+import Exercise from '../../../components/Exercise.astro';
+import QuickCheck from '../../../components/QuickCheck.tsx';
+import CodeLab from '../../../components/CodeLab.tsx';
+import DecompLab from '../../../components/DecompLab.tsx';
+import * as lab from '../../../labs/book-10-5-decompose.ts';
+
+<Stage n={1} id="warmup" title="تمهيد" sub="فكرة القسم قبل أي تعريف">
+
+عرّفنا التدفق أرقامًا على الحواف مع قيد محلي عند كل رأس. لكن الحدس الأول كان شاحنات تمشي في طرق من $s$ إلى $t$. فهل الوصفان متكافئان؟ هل يمكن دائمًا أن «نفكك» أرقام الحواف إلى شاحنات، كل واحدة بمسارها؟
+
+تقريبًا. يجب أن نسمح أيضًا بشاحنات تدور في حلقات مغلقة، لا تأتي من $s$ ولا تذهب إلى $t$. مسارات ودورات: هذا كل شيء.
+
+</Stage>
+
+<Stage n={2} id="reading" title="اقرأ من الكتاب" sub="صفحات الكتاب الأصلية لهذا القسم، ومعها دليل يوجه قراءتك">
+
+<ReadingGuide pages="336–340" minutes={20}>
+
+- **التركيبة الخطية:** $h = \alpha f + \beta g$، «Straightforward definition-chasing».
+- **تدفق المسار وتدفق الدورة:** $P$ و$C$ يعنيان الشيء ونقيضه: المسار نفسه، ووحدة التدفق عليه.
+- **المبرهنة وبرهانها:** «Recursion Fairy» من الفصل 1. أولًا الدوران (الشكل 10.9)، ثم أي تدفق بإضافة حافة $t \to s$.
+- **حالتان خاصتان، ثم الخوارزمية $O(VE)$، ثم الحد الأدنى.**
+
+</ReadingGuide>
+
+<BookPages section="10.5" />
+
+</Stage>
+
+<Stage n={3} id="explain" title="الشرح والتجربة" sub="الأفكار نفسها بالعربية، بتفصيل، مع تجربة تفاعلية">
+
+### التدفقات تُجمع
+
+لأي تدفقين (s, t) $f$ و$g$ وعددين $\alpha$ و$\beta$: $h = \alpha f + \beta g$ تدفق (s, t) قيمته $|h| = \alpha|f| + \beta|g|$. لأن قيد الحفظ خطي. (لكن لاحظ: **الإمكان** لا يُحفظ دائمًا، فمجموع تدفقين ممكنين قد يتجاوز السعات.)
+
+### تدفق المسار وتدفق الدورة
+
+لأي مسار موجه $P$ من $s$ إلى $t$، **تدفق المسار**: $+1$ على حوافه، و$-1$ على عكسها، و0 في غيرها. وهو تدفق قيمته 1. (ويستعمل Erickson الحرف $P$ للمسار ولتدفقه معًا عمدًا.) وبالمثل لأي دورة موجهة $C$، **تدفق الدورة**: تدفق قيمته **صفر**.
+
+### مبرهنة التحليل
+
+> **مبرهنة تحليل التدفق.** كل تدفق (s, t) غير سالب $f$ مجموع خطي **موجب** لمسارات موجهة من $s$ إلى $t$ ودورات موجهة. والحافة $u \to v$ تظهر في واحد منها على الأقل إن وفقط إن $f(u \to v) \gt 0$. وعدد المسارات والدورات لا يتجاوز عدد الحواف.
+
+**الفكرة:** «شغّل Ford–Fulkerson بالعكس». ما دامت حافة تحمل تدفقًا، جد مسارًا من $s$ إلى $t$ أو دورة تحمل تدفقًا، واطرح منها أكبر ما يمكن. حافة واحدة على الأقل تفرغ، و«جنية الاستدعاء الذاتي» تكمل الباقي.
+
+**أولًا: الدوران.** **الدوران** (circulation) تدفق قيمته صفر، محفوظ عند **كل** رأس. وليكن $\#f$ عدد الحواف ذات التدفق الموجب. نبرهن بالاستقراء على $\#f$ أن الدوران مجموع موجب لـ $\max\{0, \#f - 1\}$ دورة على الأكثر:
+
+- $\#f = 0$: لا دورات.
+- إن كانت الحواف الموجبة دورة واحدة: $\#f \ge 2$، ودورة واحدة تكفي.
+- وإلا، خذ أي حافة $u \to v$ موجبة، وامشِ منها على حواف موجبة: $v_0 = u, v_1 = v, v_2, \ldots$. قيد الحفظ يضمن أن كل رأس يدخله تدفق يخرج منه تدفق، فالمشي لا يعلق، فلا بد أن يكرر رأسًا. ليكن $k$ أصغر فهرس مع $v_j = v_k$ لـ $j \lt k$: الجزء من $v_j$ إلى $v_k$ دورة بسيطة $C$. ولتكن $F = \min_{e \in C} f(e)$، و$f' = f - F \cdot C$. دوران ممكن، وحافة واحدة على الأقل صارت صفرًا، فـ $\#f' \le \#f - 1$. والاستقراء يعطي $f'$ في $\#f' - 1 \le \#f - 2$ دورة. وبإضافة $C$: $f = f' + F \cdot C$.
+
+**ثانيًا: أي تدفق.** إن كان $|f| \gt 0$، أضف حافة $t \to s$ بتدفق $|f|$. فصار دورانًا $f'$ مع $\#f' = \#f + 1$. ونحلله إلى $\#f' - 1 = \#f$ دورة على الأكثر. ثم احذف $t \to s$: الدورات التي تمر بها تصير مسارات من $s$ إلى $t$، والباقي يبقى دورات. ∎
+
+### حالتان خاصتان ونتيجة
+
+- **الدوران** مجموع دورات فقط، بلا مسارات.
+- **التدفق بلا دورات** مجموع مسارات فقط.
+- وبإلغاء دورات التدفق واحدة واحدة، كل تدفق يتحول إلى تدفق **بلا دورات** بالقيمة نفسها. فـ **لكل شبكة أكبر تدفق بلا دورات**.
+
+جرّب. هذا تدفق قيمته 10 مع دورة إضافية حول $a \to c \to b \to a$. راقب المسارات والدورة تُطرح واحدة واحدة:
+
+<DecompLab client:visible />
+
+### خوارزمية التحليل وحد أدنى
+
+البرهان خوارزمية مباشرة: مرارًا، جد مسارًا أو دورة في التدفق الباقي، واطرح أكبر ما يمكن، حتى يفرغ. وكل مسار أو دورة يوجد في $O(V)$:
+
+- إن خرج تدفق موجب من $s$: امشِ من $s$ على حواف موجبة حتى تصل $t$ (مسار) أو تكرر رأسًا (دورة).
+- وإلا: جد أي رأس يخرج منه تدفق، وامشِ حتى تكرر رأسًا (دورة).
+
+وقيد الحفظ يضمن أن المشي لا يعلق. وكل تكرار $O(V)$ ويفرغ حافة على الأقل، فالمجموع **$O(VE)$**.
+
+والتحليل يعطي أيضًا **حدًا أدنى**: كل تدفق يتحلل إلى $E$ قطعة على الأكثر، كل واحدة $V$ حافة على الأكثر، فتعقيد التحليل $O(VE)$. ومن السهل بناء تدفقات **كل** تحليل لها تعقيده $\Omega(VE)$. فأي خوارزمية تبني التدفق مسارًا أو دورة في المرة (أي تطبيق لـ Ford–Fulkerson) تحتاج إلى $\Omega(VE)$ في أسوأ الأحوال.
+
+</Stage>
+
+<Stage n={4} id="check" title="تحقق من فهمك" sub="أسئلة سريعة">
+
+<QuickCheck
+  client:visible
+  id="q1"
+  question="تدفق قيمته 0 وفيه حواف موجبة. ماذا في تحليله؟"
+  options={['مسارات فقط', 'دورات فقط', 'لا شيء', 'مسار واحد']}
+  answer={1}
+  explain="دوران: لا شيء يصل من $s$ إلى $t$ صافيًا. فكل ما يجري يدور."
+  wrong={{ 0: 'كل مسار يضيف 1 إلى القيمة.', 2: 'فيه حواف موجبة.', 3: 'القيمة صفر.' }}
+/>
+
+<QuickCheck
+  client:visible
+  id="q2"
+  question="لماذا يفرغ طرح مسار أو دورة حافةً على الأقل؟"
+  options={['لأن F = أصغر تدفق على القطعة، فالحافة التي حققته تصير صفرًا', 'لأن المسارات قصيرة', 'لأن التدفق صحيح', 'لا يفرغ دائمًا']}
+  answer={0}
+  explain="وهذا ما يحد عدد القطع بـ $E$."
+  wrong={{ 1: 'لا علاقة بالطول.', 2: 'يعمل مع الحقيقية أيضًا.', 3: 'يفرغ دائمًا.' }}
+/>
+
+</Stage>
+
+<Stage n={5} id="exercises" title="تمارين الكتاب" sub="حلّها بالورقة والقلم، ثم سجّل حالتها. الكتاب لا ينشر حلولها">
+
+<BookExercises chapter={10} nums={[6, 9, 10]} core={[6]} />
+
+<Callout type="tip" title="تلميح للتمرين 6">
+(أ) احسب أي أكبر تدفق، ثم «ألغِ الدورات»: جد دورة في الحواف الموجبة، اطرح أصغر قيمة عليها، وكرر. كم مرة، وكم يكلف إيجاد كل دورة؟ (ب) كل أكبر تدفق بلا دورات ⇔ لا يمكن **إضافة** دورة إلى أكبر تدفق دون أن يبقى أكبر تدفق. وأين تعيش الدورات التي يمكن إضافتها؟ في $G_{f^*}$... لكن انتبه: تريد دورة تجعل حواف **موجبة** دورةً.
+</Callout>
+
+<Callout type="tip" title="تلميح للتمرين 9">
+حسّن العدّ: في برهان الدوران، $\max\{0, \#f - 1\}$. كيف تحسنه إلى $E - V + 1$ (عدد «الدورات المستقلة»)؟ فكّر: بعد طرح دورة، هل تبقى المكونات المتصلة للحواف الموجبة كما هي؟ وكم دورة على الأكثر في مكون فيه $V'$ رأسًا و$E'$ حافة قبل أن يصير شجرة؟
+</Callout>
+
+<Callout type="tip" title="تلميح للتمرين 10">
+(أ) فضاء التدفقات: كل التدفقات (غير الممكنة بالضرورة). كم معادلة مستقلة تفرضها قيود الحفظ؟ ($V - 2$، لماذا مستقلة؟) فالبعد $E - (V - 2)$. (ب) كل حافة خارج الشجرة تغلق دورة واحدة فيها. ومسار في الشجرة من $s$ إلى $t$. هذه $E - V + 2$ قطعة. لماذا مستقلة، ولماذا تولّد كل شيء؟
+</Callout>
+
+### تمارين إضافية بحلول كاملة
+
+<Exercise id="e1" level="apply" title="حد أدنى بلا رسم">
+
+صف تدفقًا كل تحليل له يحتاج إلى $\Omega(VE)$ حافةً مجموعةً على كل القطع.
+
+<div slot="hint">مسار طويل في المنتصف، ومراوح عند الطرفين.</div>
+<div slot="solution">
+
+خذ مسارًا $x_1 \to x_2 \to \cdots \to x_{V/3}$ في المنتصف. ومن $s$ حواف إلى $V/3$ رأسًا $a_i$، كل $a_i \to x_1$. ومن $x_{V/3}$ إلى $V/3$ رأسًا $b_j$، كل $b_j \to t$. وأعط $s \to a_i$ و$b_j \to t$ سعات مختلفة بحيث تتطلب المطابقة بين $a$ و$b$ مسارات كثيرة (مثلًا $E/3$ قطعة متمايزة). كل قطعة تمر بالمسار الأوسط كله: $V/3$ حافة. فالمجموع $\Omega(E \cdot V)$. (والكتاب يقول «من السهل بناؤها» دون تفاصيل؛ هذا بناء من البناءات الممكنة.)
+
+</div>
+</Exercise>
+
+### المختبر البرمجي
+
+<CodeLab
+  client:visible
+  id="book-10.5-decompose"
+  title="تحليل التدفق إلى مسارات ودورات"
+  exports={['decompose']}
+  starter={lab.starter}
+  tests={[
+    { name: 'مسار ودورة', code: '(() => { const E = [[0, 1, 5], [1, 2, 5], [2, 1, 5], [1, 3, 5]], f = [2, 3, 3, 2]; const P = decompose(4, E, f); const ok = (n, E, f, P) => { const back = new Array(E.length).fill(0); for (const p of P) { if (!(p.amount > 0) || p.edges.length === 0) return false; const vs = [E[p.edges[0]][0]]; for (const k of p.edges) { if (E[k][0] !== vs.at(-1)) return false; vs.push(E[k][1]); back[k] += p.amount; } const path = vs[0] === 0 && vs.at(-1) === n - 1, cyc = vs[0] === vs.at(-1); if (!path && !cyc) return false; } return P.length <= E.length && back.every((x, k) => Math.abs(x - f[k]) < 1e-9); }; return ok(4, E, f, P) && P.length === 2; })()' },
+    { name: 'أكبر تدفق المختبر مع دورة', code: '(() => { const FN = [6, "sa sb ba ac cb bd dc ct dt".split(" ").map((e, k) => ["sabcdt".indexOf(e[0]), "sabcdt".indexOf(e[1]), [16, 13, 4, 12, 9, 14, 7, 20, 4][k]])]; const f = [12, 11, 4, 16, 4, 11, 7, 19, 4]; const P = decompose(...FN, f); const ok = (n, E, f, P) => { const back = new Array(E.length).fill(0); for (const p of P) { if (!(p.amount > 0) || p.edges.length === 0) return false; const vs = [E[p.edges[0]][0]]; for (const k of p.edges) { if (E[k][0] !== vs.at(-1)) return false; vs.push(E[k][1]); back[k] += p.amount; } const path = vs[0] === 0 && vs.at(-1) === n - 1, cyc = vs[0] === vs.at(-1); if (!path && !cyc) return false; } return P.length <= E.length && back.every((x, k) => Math.abs(x - f[k]) < 1e-9); }; return ok(...FN, f, P); })()' },
+    { name: 'تدفقات عشوائية من Ford–Fulkerson', code: '(() => { const NETRAND = () => { const n = 3 + Math.floor(Math.random() * 5), E = []; for (let u = 0; u < n; u++) for (let v = 0; v < n; v++) if (u !== v && v !== 0 && u !== n - 1 && Math.random() < 0.4 && !E.some(([a, b]) => a === v && b === u)) E.push([u, v, 1 + Math.floor(Math.random() * 9)]); return [n, E]; }; const ok = (n, E, f, P) => { const back = new Array(E.length).fill(0); for (const p of P) { if (!(p.amount > 0) || p.edges.length === 0) return false; const vs = [E[p.edges[0]][0]]; for (const k of p.edges) { if (E[k][0] !== vs.at(-1)) return false; vs.push(E[k][1]); back[k] += p.amount; } const path = vs[0] === 0 && vs.at(-1) === n - 1, cyc = vs[0] === vs.at(-1); if (!path && !cyc) return false; } return P.length <= E.length && back.every((x, k) => Math.abs(x - f[k]) < 1e-9); }; for (let t = 0; t < 30; t++) { const [n, E] = NETRAND(); const f = new Array(E.length).fill(0); for (let it = 0; it < 50; it++) { const out = Array.from({ length: n }, () => []); E.forEach(([u, v, c], k) => { if (c - f[k] > 0) out[u].push([v, k, 1, c - f[k]]); if (f[k] > 0) out[v].push([u, k, -1, f[k]]); }); const via = new Array(n).fill(null), seen = new Array(n).fill(false), st = [0]; seen[0] = true; while (st.length) { const x = st.pop(); for (const a of out[x]) if (!seen[a[0]]) { seen[a[0]] = true; via[a[0]] = [x, a]; st.push(a[0]); } } if (!seen[n - 1]) break; let F = Infinity; for (let x = n - 1; x !== 0; x = via[x][0]) F = Math.min(F, via[x][1][3]); for (let x = n - 1; x !== 0; x = via[x][0]) f[via[x][1][1]] += via[x][1][2] * F; } if (!ok(n, E, f, decompose(n, E, f))) return false; } return true; })()' }
+  ]}
+  solution={lab.solution}
+/>
+
+</Stage>
+
+<Stage n={6} id="summary" title="الخلاصة">
+
+<Takeaways>
+
+- **الجمع:** تركيبة خطية من تدفقات تدفق (الإمكان غير مضمون).
+- **التحليل:** كل تدفق غير سالب = مجموع موجب لمسارات $s \to t$ ودورات، $E$ قطعة على الأكثر.
+- **حالتان:** الدوران دورات فقط، والتدفق بلا دورات مسارات فقط. ولكل شبكة أكبر تدفق بلا دورات.
+- **الخوارزمية:** $O(VE)$. و**الحد الأدنى:** $\Omega(VE)$ لكل بناء مسارًا مسارًا.
+
+</Takeaways>
+
+</Stage>

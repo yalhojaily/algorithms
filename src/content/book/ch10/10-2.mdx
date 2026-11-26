@@ -1,0 +1,177 @@
+---
+section: "10.2"
+summary: "القطع (s, t) تقسيم للرؤوس إلى S فيها s وT فيها t. وسعته مجموع سعات الحواف من S إلى T فقط، والعكس لا يُحسب. والمأخذ 10.1: قيمة أي تدفق ممكن لا تتجاوز سعة أي قطع، وتساويها إن وفقط إن أشبع التدفق كل حافة من S إلى T وتجنب كل حافة من T إلى S."
+minutes: 35
+goals:
+  - "تعرّف القطع (s, t) وسعته، وتفهم لماذا التعريف غير متماثل"
+  - "تبرهن المأخذ 10.1 بسلسلة المساواة والمتباينات"
+  - "تستنتج أن التساوي يعني أكبر تدفق وأصغر قطع معًا"
+terms:
+  - { en: (s, t)-cut, ar: قطع (s, t) }
+  - { en: capacity of a cut, ar: سعة القطع }
+  - { en: minimum cut, ar: أصغر قطع }
+  - { en: weak duality, ar: الثنائية الضعيفة }
+---
+
+import Stage from '../../../components/book/Stage.astro';
+import ReadingGuide from '../../../components/book/ReadingGuide.astro';
+import BookPages from '../../../components/book/BookPages.astro';
+import BookExercises from '../../../components/book/BookExercises.astro';
+import Takeaways from '../../../components/book/Takeaways.astro';
+import Callout from '../../../components/Callout.astro';
+import Exercise from '../../../components/Exercise.astro';
+import QuickCheck from '../../../components/QuickCheck.tsx';
+import CodeLab from '../../../components/CodeLab.tsx';
+import FlowCutLab from '../../../components/FlowCutLab.tsx';
+import * as lab from '../../../labs/book-10-2-cut.ts';
+
+<Stage n={1} id="warmup" title="تمهيد" sub="فكرة القسم قبل أي تعريف">
+
+لتمنع أي شيء من الوصول من $s$ إلى $t$، يكفي أن ترسم خطًا يفصلهما، وتقطع كل الطرق التي تعبر الخط **من جهة $s$ إلى جهة $t$**. الطرق التي تعبر بالعكس لا تهم: لا شيء يمر عليها نحو $t$.
+
+ثمن هذا الخط مجموع سعات ما قطعت. والفكرة المهمة: أي تدفق لا يستطيع أن يمرر أكثر من هذا الثمن، لأن كل ما يصل إلى $t$ يعبر الخط. فكل قطع **حد أعلى** لكل تدفق.
+
+</Stage>
+
+<Stage n={2} id="reading" title="اقرأ من الكتاب" sub="صفحات الكتاب الأصلية لهذا القسم، ومعها دليل يوجه قراءتك">
+
+<ReadingGuide pages="329–331" minutes={12}>
+
+- **التعريف:** تقسيم $S \cup T = V$، $S \cap T = \varnothing$، $s \in S$، $t \in T$. والسعة $\|S, T\|$.
+- **«the definition is asymmetric»:** جملة مهمة.
+- **الشكل 10.3:** قطع سعته 15.
+- **المأخذ 10.1 و«bouncing inequalities»:** سبعة أسطر بمبرراتها بين قوسين. اقرأها سطرًا سطرًا. (و«The first inequalities» صوابها inequality.)
+
+</ReadingGuide>
+
+<BookPages section="10.2" />
+
+</Stage>
+
+<Stage n={3} id="explain" title="الشرح والتجربة" sub="الأفكار نفسها بالعربية، بتفصيل، مع تجربة تفاعلية">
+
+### القطع
+
+**القطع (s, t)** (cut) تقسيم للرؤوس إلى مجموعتين منفصلتين $S$ و$T$، أي $S \cup T = V$ و$S \cap T = \varnothing$، مع $s \in S$ و$t \in T$. و**سعته**:
+
+$$
+\|S, T\| := \sum_{v \in S} \sum_{w \in T} c(v \to w).
+$$
+
+مجموع سعات الحواف التي **تبدأ في $S$ وتنتهي في $T$**. والتعريف **غير متماثل**: الحواف من $T$ إلى $S$ «غير مهمة». و**مسألة أصغر قطع**: جد قطعًا سعته أصغر ما يمكن. وحدسيًا: أرخص طريقة لتعطيل كل تدفق من $s$ إلى $t$.
+
+### المأخذ 10.1
+
+> **المأخذ 10.1.** ليكن $f$ أي تدفق (s, t) ممكن، و$(S, T)$ أي قطع (s, t). فـ $|f| \le \|S, T\|$. وفوق ذلك، $|f| = \|S, T\|$ إن وفقط إن **أشبع** $f$ كل حافة من $S$ إلى $T$، و**تجنب** كل حافة من $T$ إلى $S$.
+
+**البرهان («تتبع المتباينات المرتدة»).**
+
+$$
+\begin{aligned}
+|f| &= \partial f(s) && \text{[definition]} \\
+&= \textstyle\sum_{v \in S} \partial f(v) && \text{[conservation]} \\
+&= \textstyle\sum_{v \in S} \sum_{w} f(v \to w) - \sum_{v \in S} \sum_{u} f(u \to v) && \text{[definition of } \partial\text{]} \\
+&= \textstyle\sum_{v \in S} \sum_{w \notin S} f(v \to w) - \sum_{v \in S} \sum_{u \notin S} f(u \to v) && \text{[remove } S \to S\text{]} \\
+&= \textstyle\sum_{v \in S} \sum_{w \in T} f(v \to w) - \sum_{v \in S} \sum_{u \in T} f(u \to v) && \text{[definition of cut]} \\
+&\le \textstyle\sum_{v \in S} \sum_{w \in T} f(v \to w) && [f(u \to v) \ge 0] \\
+&\le \textstyle\sum_{v \in S} \sum_{w \in T} c(v \to w) && [f \le c] \\
+&= \|S, T\|.
+\end{aligned}
+$$
+
+في الخطوة الثانية نضيف أصفارًا: $\partial f(v) = 0$ لكل $v \in S$ غير $s$. وفي الرابعة نحذف التدفق على الحواف $x \to y$ التي طرفاها كلاهما في $S$، لأنها تظهر في المجموعين: موجبة حين $v = x$ و$w = y$، وسالبة حين $v = y$ و$u = x$.
+
+والمتباينة الأولى مساواة إن وفقط إن **تجنب** $f$ كل حافة من $T$ إلى $S$، والثانية إن وفقط إن **أشبع** كل حافة من $S$ إلى $T$. ∎
+
+**النتيجة المباشرة:** إن كان $|f| = \|S, T\|$، فـ $f$ **أكبر تدفق** (لا تدفق يتجاوز $\|S, T\|$)، و$(S, T)$ **أصغر قطع** (لا قطع أقل من $|f|$). شاهدٌ واحد يبرهن الأمثلية للاثنين معًا.
+
+جرّب. حرّك الرؤوس بين $S$ و$T$، وابحث عن قطع سعته تساوي أكبر تدفق (23):
+
+<FlowCutLab client:visible />
+
+</Stage>
+
+<Stage n={4} id="check" title="تحقق من فهمك" sub="أسئلة سريعة">
+
+<QuickCheck
+  client:visible
+  id="q1"
+  question="قطع سعته 20. ماذا نعرف عن كل تدفق ممكن؟"
+  options={['قيمته 20', 'قيمته ≤ 20', 'قيمته ≥ 20', 'لا شيء']}
+  answer={1}
+  explain="المأخذ 10.1: كل قطع حد أعلى لكل تدفق. والمساواة تحتاج إلى قطع أصغر."
+  wrong={{ 0: 'قد يكون القطع ليس الأصغر.', 2: 'بالعكس.', 3: 'نعرف الحد الأعلى.' }}
+/>
+
+<QuickCheck
+  client:visible
+  id="q2"
+  question="لماذا لا تُحسب الحواف من T إلى S في سعة القطع؟"
+  options={['نسيان', 'لأن التدفق عليها يعود إلى S، فلا يساعد على الوصول إلى t؛ بل ينقص الصافي العابر', 'لأن سعتها صفر', 'لأنها غير موجودة']}
+  answer={1}
+  explain="في البرهان تظهر هذه الحواف بإشارة سالبة. فأقصى ما يعبر يحدث حين يكون تدفقها صفرًا."
+  wrong={{ 0: 'مقصود.', 2: 'قد تكون كبيرة.', 3: 'قد توجد.' }}
+/>
+
+</Stage>
+
+<Stage n={5} id="exercises" title="تمارين الكتاب" sub="حلّها بالورقة والقلم، ثم سجّل حالتها. الكتاب لا ينشر حلولها">
+
+<BookExercises chapter={10} nums={[2, 3, 11]} core={[3]} />
+
+<Callout type="tip" title="تلميح للتمرين 2">
+خذ أكبر تدفق $f^*$. بالمأخذ 10.1 (حالة المساواة)، كل قطع أصغر يجعل $f^*$ يشبع حوافه من $S$ إلى $T$ ويتجنب حوافه من $T$ إلى $S$. فماذا يقول القطعان المفترضان عن $f^*(u \to v)$؟ (وانتبه إلى حالة $c(u \to v) = 0$.)
+</Callout>
+
+<Callout type="tip" title="تلميح للتمرين 3">
+**دالة القطع تحت-معيارية**: برهن أولًا أن $\|S \cap S'\| + \|S \cup S'\| \le \|S\| + \|S'\|$، بعدّ كل حافة حسب موقع طرفيها في المربعات الأربعة ($S \cap S'$، $S \setminus S'$، ...). ثم: إن كان $S$ و$S'$ أصغرين، فكل من الجديدين $\ge$ الأصغر. ماذا يبقى؟
+</Callout>
+
+<Callout type="tip" title="تلميح للتمرين 11">
+(أ) أي مسار من $s \in S$ إلى $t \in T$ يغادر $S$ في مكان ما. (ب) لتكن $S$ الرؤوس التي يصل إليها $s$ **دون** استعمال حواف $X$. (ج) مع $X$ أصغري: خذ $S$ من (ب). إن كانت حافة في $X$ ليست في $\delta S$، فاحذفها من $X$: هل ما زال يفصل؟
+</Callout>
+
+### تمارين إضافية بحلول كاملة
+
+<Exercise id="e1" level="apply" title="كم قطعًا؟">
+
+كم قطعًا (s, t) مختلفًا في شبكة فيها $V$ رأسًا؟ ولماذا لا نحسب أصغر قطع بتجربتها كلها؟
+
+<div slot="hint">كل رأس غير $s$ و$t$ يختار جهة.</div>
+<div slot="solution">
+
+$2^{V-2}$: كل رأس من الـ $V - 2$ الآخرين في $S$ أو في $T$. وهذا أسي، فالتجربة الغاشمة (كما في المختبر البرمجي) مستحيلة إلا لرسوم صغيرة جدًا. والقسم القادم يجد أصغر قطع من أكبر تدفق مباشرة، في زمن متعدد الحدود.
+
+</div>
+</Exercise>
+
+### المختبر البرمجي
+
+<CodeLab
+  client:visible
+  id="book-10.2-cut"
+  title="سعة القطع، وأصغر قطع بالقوة الغاشمة"
+  exports={['cutCapacity', 'minCutBrute']}
+  starter={lab.starter}
+  tests={[
+    { name: 'سعة قطع', code: '(() => { const FN = [6, "sa sb ba ac cb bd dc ct dt".split(" ").map((e, k) => ["sabcdt".indexOf(e[0]), "sabcdt".indexOf(e[1]), [16, 13, 4, 12, 9, 14, 7, 20, 4][k]])]; const E = FN[1]; return cutCapacity(E, [true, true, false, false, false, false]) === 13 + 12 && cutCapacity(E, [true, false, false, false, false, false]) === 29; })()' },
+    { name: 'حواف T → S لا تُحسب', code: 'cutCapacity([[0, 1, 5], [1, 0, 100]], [true, false]) === 5' },
+    { name: 'أصغر قطع في شبكة المختبر: 23', code: '(() => { const FN = [6, "sa sb ba ac cb bd dc ct dt".split(" ").map((e, k) => ["sabcdt".indexOf(e[0]), "sabcdt".indexOf(e[1]), [16, 13, 4, 12, 9, 14, 7, 20, 4][k]])]; return minCutBrute(...FN) === 23; })()' },
+    { name: 'شبكات عشوائية', code: '(() => { const NETRAND = () => { const n = 3 + Math.floor(Math.random() * 5), E = []; for (let u = 0; u < n; u++) for (let v = 0; v < n; v++) if (u !== v && v !== 0 && u !== n - 1 && Math.random() < 0.4 && !E.some(([a, b]) => a === v && b === u)) E.push([u, v, 1 + Math.floor(Math.random() * 9)]); return [n, E]; };const MINCUT = (n, E) => { let best = Infinity; for (let m = 0; m < 1 << (n - 2); m++) { const S = (v) => v === 0 || (v < n - 1 && ((m >> (v - 1)) & 1)); let c = 0; for (const [u, v, w] of E) if (S(u) && !S(v)) c += w; best = Math.min(best, c); } return best; }; for (let t = 0; t < 30; t++) { const [n, E] = NETRAND(); if (minCutBrute(n, E) !== MINCUT(n, E)) return false; } return true; })()' }
+  ]}
+  solution={lab.solution}
+/>
+
+</Stage>
+
+<Stage n={6} id="summary" title="الخلاصة">
+
+<Takeaways>
+
+- **القطع:** $S \ni s$ و$T \ni t$. والسعة $\|S, T\|$: حواف $S \to T$ وحدها.
+- **المأخذ 10.1:** $|f| \le \|S, T\|$ لكل تدفق ممكن وكل قطع.
+- **المساواة** ⇔ $f$ يشبع كل $S \to T$ ويتجنب كل $T \to S$. وحينئذ كلاهما أمثل.
+
+</Takeaways>
+
+</Stage>

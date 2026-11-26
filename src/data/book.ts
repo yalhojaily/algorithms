@@ -168,6 +168,19 @@ export const chapters: BookChapter[] = [
       sec('9.8', '(Kleene-Roy-)Floyd-Warshall(-Ingerman)', 'خوارزمية Floyd–Warshall', 318, [8, 11]),
     ],
   },
+  {
+    num: 10, slug: '10-maxflow', en: 'Maximum Flows & Minimum Cuts', ar: 'أكبر التدفقات وأصغر القطوع', pages: [327, 352], exercisesPage: 344,
+    blurb: 'أكبر كمية يمكن نقلها من s إلى t عبر شبكة سعات، وأرخص طريقة لفصل s عن t. والمبرهنة المركزية: القيمتان متساويتان دائمًا. وبرهانها خوارزمية Ford–Fulkerson بمسارات التحسين في الرسم المتبقي، ثم مبرهنة الأعداد الصحيحة، وتحليل التدفق إلى مسارات ودورات، وقاعدتا Edmonds–Karp: المسار الأسمن والمسار الأقصر.',
+    sections: [
+      sec('10.1', 'Flows', 'التدفقات', 328, [12]),
+      sec('10.2', 'Cuts', 'القطوع', 329, [2, 3, 11]),
+      sec('10.3', 'The Maxﬂow-Mincut Theorem', 'مبرهنة أكبر تدفق وأصغر قطع', 331, [0, 1, 4, 5]),
+      sec('10.4', 'Ford and Fulkerson’s augmenting-path algorithm', 'خوارزمية Ford–Fulkerson', 334, [14, 15, 17]),
+      sec('10.5', 'Combining and Decomposing Flows', 'جمع التدفقات وتحليلها', 336, [6, 9, 10]),
+      sec('10.6', 'Edmonds and Karp’s Algorithms', 'خوارزميتا Edmonds وKarp', 340, [7, 13, 18, 20]),
+      sec('10.7', 'Further Progress', 'ما بعد ذلك', 343, [8, 16, 19]),
+    ],
+  },
 ];
 
 /** The whole book, for the table of contents (chapters not yet on the site are shown as coming). */
