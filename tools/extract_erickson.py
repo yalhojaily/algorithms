@@ -60,6 +60,11 @@ CHAPTERS = {
         ("7.1", "Distinct Edge Weights"), ("7.2", "The Only Minimum Spanning Tree Algorithm"),
         ("7.3", "Borůvka’s Algorithm"), ("7.4", "Jarník’s (“Prim’s”) Algorithm"), ("7.5", "Kruskal’s Algorithm"),
     ]),
+    8: dict(first=273, last=307, exercises=297, sections=[
+        ("8.1", "Shortest Path Trees"), ("8.2", "Negative Edges"), ("8.3", "The Only SSSP Algorithm"),
+        ("8.4", "Unweighted Graphs: Breadth-First Search"), ("8.5", "Directed Acyclic Graphs: Depth-First Search"),
+        ("8.6", "Best-First: Dijkstra’s Algorithm"), ("8.7", "Relax ALL the Edges: Bellman-Ford"),
+    ]),
     1: dict(first=21, last=70, exercises=44, sections=[
         ("1.1", "Reductions"), ("1.2", "Simplify and Delegate"), ("1.3", "Tower of Hanoi"),
         ("1.4", "Mergesort"), ("1.5", "Quicksort"), ("1.6", "The Pattern"), ("1.7", "Recursion Trees"),

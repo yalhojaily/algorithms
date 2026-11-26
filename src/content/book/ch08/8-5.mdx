@@ -1,0 +1,214 @@
+---
+section: "8.5"
+summary: "في dag أقصر المسارات سهلة حتى مع أوزان سالبة: لا دورات، فلا دورات سالبة. والتكرار dist(v) = min(dist(u) + w(u→v)) صحيح في كل رسم، لكنه تكرار فقط في dag. فبرمجة ديناميكية بالترتيب الطوبولوجي، في O(V + E). وهي، مرة أخرى، حالة من Ford: أرخِ الحواف الداخلة إلى كل رأس بالترتيب الطوبولوجي، أو الخارجة منه."
+minutes: 35
+goals:
+  - تكتب تكرار أقصر المسافة وتعرف لماذا هو تكرار في dag فقط
+  - تحسب أقصر المسارات في dag بالبرمجة الديناميكية في O(V + E)، حتى مع أوزان سالبة
+  - ترى DagSSSP حالة من Ford، وتميز «سحب» الموجة من «دفعها»
+terms:
+  - { en: DagSSSP, ar: أقصر المسارات في dag }
+  - { en: topological order, ar: ترتيب طوبولوجي }
+  - { en: pull / push, ar: سحب / دفع }
+  - { en: recurrence, ar: تكرار }
+---
+
+import Stage from '../../../components/book/Stage.astro';
+import ReadingGuide from '../../../components/book/ReadingGuide.astro';
+import BookPages from '../../../components/book/BookPages.astro';
+import BookExercises from '../../../components/book/BookExercises.astro';
+import Takeaways from '../../../components/book/Takeaways.astro';
+import Callout from '../../../components/Callout.astro';
+import Exercise from '../../../components/Exercise.astro';
+import QuickCheck from '../../../components/QuickCheck.tsx';
+import SSSPLab from '../../../components/SSSPLab.tsx';
+import CodeLab from '../../../components/CodeLab.tsx';
+import * as lab from '../../../labs/book-8-5-dag.ts';
+
+<Stage n={1} id="warmup" title="تمهيد" sub="فكرة القسم قبل أي تعريف">
+
+في الفصل 6 حسبت **أطول** مسار في dag ببرمجة ديناميكية بسيطة. وقلنا هناك: في dag، الأطول والأقصر متناظران تمامًا، غيّر max إلى min. فهذا القسم تقريبًا لا جديد فيه، إلا شيئًا واحدًا: أن نرى البرمجة الديناميكية نفسها **حالة من خوارزمية Ford**. فالخوارزمية العامة للقسم 8.3 تشمل حتى هذا.
+
+والمكافأة: الأوزان السالبة لا تخيف هنا. dag لا دورات فيه، فلا دورات سالبة.
+
+</Stage>
+
+<Stage n={2} id="reading" title="اقرأ من الكتاب" sub="صفحات الكتاب الأصلية لهذا القسم، ومعها دليل يوجه قراءتك">
+
+<ReadingGuide pages="282–284" minutes={12}>
+
+- **التكرار:** «In fact, this identity holds for all directed graphs, but it is only a recurrence for directed acyclic graphs.» جملة دقيقة جدًا.
+- **الرسم الاعتمادي:** هو **معكوس** $G$. وفي الجملة التالية سقطت كلمة: «the distance of every **vertex**».
+- **الشكلان 8.7 و8.8:** «These are the same algorithm.»
+- **الشكلان 8.9 و8.10:** سحب الحواف الداخلة، ثم دفع الحواف الخارجة.
+- **PushDagSSSP:** الصيغة الأقرب إلى بقية خوارزميات الفصل.
+
+</ReadingGuide>
+
+<BookPages section="8.5" />
+
+</Stage>
+
+<Stage n={3} id="explain" title="الشرح والتجربة" sub="الأفكار نفسها بالعربية، بتفصيل، مع تجربة تفاعلية">
+
+### التكرار
+
+ليكن $\text{dist}(v)$ طول أقصر مسار من $s$ إلى $v$. فهو يحقق:
+
+$$
+\text{dist}(v) = \begin{cases} 0 & \text{if } v = s \\ \min_{u \to v} \big(\text{dist}(u) + w(u \to v)\big) & \text{otherwise} \end{cases}
+$$
+
+أي: أقصر طريق إلى $v$ يأتي من سابق ما $u$، فجرّب كل السوابق. «في الحقيقة، هذه **المساواة** صحيحة لكل الرسوم الموجهة (بلا دورات سالبة)، لكنها **تكرار** في الـ dags فقط.» والفرق: المساواة تصف الحل، أما التكرار فيمكن **تقييمه**. ومع دورة، التقييم الاستدعائي يقع في حلقة لا نهائية: لحساب $\text{dist}(v)$ تحتاج إلى $\text{dist}(u)$ الذي يحتاج إلى $\text{dist}(v)$. وفي dag، كل استدعاء يزور رأسًا **أسبق** في الترتيب الطوبولوجي، فلا حلقة.
+
+### الرسم الاعتمادي معكوس $G$
+
+$\text{dist}(v)$ تعتمد على $\text{dist}(u)$ إن وفقط إن كانت $u \to v$ حافة. فالرسم الاعتمادي هو $\text{rev}(G)$. ومن الفصل 6: البرمجة الديناميكية = ترتيب بعدي للرسم الاعتمادي = ترتيب بعدي لـ $\text{rev}(G)$ = (بما يكافئه) **ترتيب طوبولوجي لـ $G$**:
+
+```
+DagSSSP(s):
+  for all vertices v in topological order
+    if v = s
+      dist(v) ← 0
+    else
+      dist(v) ← ∞
+      for all edges u→v
+        if dist(v) > dist(u) + w(u→v)    ⟨⟨if u→v is tense⟩⟩
+          dist(v) ← dist(u) + w(u→v)      ⟨⟨relax u→v⟩⟩
+```
+
+والزمن $O(V + E)$: الترتيب الطوبولوجي، ثم كل حافة مرة.
+
+### وهي خوارزمية Ford!
+
+انقل التهيئة خارج الحلقة، وأضف pred:
+
+```
+DagSSSP(s):
+  InitSSSP(s)
+  for all vertices v in topological order
+    for all edges u→v
+      if u→v is tense
+        Relax(u→v)
+```
+
+«هذه الخوارزمية نفسها.» وهي حالة من Ford: ترتيب محدد لإرخاء الحواف.
+
+### سحب أم دفع؟
+
+DagSSSP تختلف عن بقية حالات Ford في أمر صغير: حين تنظر إلى رأس، تحاول أن ترخي حوافه **الداخلة**. فهي «**تسحب**» الموجة إلى الأمام. أما BFS وDijkstra فترخي الحواف **الخارجة**، «**تدفع**» الموجة من المصدر. ويمكن تعديل DagSSSP لتدفع أيضًا:
+
+```
+PushDagSSSP(s):
+  InitSSSP(s)
+  for all vertices u in topological order
+    for all outgoing edges u→v
+      if u→v is tense
+        Relax(u→v)
+```
+
+وهي $O(V + E)$ أيضًا، وأقرب شكلًا إلى بقية الفصل. وصحتها مباشرة من صحة Ford، أو بالاستقراء على الترتيب الطوبولوجي: حين نصل إلى $u$، كل سوابقه عولجت ودفعت قيمها إليه، فـ $\text{dist}(u)$ نهائية.
+
+جرّب. الطابور هنا هو الترتيب الطوبولوجي نفسه، والأوزان فيها سالبة:
+
+<SSSPLab client:visible algo="dag" />
+
+<Callout type="tip" title="والأطول؟">
+بدّل min بـ max و$\infty$ بـ $-\infty$، والخوارزمية نفسها تحسب **أطول** المسارات في dag. وهذا ما فعلته في القسم 6.4. أو اضرب كل الأوزان في $-1$ واحسب الأقصر: في dag لا تظهر دورات سالبة جديدة لأنه لا دورات أصلًا.
+</Callout>
+
+</Stage>
+
+<Stage n={4} id="check" title="تحقق من فهمك" sub="أسئلة سريعة قبل التمارين">
+
+<QuickCheck
+  client:visible
+  id="q1"
+  question="لماذا لا تخيفنا الأوزان السالبة في dag؟"
+  options={['لأن الخوارزمية تتجاهلها', 'لأن لا دورات، فلا دورات سالبة، وأقصر المسارات معرّفة دائمًا', 'لأن dag لا يمكن أن تكون فيه أوزان سالبة', 'لأنها تُحوّل إلى موجبة']}
+  answer={1}
+  explain="المشكلة الوحيدة مع الأوزان السالبة كانت الدورات السالبة."
+  wrong={{ 0: 'تستعملها كأي وزن.', 2: 'يمكن.', 3: 'لا تحويل.' }}
+/>
+
+<QuickCheck
+  client:visible
+  id="q2"
+  question="في PushDagSSSP، حين نعالج u، لماذا dist(u) نهائية؟"
+  options={['لأن u هو s', 'لأن كل سوابقه أسبق في الترتيب الطوبولوجي، فعولجت كلها ودفعت قيمها إليه', 'لأن الأوزان موجبة', 'ليست نهائية دائمًا']}
+  answer={1}
+  explain="كل حافة داخلة إلى $u$ تأتي من رأس قبله في الترتيب، وقد أُرخيت حين عولج ذلك الرأس."
+  wrong={{ 0: 'لأي $u$.', 2: 'تعمل مع السالبة.', 3: 'نهائية دائمًا هنا.' }}
+/>
+
+</Stage>
+
+<Stage n={5} id="exercises" title="تمارين الكتاب" sub="حلّها بالورقة والقلم، ثم سجّل حالتها. الكتاب لا ينشر حلولها">
+
+<BookExercises chapter={8} nums={[1, 20]} core={[20]} />
+
+<Callout type="tip" title="تلميح للتمرين 1">
+(أ) Dijkstra على $n$ رأسًا و$O(n)$ حافة. (ب) الشجرة الحلقية **ليست** dag (الحواف من الأوراق إلى الجذر تصنع دورات)، لكنها «تقريبًا» شجرة. أقصر مسار من $u$ إلى $v$: إما ينزل في الشجرة مباشرة (إن كان $v$ من نسل $u$)، وإما ينزل إلى ورقة ما، ويعود إلى الجذر، ثم ينزل إلى $v$. فما الذي تحتاج إلى حسابه؟ (أقرب ورقة من $u$ «إلى الأسفل»، ومسار الجذر إلى $v$.) كم يكلف كل منهما؟
+</Callout>
+
+<Callout type="tip" title="تلميح للتمرين 20">
+(أ) الارتفاعات مختلفة، فوجّه كل حافة «إلى الأعلى»: الرسم الناتج **dag** (لا يمكن أن تصعد في دورة). فأقصر مسار صاعد من $s$ إلى كل رأس: القسم 8.5. وأقصر مسار هابط من كل رأس إلى $t$: dag آخر. ثم اختر نقطة القمة. (ب) الحواف المسطحة تكسر الـ dag. ابنِ رسم حالات: (رأس، «ما زلت أصعد» أو «بدأت أنزل»)، وحواف الانتقال. (ج) أضف إلى الحالة **عدد** التبديلات، أو اجعل وزن التبديل ضخمًا.
+</Callout>
+
+### تمارين إضافية بحلول كاملة
+
+<Exercise id="e1" level="apply" title="أقصر مسار بعدد حواف محدود">
+
+في رسم موجه **عام** (فيه دورات) بأوزان موجبة، المطلوب أقصر مشي من $s$ إلى $t$ فيه $k$ حافة **بالضبط**. اختزله إلى أقصر مسار في dag.
+
+<div slot="hint">رسم جداء: (رأس، عدد الحواف حتى الآن).</div>
+<div slot="solution">
+
+الرؤوس $(v, i)$ لـ $0 \le i \le k$. والحواف $(u, i) \to (v, i + 1)$ لكل حافة $u \to v$، بالوزن نفسه. هذا dag (كل حافة تزيد $i$). وأقصر مسار من $(s, 0)$ إلى $(t, k)$ هو المطلوب. الحجم $(k + 1)V$ رأسًا و$kE$ حافة، فالزمن $O(k(V + E))$. (وهذا جوهر Bellman-Ford في القسم 8.7: $i$ هو «عدد الحواف».)
+
+</div>
+</Exercise>
+
+<Exercise id="e2" level="prove" title="الترتيب الطوبولوجي ضروري">
+
+أعط dag صغيرًا وترتيبًا **غير** طوبولوجي يجعل PushDagSSSP تخطئ.
+
+<div slot="hint">رأس يُعالج قبل أن تصله أفضل قيمة.</div>
+<div slot="solution">
+
+$s \to a$ (1)، $s \to b$ (5)، $a \to b$ (1)، $b \to t$ (1). عالج بالترتيب $s, b, a, t$. بعد $s$: $a = 1$، $b = 5$. عالج $b$: $t = 6$. عالج $a$: $b = 2$ (أُصلح). عالج $t$: لا شيء. فـ $\text{dist}(t) = 6$، والصحيح $4$. لأن $b$ دفع قيمته **قبل** أن تصله القيمة الأفضل من $a$.
+
+</div>
+</Exercise>
+
+### المختبر البرمجي
+
+<CodeLab
+  client:visible
+  id="book-8.5-dag"
+  title="أقصر المسارات في dag، بأوزان سالبة"
+  exports={['dagShortest']}
+  starter={lab.starter}
+  tests={[
+    { name: 'مثال المختبر', code: '(() => { const N = "sabcdeft", id = (c) => N.indexOf(c), E = "sa sb ab ac bc bd cd ce de df ef et ft".split(" ").map((e, k) => [id(e[0]), id(e[1]), [3, 2, -2, 4, 1, 6, -3, 2, 2, 5, -1, 4, 2][k]]); return dagShortest(8, E, 0).join() === "0,3,1,2,-1,1,0,2"; })()' },
+    { name: 'غير قابل للوصول', code: '(() => { const d = dagShortest(3, [[1, 2, 4]], 0); return d[0] === 0 && d[1] === Infinity && d[2] === Infinity; })()' },
+    { name: 'dags عشوائية (مقارنة بكل المسارات)', code: '(() => { for (let t = 0; t < 50; t++) { const n = 1 + Math.floor(Math.random() * 9), perm = [...Array(n).keys()].sort(() => Math.random() - 0.5), E = []; for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) if (Math.random() < 0.35) E.push([perm[i], perm[j], Math.floor(Math.random() * 15) - 6]); const s = perm[0], best = new Array(n).fill(Infinity); const walk = (v, d) => { if (d < best[v]) best[v] = d; for (const [a, b, w] of E) if (a === v) walk(b, d + w); }; walk(s, 0); if (dagShortest(n, E, s).join() !== best.join()) return false; } return true; })()' },
+  ]}
+  bench={{ title: 'زمن dagShortest على dag فيه n رأسًا و3n حافة', fn: 'dagShortest', make: '(() => { const E = []; for (let i = 0; i < 3 * n; i++) { const a = Math.floor(Math.random() * n), b = Math.floor(Math.random() * n); if (a < b) E.push([a, b, Math.floor(Math.random() * 20) - 5]); } return [n, E, 0]; })()', spread: true, ns: [500, 1000, 2000, 4000] }}
+  solution={lab.solution}
+/>
+
+</Stage>
+
+<Stage n={6} id="summary" title="الخلاصة">
+
+<Takeaways>
+
+- **التكرار** $\text{dist}(v) = \min_{u \to v}(\text{dist}(u) + w(u \to v))$ صحيح دائمًا، لكنه قابل للتقييم في dag فقط.
+- **DagSSSP:** بالترتيب الطوبولوجي، $O(V + E)$، حتى مع أوزان سالبة.
+- **حالة من Ford:** إرخاء الحواف الداخلة (سحب) أو الخارجة (دفع) بالترتيب الطوبولوجي.
+- **الأطول:** max بدل min، والخوارزمية نفسها.
+
+</Takeaways>
+
+</Stage>

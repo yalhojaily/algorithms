@@ -1,0 +1,289 @@
+---
+section: "8.7"
+summary: "أبسط تطبيق لـ Ford: أرخِ كل الحواف المشدودة، وكرر. ومفتاح التحليل المأخذ 8.6: بعد i جولة، dist(v) لا تتجاوز أقصر مشي من s إلى v بـ i حافة على الأكثر. فبلا دورة سالبة تكفي V − 1 جولة، وأي حافة مشدودة بعدها تكشف دورة سالبة. الزمن O(VE) مهما كانت الأوزان. ثم تحسين Moore بطابور، ثم كيف اشتق Bellman الخوارزمية نفسها بالبرمجة الديناميكية."
+minutes: 55
+goals:
+  - تكتب Bellman-Ford بـ V − 1 جولة واختبار الدورة السالبة
+  - تبرهن المأخذ 8.6 بالاستقراء على عدد الجولات
+  - تفهم تحسين Moore بطابور ورمز المراحل، والمأخذ 8.7
+  - تشتق Bellman-Ford من تكرار Bellman dist≤i(v) بأربع خطوات تبسيط
+terms:
+  - { en: Bellman-Ford algorithm, ar: خوارزمية Bellman-Ford }
+  - { en: round / iteration, ar: جولة }
+  - { en: negative cycle detection, ar: كشف الدورة السالبة }
+  - { en: Moore's algorithm, ar: خوارزمية Moore }
+  - { en: Bellman's equation, ar: معادلة Bellman }
+---
+
+import Stage from '../../../components/book/Stage.astro';
+import ReadingGuide from '../../../components/book/ReadingGuide.astro';
+import BookPages from '../../../components/book/BookPages.astro';
+import BookExercises from '../../../components/book/BookExercises.astro';
+import Takeaways from '../../../components/book/Takeaways.astro';
+import Callout from '../../../components/Callout.astro';
+import Exercise from '../../../components/Exercise.astro';
+import QuickCheck from '../../../components/QuickCheck.tsx';
+import SSSPLab from '../../../components/SSSPLab.tsx';
+import CodeLab from '../../../components/CodeLab.tsx';
+import * as lab from '../../../labs/book-8-7-bellman.ts';
+
+<Stage n={1} id="warmup" title="تمهيد" sub="فكرة القسم قبل أي تعريف">
+
+Dijkstra ذكية: ترتب، وتختار، وتتجنب العمل الضائع. لكن ذكاءها يعتمد على افتراض (لا أوزان سالبة)، وإلا قد تنفجر أسيًا. فما الخوارزمية التي لا تفترض شيئًا، وتضمن زمنًا معقولًا دائمًا، وتكتشف الدورة السالبة إن وُجدت؟
+
+أغبى خوارزمية ممكنة: أرخِ **كل** الحواف. ثم أرخِ كلها مرة أخرى. وكرر. والسؤال الوحيد: كم مرة؟ والجواب الجميل: $V - 1$ مرة تكفي دائمًا.
+
+</Stage>
+
+<Stage n={2} id="reading" title="اقرأ من الكتاب" sub="صفحات الكتاب الأصلية لهذا القسم، ومعها دليل يوجه قراءتك">
+
+<ReadingGuide pages="289–297" minutes={30}>
+
+- **التاريخ:** Shimbel 1954، ثم Moore 1957، وWoodbury وDantzig 1957، وBellman 1958، وMinty 1958. والحاشيتان 10 و11، و«Brosh» مرة أخرى في الحاشية 12.
+- **السطر الواحد:** «Relax ALL the tense edges, then recurse.»
+- **المأخذ 8.6:** التعريف $\text{dist}_{\le i}(v)$ أولًا.
+- **الصيغة المحددة:** «repeat V − 1 times»، ثم فحص الدورة السالبة.
+- **Moore's Improvement والشكل 8.16:** الطابور مع شرط «not already in the queue»، والحاشية 13.
+- **Dynamic Programming Formulation:** معادلة Bellman، ثم أربع نسخ متتالية تنتهي بـ BellmanFordFinal.
+
+</ReadingGuide>
+
+<BookPages section="8.7" />
+
+</Stage>
+
+<Stage n={3} id="explain" title="الشرح والتجربة" sub="الأفكار نفسها بالعربية، بتفصيل، مع تجربة تفاعلية">
+
+### اسم آخر لا يخص مكتشفه
+
+رسمها Alfonso Shimbel أول مرة سنة 1954، ووصفها Edward Moore بتفصيل أكثر سنة 1957، وأعاد اكتشافها مستقلين Max Woodbury وGeorge Dantzig (1957)، وRichard Bellman (1958)، وGeorge Minty (1958). و«بامتثال تام لقانون Stigler»، اسمها شبه العالمي **Bellman-Ford**، لأن Bellman استعمل صراحةً صيغة Ford للإرخاء. وسطرها الواحد:
+
+> **Bellman-Ford: أرخِ كل الحواف المشدودة، ثم كرر.**
+
+```
+BellmanFord(s):
+  InitSSSP(s)
+  while there is at least one tense edge
+    for every edge u→v
+      if u→v is tense
+        Relax(u→v)
+```
+
+### المأخذ 8.6
+
+لكل رأس $v$ وعدد صحيح $i \ge 0$، ليكن $\text{dist}_{\le i}(v)$ طول أقصر **مشي** من $s$ إلى $v$ فيه $i$ حافة **على الأكثر**. خاصة: $\text{dist}_{\le 0}(s) = 0$، و$\text{dist}_{\le 0}(v) = \infty$ لكل $v \ne s$.
+
+> **المأخذ 8.6.** لكل $v$ ولكل $i \ge 0$: بعد $i$ تكرار من الحلقة الرئيسة، $\text{dist}(v) \le \text{dist}_{\le i}(v)$.
+
+**البرهان (استقراء على $i$).** الأساس $i = 0$ بديهي. ولـ $i \gt 0$: خذ $v$، وليكن $W$ أقصر مشي من $s$ إلى $v$ فيه $i$ حافة على الأكثر. حالتان:
+
+- $W$ بلا حواف: فـ $v = s$ و$\text{dist}_{\le i}(s) = 0$. وInitSSSP وضع $\text{dist}(s) = 0$، والمسافات لا تزيد أبدًا.
+- وإلا، فلتكن $u \to v$ آخر حافة في $W$. فرضية الاستقراء: بعد $i - 1$ تكرار، $\text{dist}(u) \le \text{dist}_{\le i-1}(u)$. وفي التكرار $i$، حين نفحص $u \to v$، إما $\text{dist}(v) \le \text{dist}(u) + w(u \to v)$ أصلًا، وإما نضعه كذلك. ففي الحالتين $\text{dist}(v) \le \text{dist}_{\le i-1}(u) + w(u \to v) = \text{dist}_{\le i}(v)$. (وقد تنقص أكثر قبل نهاية التكرار، لكنها لا تزيد.) ∎
+
+### $V - 1$ جولة، ثم الدورة السالبة
+
+إن لم تكن هناك دورات سالبة، فأقصر مشي من $s$ إلى أي رأس مسار بسيط، فيه $V - 1$ حافة على الأكثر. فبعد $V - 1$ تكرار، كل المسافات صحيحة. وبعبارة أخرى: **إن بقيت حافة مشدودة بعد $V - 1$ تكرار، ففي الرسم دورة سالبة!** فالصيغة المحددة:
+
+```
+BellmanFord(s):
+  InitSSSP(s)
+  repeat V − 1 times
+    for every edge u→v
+      if u→v is tense
+        Relax(u→v)
+  for every edge u→v
+    if u→v is tense
+      return "Negative cycle!"
+```
+
+كل تكرار $O(E)$، فالزمن **$O(VE)$**. «فـ Bellman-Ford فعالة **دائمًا**، حتى مع حواف سالبة، بل حتى مع دورات سالبة.» وإن كانت كل الأوزان غير سالبة، فـ Dijkstra أسرع (على الأقل في أسوأ الحالات). «وعمليًا، Dijkstra غالبًا أسرع من Bellman-Ford حتى مع حواف سالبة.»
+
+جرّب. كل جولة تمر على **كل** الحواف بالترتيب. ثم بدّل إلى الدورة السالبة:
+
+<SSSPLab client:visible algo="bellman" />
+
+### تحسين Moore
+
+لم يقدم Moore ولا Bellman الخوارزمية بهذا الشكل. Moore قدم نسخته («Algorithm D») في الورقة نفسها التي فيها BFS («Algorithm A»)، و«الخوارزميتان متطابقتان تقريبًا». اشتقها من BFS بتعديلين:
+
+1. «+1» تصير «$+ w(u \to v)$».
+2. قبل دفع رأس، تحقق إن كان **في الطابور أصلًا**، فلا يحتوي الطابور إلا نسخة واحدة من كل رأس. (الحاشية 13: بلا هذا الشرط تبقى صحيحة، لكن حد $O(VE)$ لا يبقى.)
+
+```
+Moore(s):
+  InitSSSP(s)
+  Push(s)
+  Push(✠)                              ⟨⟨start the first phase⟩⟩
+  while the queue contains at least one vertex
+    u ← Pull()
+    if u = ✠
+      Push(✠)                          ⟨⟨start the next phase⟩⟩
+    else
+      for all edges u→v
+        if u→v is tense
+          Relax(u→v)
+          if v is not already in the queue
+            Push(v)
+```
+
+ولأن في الطابور نسخة واحدة على الأكثر من كل رأس، فكل رأس يُسحب مرة على الأكثر في كل مرحلة، وكل حافة تُفحص مرة على الأكثر في كل مرحلة. وكل حافة مشدودة في بداية مرحلة تُرخى خلالها. فـ Moore «تحسين لـ Bellman-Ford يحتفظ بالحواف المشدودة في طابور، بدل أن يختبر كل حافة بالقوة الغاشمة». وبالبرهان نفسه:
+
+> **المأخذ 8.7.** بعد $i$ مرحلة من Moore، $\text{dist}(v) \le \text{dist}_{\le i}(v)$.
+
+فبلا دورات سالبة، Moore يتوقف بعد $V - 1$ مرحلة على الأكثر، كل مرحلة $O(E)$: **$O(VE)$**. «لكن عمليًا، Moore أسرع بكثير غالبًا»، لأنه لا يفحص الحافة $u \to v$ إلا إن تغير $\text{dist}(u)$ في المرحلة السابقة. ومع دورة سالبة لا يتوقف أبدًا، والحل: عدّ مرات سحب الرمز. في الرسم دورة سالبة إن وفقط إن كان الطابور غير فارغ بعد أن يُسحب الرمز للمرة $V - 1$.
+
+<SSSPLab client:visible algo="moore" />
+
+### كيف اشتقها Bellman: برمجة ديناميكية
+
+«ككل شيء تقريبًا يحمل اسمه»، اشتق Richard Bellman الخوارزمية **بالبرمجة الديناميكية**. والتكرار المغري من القسم 8.5 ($\text{dist}(v) = \min_{u \to v}(\ldots)$) لا يعمل في رسم فيه دورات: حلقة لا نهائية. فنحتاج إلى **معامل بنيوي إضافي** يتناقص مع كل استدعاء، والتقييم تافه حين يصل إلى صفر. واختار Bellman **عدد الحواف الأقصى**. و**معادلة Bellman**:
+
+$$
+\text{dist}_{\le i}(v) = \begin{cases} 0 & i = 0,\ v = s \\ \infty & i = 0,\ v \ne s \\ \min\Big\{\text{dist}_{\le i-1}(v),\ \min_{u \to v}\big(\text{dist}_{\le i-1}(u) + w(u \to v)\big)\Big\} & \text{otherwise} \end{cases}
+$$
+
+وبافتراض أن لا دورات سالبة، الهدف $\text{dist}_{\le V-1}(v)$. والتقييم المباشر بمصفوفة $\text{dist}[i, v]$ في $O(VE)$:
+
+```
+BellmanFordDP(s):
+  dist[0, s] ← 0
+  for every vertex v ≠ s
+    dist[0, v] ← ∞
+  for i ← 1 to V − 1
+    for every vertex v
+      dist[i, v] ← dist[i − 1, v]
+      for every edge u→v
+        if dist[i, v] > dist[i − 1, u] + w(u→v)
+          dist[i, v] ← dist[i − 1, u] + w(u→v)
+```
+
+ثم ثلاث خطوات تبسيط، كل واحدة صغيرة:
+
+1. **(DP2)** في كل تكرار خارجي نفحص كل حافة $u \to v$ مرة بالضبط، والترتيب لا يهم. فاحذف مستوى إزاحة من الأسطر الثلاثة الأخيرة: حلقة على كل الحواف بدل «لكل رأس، لكل حافة داخلة».
+2. **(DP3)** غيّر $i - 1$ إلى $i$ في السطرين الأخيرين («not $i - 1$!»). فقد تقترب المسافات من الحقيقة **أسرع**، لكن النتيجة صحيحة. وبدل $\text{dist}[i, v] = \text{dist}_{\le i}(v)$، صار $\text{dist}[i, v] \le \text{dist}_{\le i}(v)$: بالضبط المأخذان 8.6 و8.7.
+3. **(Final)** الآن الصف $i$ نسخة من الصف $i - 1$ نعدّلها. «فالخوارزمية سخيفة قليلًا»: لا حاجة إلى مصفوفة ثنائية أصلًا، والفهرس $i$ زائد. مصفوفة واحدة تكفي:
+
+```
+BellmanFordFinal(s):
+  dist[s] ← 0
+  for every vertex v ≠ s
+    dist[v] ← ∞
+  for i ← 1 to V − 1
+    for every edge u→v
+      if dist[v] > dist[u] + w(u→v)
+        dist[v] ← dist[u] + w(u→v)
+```
+
+وهي تقريبًا BellmanFord الأصلية حرفيًا. ينقصها شيئان فقط: مؤشرات pred، وكشف الدورة السالبة، «وإضافتهما مباشرة».
+
+<Callout type="tip" title="الحلقة تُغلق">
+الفصل كله في جملة: كل خوارزمية أقصر مسار من مصدر واحد هي Ford بترتيب إرخاء. BFS: بترتيب المراحل. DagSSSP: بالترتيب الطوبولوجي. Dijkstra: بترتيب المسافة. Bellman-Ford: كل شيء $V - 1$ مرة. وBellman-Ford أيضًا برمجة ديناميكية، كـ DagSSSP، لكن بمعامل إضافي يحوّل الرسم ذا الدورات إلى dag (عدد الحواف، كما في التمرين الإضافي الأول في القسم 8.5).
+</Callout>
+
+</Stage>
+
+<Stage n={4} id="check" title="تحقق من فهمك" sub="أسئلة سريعة قبل التمارين">
+
+<QuickCheck
+  client:visible
+  id="q1"
+  question="لماذا تكفي V − 1 جولة في Bellman-Ford بلا دورات سالبة؟"
+  options={['لأن الحواف E', 'لأن أقصر مشي مسار بسيط فيه V − 1 حافة على الأكثر، والمأخذ 8.6 يضمن dist(v) ≤ dist≤V−1(v)', 'لأن كل جولة تُصلح رأسًا', 'لا تكفي دائمًا']}
+  answer={1}
+  explain="و$\text{dist}(v)$ لا ينزل تحت المسافة الحقيقية أبدًا (هو طول مشي ما). فيساويها."
+  wrong={{ 0: 'لا علاقة بعدد الحواف.', 2: 'الجولة الواحدة قد تُصلح رؤوسًا كثيرة.', 3: 'تكفي.' }}
+/>
+
+<QuickCheck
+  client:visible
+  id="q2"
+  question="بعد V − 1 جولة، ما زالت حافة مشدودة. ماذا نستنتج؟"
+  options={['نحتاج إلى جولة أخرى', 'في الرسم دورة سالبة قابلة للوصول من s', 'الرسم غير متصل', 'خطأ في التطبيق']}
+  answer={1}
+  explain="بلا دورة سالبة كل المسافات صحيحة بعد $V - 1$ جولة، فلا حافة مشدودة."
+  wrong={{ 0: 'لن تكفي أي جولات: مع دورة سالبة دائمًا حافة مشدودة.', 2: 'غير المتصل لا يترك حواف مشدودة.', 3: 'هذا بالضبط ما يُفترض أن يحدث مع دورة سالبة.' }}
+/>
+
+<QuickCheck
+  client:visible
+  id="q3"
+  question="في DP3، لماذا تغيير i − 1 إلى i لا يفسد الصحة؟"
+  options={['لأنه لا يغير شيئًا', 'لأن القيم الجديدة ما زالت أطوال مشي حقيقية، ولا تزيد عن dist≤i(v)', 'لأن الأوزان موجبة', 'يفسدها أحيانًا']}
+  answer={1}
+  explain="استعمال قيمة أحدث (أصغر) من $u$ يعطي طول مشي أقصر أو مساويًا، وما زال مشيًا فعليًا. فالحد العلوي والسفلي محفوظان."
+  wrong={{ 0: 'يغير السرعة.', 2: 'يعمل مع السالبة.', 3: 'لا يفسدها.' }}
+/>
+
+</Stage>
+
+<Stage n={5} id="exercises" title="تمارين الكتاب" sub="حلّها بالورقة والقلم، ثم سجّل حالتها. الكتاب لا ينشر حلولها">
+
+<BookExercises chapter={8} nums={[6, 8]} core={[6]} />
+
+<Callout type="tip" title="تلميح للتمرين 6">
+(أ) إن بقيت حافة $u \to v$ مشدودة بعد $V - 1$ جولة، فأرخها، ثم اتبع pred من $v$ رجوعًا $V$ خطوة. لماذا تكون حينئذ **داخل** دورة؟ وهل هي دورة سالبة؟ (ب) كل رأس **قابل للوصول من** أي رأس على دورة سالبة مسافته $-\infty$. فاجمع رؤوس الحواف التي ما زالت مشدودة، وابحث منها. (ج) متقدم.
+</Callout>
+
+<Callout type="tip" title="تلميح للتمرين 8">
+(أ) إن تغير $\text{pred}(s)$، فـ $\text{dist}(s)$ صار سالبًا. ماذا يعني مشي من $s$ إلى $s$ طوله سالب؟ (ب) ابحث عن ترتيب إرخاء لا يعود فيه أي تحسين إلى $s$ نفسه. (ج) و(د) (متقدمان): الفكرة أن «الدورة في pred» تعني دورة سالبة. لماذا مجموع الأوزان حول دورة في رسم pred سالب؟
+</Callout>
+
+### تمارين إضافية بحلول كاملة
+
+<Exercise id="e1" level="apply" title="ترتيب الحواف يهم في الجولة الواحدة">
+
+مسار $s = v_0 \to v_1 \to \cdots \to v_k$. كم جولة يحتاج Bellman-Ford إن مر على الحواف بالترتيب من $v_0$ إلى $v_k$؟ وبالترتيب المعاكس؟
+
+<div slot="hint">في الترتيب الأمامي، الإرخاء الأول يجعل الحافة التالية مشدودة فورًا في الجولة نفسها.</div>
+<div slot="solution">
+
+**أمامي:** جولة واحدة تصحح كل المسار: $v_1$ ثم $v_2$ ثم ... في الجولة نفسها. (وجولة ثانية لتكتشف أن لا شيء تغير، إن كنت تتوقف مبكرًا.) **معاكس:** في كل جولة، الحافة $v_{j-1} \to v_j$ تُفحص قبل أن يتحسن $v_{j-1}$ في الجولة نفسها، فلا يتقدم التصحيح إلا خطوة واحدة في الجولة: $k$ جولات. فحد $V - 1$ ضروري في أسوأ ترتيب. (وهذا سبب أن DP3 «أسرع» من DP: تستعمل قيمًا أحدث داخل الجولة.)
+
+</div>
+</Exercise>
+
+<Exercise id="e2" level="prove" title="متى نتوقف مبكرًا؟">
+
+برهن: إن مرت جولة كاملة دون أي إرخاء، فكل المسافات صحيحة، ويمكن التوقف (حتى لو لم تكتمل $V - 1$ جولة).
+
+<div slot="hint">ماذا تقول جولة بلا إرخاء عن الحواف المشدودة؟ ثم القسم 8.3.</div>
+<div slot="solution">
+
+جولة بلا إرخاء فحصت **كل** حافة ولم تجد واحدة مشدودة. وبما أن لا شيء تغير، فلا حافة مشدودة الآن. وبالادعاءين 3 و4 من القسم 8.3، المسافات حينئذ صحيحة، ومؤشرات pred شجرة أقصر المسارات. (وهذا يعني أيضًا أن لا دورة سالبة قابلة للوصول.) والمختبر البرمجي يستعمل هذا: `if (!changed) break`.
+
+</div>
+</Exercise>
+
+### المختبر البرمجي
+
+<CodeLab
+  client:visible
+  id="book-8.7-bellman"
+  title="Bellman-Ford مع كشف الدورة السالبة"
+  exports={['bellmanFord']}
+  starter={lab.starter}
+  tests={[
+    { name: 'حواف سالبة', code: 'bellmanFord(6, [[0, 1, 1], [0, 2, 5], [2, 1, -5], [1, 3, 2], [3, 4, 1], [2, 4, 4], [4, 5, 2], [3, 5, 6]], 0).join() === "0,0,5,2,3,5"' },
+    { name: 'دورة سالبة: null', code: 'bellmanFord(5, [[0, 1, 2], [1, 2, 1], [2, 3, -4], [3, 1, 2], [2, 4, 3]], 0) === null' },
+    { name: 'دورة سالبة غير قابلة للوصول: لا تهم', code: '(() => { const d = bellmanFord(4, [[0, 1, 3], [2, 3, -5], [3, 2, 1]], 0); return d && d.join() === "0,3,Infinity,Infinity"; })()' },
+    { name: 'رسوم عشوائية', code: '(() => { for (let t = 0; t < 80; t++) { const n = 1 + Math.floor(Math.random() * 10), E = []; for (let u = 0; u < n; u++) for (let v = 0; v < n; v++) if (u !== v && Math.random() < 0.25) E.push([u, v, Math.floor(Math.random() * 14) - 4]); const R = new Set([0]), st = [0]; while (st.length) { const x = st.pop(); for (const [a, b] of E) if (a === x && !R.has(b)) { R.add(b); st.push(b); } } const d = new Array(n).fill(Infinity); d[0] = 0; for (let i = 0; i < 3 * n; i++) for (const [u, v, w] of E) if (R.has(u) && d[u] + w < d[v]) d[v] = d[u] + w; const neg = E.some(([u, v, w]) => R.has(u) && d[u] + w < d[v]); const got = bellmanFord(n, E, 0); if (neg) { if (got !== null) return false; } else if (!got || got.join() !== d.join()) return false; } return true; })()' },
+  ]}
+  bench={{ title: 'زمن bellmanFord على dag عشوائي (أسوأ ترتيب) فيه n رأسًا و3n حافة', fn: 'bellmanFord', make: '(() => { const E = []; for (let i = 0; i < 3 * n; i++) { const a = Math.floor(Math.random() * n), b = Math.floor(Math.random() * n); if (a < b) E.push([a, b, Math.floor(Math.random() * 10) - 3]); } E.sort((x, y) => y[0] - x[0]); return [n, E, 0]; })()', spread: true, ns: [250, 500, 1000, 2000] }}
+  solution={lab.solution}
+/>
+
+</Stage>
+
+<Stage n={6} id="summary" title="الخلاصة">
+
+<Takeaways>
+
+- **Bellman-Ford:** أرخِ كل الحواف، $V - 1$ مرة. ثم أي حافة مشدودة = دورة سالبة. $O(VE)$ دائمًا.
+- **المأخذ 8.6:** بعد $i$ جولة، $\text{dist}(v) \le \text{dist}_{\le i}(v)$.
+- **Moore:** طابور بنسخة واحدة من كل رأس، ومراحل بالرمز. $O(VE)$ أيضًا، وأسرع عمليًا بكثير.
+- **Bellman:** برمجة ديناميكية على $\text{dist}_{\le i}(v)$، ثم ثلاثة تبسيطات توصل إلى الخوارزمية نفسها.
+- **الفصل كله:** Ford بترتيبات مختلفة، كل واحد لصنف من الرسوم.
+
+</Takeaways>
+
+</Stage>

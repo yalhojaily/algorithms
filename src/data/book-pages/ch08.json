@@ -1,0 +1,579 @@
+{
+ "chapter": 8,
+ "offset": 18,
+ "pages": [
+  273,
+  307
+ ],
+ "exercisesPage": 297,
+ "reading": {
+  "8.1": [
+   {
+    "src": "book/ch08/8.1-1.webp",
+    "w": 999,
+    "h": 1556,
+    "page": 273
+   },
+   {
+    "src": "book/ch08/8.1-2.webp",
+    "w": 999,
+    "h": 1237,
+    "page": 274
+   }
+  ],
+  "8.2": [
+   {
+    "src": "book/ch08/8.2-1.webp",
+    "w": 999,
+    "h": 230,
+    "page": 274
+   },
+   {
+    "src": "book/ch08/8.2-2.webp",
+    "w": 999,
+    "h": 1492,
+    "page": 275
+   },
+   {
+    "src": "book/ch08/8.2-3.webp",
+    "w": 999,
+    "h": 414,
+    "page": 276
+   }
+  ],
+  "8.3": [
+   {
+    "src": "book/ch08/8.3-1.webp",
+    "w": 999,
+    "h": 1055,
+    "page": 276
+   },
+   {
+    "src": "book/ch08/8.3-2.webp",
+    "w": 999,
+    "h": 1503,
+    "page": 277
+   },
+   {
+    "src": "book/ch08/8.3-3.webp",
+    "w": 999,
+    "h": 301,
+    "page": 278
+   }
+  ],
+  "8.4": [
+   {
+    "src": "book/ch08/8.4-1.webp",
+    "w": 999,
+    "h": 1142,
+    "page": 278
+   },
+   {
+    "src": "book/ch08/8.4-2.webp",
+    "w": 999,
+    "h": 1484,
+    "page": 279
+   },
+   {
+    "src": "book/ch08/8.4-3.webp",
+    "w": 999,
+    "h": 1508,
+    "page": 280
+   },
+   {
+    "src": "book/ch08/8.4-4.webp",
+    "w": 999,
+    "h": 1500,
+    "page": 281
+   },
+   {
+    "src": "book/ch08/8.4-5.webp",
+    "w": 999,
+    "h": 492,
+    "page": 282
+   }
+  ],
+  "8.5": [
+   {
+    "src": "book/ch08/8.5-1.webp",
+    "w": 999,
+    "h": 998,
+    "page": 282
+   },
+   {
+    "src": "book/ch08/8.5-2.webp",
+    "w": 999,
+    "h": 1448,
+    "page": 283
+   },
+   {
+    "src": "book/ch08/8.5-3.webp",
+    "w": 999,
+    "h": 748,
+    "page": 284
+   }
+  ],
+  "8.6": [
+   {
+    "src": "book/ch08/8.6-1.webp",
+    "w": 999,
+    "h": 711,
+    "page": 284
+   },
+   {
+    "src": "book/ch08/8.6-2.webp",
+    "w": 999,
+    "h": 1345,
+    "page": 285
+   },
+   {
+    "src": "book/ch08/8.6-3.webp",
+    "w": 999,
+    "h": 1494,
+    "page": 286
+   },
+   {
+    "src": "book/ch08/8.6-4.webp",
+    "w": 999,
+    "h": 1510,
+    "page": 287
+   },
+   {
+    "src": "book/ch08/8.6-5.webp",
+    "w": 999,
+    "h": 1498,
+    "page": 288
+   },
+   {
+    "src": "book/ch08/8.6-6.webp",
+    "w": 999,
+    "h": 862,
+    "page": 289
+   }
+  ],
+  "8.7": [
+   {
+    "src": "book/ch08/8.7-1.webp",
+    "w": 999,
+    "h": 562,
+    "page": 289
+   },
+   {
+    "src": "book/ch08/8.7-2.webp",
+    "w": 999,
+    "h": 1371,
+    "page": 290
+   },
+   {
+    "src": "book/ch08/8.7-3.webp",
+    "w": 999,
+    "h": 1499,
+    "page": 291
+   },
+   {
+    "src": "book/ch08/8.7-4.webp",
+    "w": 999,
+    "h": 1504,
+    "page": 292
+   },
+   {
+    "src": "book/ch08/8.7-5.webp",
+    "w": 999,
+    "h": 1494,
+    "page": 293
+   },
+   {
+    "src": "book/ch08/8.7-6.webp",
+    "w": 999,
+    "h": 1507,
+    "page": 294
+   },
+   {
+    "src": "book/ch08/8.7-7.webp",
+    "w": 999,
+    "h": 1492,
+    "page": 295
+   },
+   {
+    "src": "book/ch08/8.7-8.webp",
+    "w": 999,
+    "h": 1508,
+    "page": 296
+   },
+   {
+    "src": "book/ch08/8.7-9.webp",
+    "w": 999,
+    "h": 120,
+    "page": 297
+   }
+  ]
+ },
+ "exercises": [
+  {
+   "num": 0,
+   "group": null,
+   "strips": [
+    {
+     "src": "book/ch08/ex0-1.webp",
+     "w": 999,
+     "h": 403,
+     "page": 297
+    }
+   ]
+  },
+  {
+   "num": 1,
+   "group": null,
+   "strips": [
+    {
+     "src": "book/ch08/ex1-1.webp",
+     "w": 999,
+     "h": 617,
+     "page": 297
+    }
+   ]
+  },
+  {
+   "num": 2,
+   "group": null,
+   "strips": [
+    {
+     "src": "book/ch08/ex2-1.webp",
+     "w": 999,
+     "h": 211,
+     "page": 297
+    },
+    {
+     "src": "book/ch08/ex2-2.webp",
+     "w": 999,
+     "h": 126,
+     "page": 298
+    }
+   ]
+  },
+  {
+   "num": 3,
+   "group": null,
+   "strips": [
+    {
+     "src": "book/ch08/ex3-1.webp",
+     "w": 999,
+     "h": 382,
+     "page": 298
+    }
+   ]
+  },
+  {
+   "num": 4,
+   "group": null,
+   "strips": [
+    {
+     "src": "book/ch08/ex4-1.webp",
+     "w": 999,
+     "h": 525,
+     "page": 298
+    }
+   ]
+  },
+  {
+   "num": 5,
+   "group": null,
+   "strips": [
+    {
+     "src": "book/ch08/ex5-1.webp",
+     "w": 999,
+     "h": 238,
+     "page": 298
+    }
+   ]
+  },
+  {
+   "num": 6,
+   "group": null,
+   "strips": [
+    {
+     "src": "book/ch08/ex6-1.webp",
+     "w": 999,
+     "h": 155,
+     "page": 298
+    },
+    {
+     "src": "book/ch08/ex6-2.webp",
+     "w": 999,
+     "h": 414,
+     "page": 299
+    }
+   ]
+  },
+  {
+   "num": 7,
+   "group": null,
+   "strips": [
+    {
+     "src": "book/ch08/ex7-1.webp",
+     "w": 999,
+     "h": 514,
+     "page": 299
+    }
+   ]
+  },
+  {
+   "num": 8,
+   "group": null,
+   "strips": [
+    {
+     "src": "book/ch08/ex8-1.webp",
+     "w": 999,
+     "h": 522,
+     "page": 299
+    }
+   ]
+  },
+  {
+   "num": 9,
+   "group": null,
+   "strips": [
+    {
+     "src": "book/ch08/ex9-1.webp",
+     "w": 999,
+     "h": 203,
+     "page": 300
+    }
+   ]
+  },
+  {
+   "num": 10,
+   "group": null,
+   "strips": [
+    {
+     "src": "book/ch08/ex10-1.webp",
+     "w": 999,
+     "h": 128,
+     "page": 300
+    }
+   ]
+  },
+  {
+   "num": 11,
+   "group": null,
+   "strips": [
+    {
+     "src": "book/ch08/ex11-1.webp",
+     "w": 999,
+     "h": 431,
+     "page": 300
+    }
+   ]
+  },
+  {
+   "num": 12,
+   "group": null,
+   "strips": [
+    {
+     "src": "book/ch08/ex12-1.webp",
+     "w": 999,
+     "h": 516,
+     "page": 300
+    }
+   ]
+  },
+  {
+   "num": 13,
+   "group": null,
+   "strips": [
+    {
+     "src": "book/ch08/ex13-1.webp",
+     "w": 999,
+     "h": 155,
+     "page": 300
+    },
+    {
+     "src": "book/ch08/ex13-2.webp",
+     "w": 999,
+     "h": 126,
+     "page": 301
+    }
+   ]
+  },
+  {
+   "num": 14,
+   "group": null,
+   "strips": [
+    {
+     "src": "book/ch08/ex14-1.webp",
+     "w": 999,
+     "h": 452,
+     "page": 301
+    }
+   ]
+  },
+  {
+   "num": 15,
+   "group": null,
+   "strips": [
+    {
+     "src": "book/ch08/ex15-1.webp",
+     "w": 999,
+     "h": 874,
+     "page": 301
+    },
+    {
+     "src": "book/ch08/ex15-2.webp",
+     "w": 999,
+     "h": 526,
+     "page": 302
+    }
+   ]
+  },
+  {
+   "num": 16,
+   "group": null,
+   "strips": [
+    {
+     "src": "book/ch08/ex16-1.webp",
+     "w": 999,
+     "h": 407,
+     "page": 302
+    }
+   ]
+  },
+  {
+   "num": 17,
+   "group": null,
+   "strips": [
+    {
+     "src": "book/ch08/ex17-1.webp",
+     "w": 999,
+     "h": 503,
+     "page": 302
+    }
+   ]
+  },
+  {
+   "num": 18,
+   "group": null,
+   "strips": [
+    {
+     "src": "book/ch08/ex18-1.webp",
+     "w": 999,
+     "h": 306,
+     "page": 303
+    }
+   ]
+  },
+  {
+   "num": 19,
+   "group": null,
+   "strips": [
+    {
+     "src": "book/ch08/ex19-1.webp",
+     "w": 999,
+     "h": 499,
+     "page": 303
+    }
+   ]
+  },
+  {
+   "num": 20,
+   "group": null,
+   "strips": [
+    {
+     "src": "book/ch08/ex20-1.webp",
+     "w": 999,
+     "h": 668,
+     "page": 303
+    },
+    {
+     "src": "book/ch08/ex20-2.webp",
+     "w": 999,
+     "h": 161,
+     "page": 304
+    }
+   ]
+  },
+  {
+   "num": 21,
+   "group": null,
+   "strips": [
+    {
+     "src": "book/ch08/ex21-1.webp",
+     "w": 999,
+     "h": 371,
+     "page": 304
+    }
+   ]
+  },
+  {
+   "num": 22,
+   "group": null,
+   "strips": [
+    {
+     "src": "book/ch08/ex22-1.webp",
+     "w": 999,
+     "h": 932,
+     "page": 304
+    },
+    {
+     "src": "book/ch08/ex22-2.webp",
+     "w": 999,
+     "h": 121,
+     "page": 305
+    }
+   ]
+  },
+  {
+   "num": 23,
+   "group": null,
+   "strips": [
+    {
+     "src": "book/ch08/ex23-1.webp",
+     "w": 999,
+     "h": 750,
+     "page": 305
+    }
+   ]
+  },
+  {
+   "num": 24,
+   "group": null,
+   "strips": [
+    {
+     "src": "book/ch08/ex24-1.webp",
+     "w": 999,
+     "h": 590,
+     "page": 305
+    },
+    {
+     "src": "book/ch08/ex24-2.webp",
+     "w": 999,
+     "h": 516,
+     "page": 306
+    }
+   ]
+  },
+  {
+   "num": 25,
+   "group": null,
+   "strips": [
+    {
+     "src": "book/ch08/ex25-1.webp",
+     "w": 999,
+     "h": 961,
+     "page": 306
+    }
+   ]
+  },
+  {
+   "num": 26,
+   "group": null,
+   "strips": [
+    {
+     "src": "book/ch08/ex26-1.webp",
+     "w": 999,
+     "h": 1138,
+     "page": 307
+    }
+   ]
+  }
+ ]
+}

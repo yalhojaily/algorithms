@@ -141,6 +141,19 @@ export const chapters: BookChapter[] = [
       sec('7.5', 'Kruskal’s Algorithm', 'خوارزمية Kruskal', 265, [4, 5, 6]),
     ],
   },
+  {
+    num: 8, slug: '08-shortest-paths', en: 'Shortest Paths', ar: 'أقصر المسارات', pages: [273, 307], exercisesPage: 297,
+    blurb: 'أقصر المسارات من مصدر واحد إلى كل الرؤوس، في شجرة. والحواف السالبة والدورات السالبة. ثم خوارزمية Ford العامة: أرخِ أي حافة مشدودة حتى لا يبقى شيء. ومنها أربع حالات، كل واحدة الأفضل لصنف من الرسوم: البحث بالعرض للأوزان الواحدة، والبحث بالعمق للـ dags، وDijkstra للأوزان غير السالبة، وBellman-Ford لكل شيء.',
+    sections: [
+      sec('8.1', 'Shortest Path Trees', 'أشجار أقصر المسارات', 273, [12, 13]),
+      sec('8.2', 'Negative Edges', 'الحواف السالبة', 274, [11]),
+      sec('8.3', 'The Only SSSP Algorithm', 'خوارزمية أقصر المسارات الوحيدة', 276, [0, 7, 10]),
+      sec('8.4', 'Unweighted Graphs: Breadth-First Search', 'الرسوم غير الموزونة: البحث بالعرض', 278, [16, 17]),
+      sec('8.5', 'Directed Acyclic Graphs: Depth-First Search', 'الـ dags: البحث بالعمق', 282, [1, 20]),
+      sec('8.6', 'Best-First: Dijkstra’s Algorithm', 'الأفضل أولًا: خوارزمية Dijkstra', 284, [2, 3, 9, 25]),
+      sec('8.7', 'Relax ALL the Edges: Bellman-Ford', 'أرخِ كل الحواف: Bellman-Ford', 289, [6, 8]),
+    ],
+  },
 ];
 
 /** The whole book, for the table of contents (chapters not yet on the site are shown as coming). */

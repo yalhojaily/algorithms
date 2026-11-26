@@ -1,0 +1,249 @@
+---
+section: "8.6"
+summary: "استبدل بطابور BFS طابور أولويات مفتاحه dist(v): هذه خوارزمية Dijkstra. ونسخة Erickson تعيد إدخال الرأس إن تحسنت مسافته بعد استخراجه، فهي حالة من Ford وصحيحة مع أي أوزان بلا دورة سالبة. ومع أوزان غير سالبة، الموجة تتسع بانتظام: الاستخراجات بترتيب غير متناقص، وكل رأس يُستخرج مرة، والزمن O(E log V). ومع أوزان سالبة، قد يصير الزمن أسيًا."
+minutes: 55
+goals:
+  - تكتب Dijkstra بنسخة Erickson (Insert وDecreaseKey وإعادة الإدخال) وتراها حالة من Ford
+  - تبرهن المأخذين 8.3 و8.4 والمبرهنة 8.5 لأوزان غير سالبة
+  - تحلل الزمن O(E log V) بكومة ثنائية
+  - تعرف لماذا NonnegativeDijkstra المبسطة تخطئ مع أوزان سالبة، ولماذا Dijkstra الكاملة قد تكون أسية
+terms:
+  - { en: Dijkstra's algorithm, ar: خوارزمية Dijkstra }
+  - { en: ExtractMin, ar: استخراج الأصغر }
+  - { en: DecreaseKey, ar: إنقاص المفتاح }
+  - { en: Stigler's law, ar: قانون Stigler }
+  - { en: wavefront, ar: جبهة الموجة }
+---
+
+import Stage from '../../../components/book/Stage.astro';
+import ReadingGuide from '../../../components/book/ReadingGuide.astro';
+import BookPages from '../../../components/book/BookPages.astro';
+import BookExercises from '../../../components/book/BookExercises.astro';
+import Takeaways from '../../../components/book/Takeaways.astro';
+import Callout from '../../../components/Callout.astro';
+import Exercise from '../../../components/Exercise.astro';
+import QuickCheck from '../../../components/QuickCheck.tsx';
+import SSSPLab from '../../../components/SSSPLab.tsx';
+import CodeLab from '../../../components/CodeLab.tsx';
+import * as lab from '../../../labs/book-8-6-dijkstra.ts';
+
+<Stage n={1} id="warmup" title="تمهيد" sub="فكرة القسم قبل أي تعريف">
+
+موجة BFS تتسع حافةً حافة. لكن إن كانت الحواف بأطوال مختلفة، فالموجة يجب أن تتسع **مسافةً**: الرأس الأقرب أولًا، أيًا كان عدد الحواف إليه. والأداة: طابور يُخرج دائمًا الرأس صاحب أصغر مسافة مؤقتة. هذا Dijkstra.
+
+والقسم يحمل مفاجأتين. الأولى تاريخية: Dijkstra ليس أول من اكتشفها. والثانية أهم: النسخة التي في أغلب الكتب **تخطئ** مع الأوزان السالبة، ونسخة Erickson لا تخطئ، لكن ثمنها قد يكون زمنًا أسيًا.
+
+</Stage>
+
+<Stage n={2} id="reading" title="اقرأ من الكتاب" sub="صفحات الكتاب الأصلية لهذا القسم، ومعها دليل يوجه قراءتك">
+
+<ReadingGuide pages="284–289" minutes={25}>
+
+- **التاريخ و«قانون Stigler»:** لا اكتشاف علمي يحمل اسم مكتشفه الأول. والحاشية 7: «Leyzorek-Gray-Johnson-...-Hillier algorithm».
+- **الشكل 8.11:** لاحظ «if v is in the priority queue ... else Insert». هذا ما يجعلها حالة من Ford.
+- **No Negative Edges:** المأخذان 8.3 و8.4 والمبرهنة 8.5. وفي برهان المبرهنة كُتب $v_i$ مرتين والمقصود $v_j$، و«Pull» والمقصود Extract.
+- **الحاشية 8:** Dijkstra الأصلية $O(V^2)$، وMinty $O(VE)$، والكومة الثنائية من Johnson سنة 1977.
+- **الشكل 8.13:** NonnegativeDijkstra، «النسخة في أغلب الكتب وWikipedia وحتى ورقة Dijkstra».
+- **Negative Edges (متقدم):** الأشكال 8.14 و8.15، والزمن الأسي، والحاشية 9 الطريفة.
+
+</ReadingGuide>
+
+<BookPages section="8.6" />
+
+</Stage>
+
+<Stage n={3} id="explain" title="الشرح والتجربة" sub="الأفكار نفسها بالعربية، بتفصيل، مع تجربة تفاعلية">
+
+### من «نشرها» أولًا؟
+
+استبدل بطابور BFS **طابور أولويات** مفتاح الرأس فيه $\text{dist}(v)$، تحصل على خوارزمية «نُشرت» أول مرة سنة 1957 من فريق في معهد Case للتقنية بقيادة Michael Leyzorek، في تقرير سنوي لقسم في الجيش الأمريكي. واكتشفها Edsger Dijkstra مستقلًا سنة 1956 (ونشرها 1959)، ثم George Minty قبل 1960، ثم Peter Whiting وJohn Hillier سنة 1960. ووصف George Dantzig خوارزمية شبه مطابقة سنة 1958. وبعض المصادر الأولى سمّتها «خوارزمية Minty»، لكنها اليوم «خوارزمية Dijkstra» عالميًا، «تمامًا وفق **قانون Stigler**»: لا اكتشاف علمي يحمل اسم مكتشفه الأول. (والقانون نفسه، بسخرية، ليس لـ Stigler.)
+
+### الخوارزمية
+
+```
+Dijkstra(s):
+  InitSSSP(s)
+  Insert(s, 0)
+  while the priority queue is not empty
+    u ← ExtractMin()
+    for all edges u→v
+      if u→v is tense
+        Relax(u→v)
+        if v is in the priority queue
+          DecreaseKey(v, dist(v))
+        else
+          Insert(v, dist(v))
+```
+
+لاحظ السطر الأخير: إن تحسنت مسافة رأس **بعد** أن استُخرج، فإنه **يعود** إلى الطابور. وبهذا، باستقراء سهل: في كل لحظة، الحافة $u \to v$ مشدودة إن وفقط إن كان $u$ في الطابور أو هو آخر رأس استُخرج. فـ Dijkstra حالة من Ford، وهي **صحيحة** ما دامت لا دورة سالبة في $G$.
+
+### أوزان غير سالبة: موجة منتظمة
+
+حين لا تكون هناك حواف سالبة، Dijkstra «حسنة السلوك جدًا». حدسيًا، تتسع موجة من $s$ تمر على الرؤوس بترتيب **تزايد** بعدها عن $s$، كـ BFS. ولنبرهن ذلك: لتكن $u_i$ الرأس الذي يعيده الاستدعاء رقم $i$ لـ ExtractMin، و$d_i$ قيمة $\text{dist}(u_i)$ بعد الاستخراج مباشرة. ($u_1 = s$ و$d_1 = 0$. ولا نفترض بعد أن $u_i$ مختلفة.)
+
+> **المأخذ 8.3.** إن لم تكن في $G$ حواف سالبة، فلكل $i \lt j$: $d_i \le d_j$.
+
+**البرهان.** يكفي $d_{i+1} \ge d_i$. حالتان:
+- إن أُرخيت الحافة $u_i \to u_{i+1}$ في التكرار $i$، فـ $\text{dist}(u_{i+1}) = \text{dist}(u_i) + w(u_i \to u_{i+1}) \ge \text{dist}(u_i)$، لأن الأوزان غير سالبة.
+- وإلا، فـ $u_{i+1}$ كان في الطابور أصلًا في بداية التكرار $i$، بأولوية $\ge \text{dist}(u_i)$ (لأن $u_i$ هو ما أعاده ExtractMin)، ولم تتغير في التكرار $i$. ∎
+
+> **المأخذ 8.4.** إن لم تكن في $G$ حواف سالبة، فكل رأس يُستخرج مرة واحدة على الأكثر.
+
+**البرهان.** افترض أن $v$ استُخرج في التكرار $i$، وأُعيد إدخاله في $j$، واستُخرج ثانية في $k$، مع $i \lt j \lt k$. $\text{dist}(v)$ لا تزيد أبدًا، و**نقصت تمامًا** في $j$ قبل إعادة الإدخال. فـ $d_i \gt d_k$. وبالمأخذ 8.3، في $G$ حافة سالبة. ∎
+
+فكل رأس يُمسح مرة، وكل حافة تُرخى مرة على الأكثر. لكن، بعكس BFS، $\text{dist}(v)$ قد يتغير **مرات** قبل الاستخراج (أول مرة Insert، وبعدها DecreaseKey). وبعد الاستخراج لا يتغير أبدًا.
+
+> **المبرهنة 8.5.** إن لم تكن في $G$ حواف سالبة، فحين تنتهي Dijkstra، $\text{dist}(v)$ طول أقصر مسار من $s$ إلى $v$، لكل $v$.
+
+**البرهان** كبرهان BFS تقريبًا. خذ أي مسار $v_0 \to \cdots \to v_\ell$ من $s$ إلى $v$، وليكن $L_j$ طول جزئه حتى $v_j$. بالاستقراء $\text{dist}(v_j) \le L_j$: بعد استخراج $v_{j-1}$ مباشرة، إما $\text{dist}(v_j) \le \text{dist}(v_{j-1}) + w(v_{j-1} \to v_j)$ أصلًا، وإما نضعه كذلك. ففي الحالتين $\text{dist}(v_j) \le L_{j-1} + w = L_j$. فـ $\text{dist}(v)$ لا يتجاوز طول أي مسار، و(بالاستقراء نفسه) هو طول مسار pred. ∎
+
+**الزمن.** على الأكثر $E$ عملية DecreaseKey، و$V$ عملية Insert وExtractMin. وبكومة ثنائية (كل عملية $O(\log V)$): **$O(E \log V)$**.
+
+جرّب على الرسم الموجب. لاحظ أن كل رأس يُستخرج مرة، وبترتيب تزايد المسافة:
+
+<SSSPLab client:visible algo="dijkstra" />
+
+### الحاشية 8: تاريخ الطابور
+
+أوراق الخمسينيات لم تذكر طوابير الأولويات أصلًا. اقترح Dijkstra مسحًا غاشمًا لكل رؤوس الجبهة في كل تكرار: $O(V^2)$، وهذا **أسرع** من الكومة الثنائية حين $E = \Omega(V^2)$! واقترح Minty مسح كل الحواف $u \to v$ مع $\text{dist}(u)$ منته و$\text{dist}(v)$ لا: $O(VE)$. والكومة الثنائية لزمن شبه خطي اقترحها Donald Johnson سنة 1977. وبكومة Fibonacci: $O(E + V \log V)$.
+
+### NonnegativeDijkstra
+
+إن عرفت مسبقًا أن لا حواف سالبة، يمكن التبسيط قليلًا: أدخل **كل** الرؤوس إلى الطابور في البداية، واستعمل DecreaseKey فقط:
+
+```
+NonnegativeDijkstra(s):
+  InitSSSP(s)
+  for all vertices v
+    Insert(v, dist(v))
+  while the priority queue is not empty
+    u ← ExtractMin()
+    for all edges u→v
+      if u→v is tense
+        Relax(u→v)
+        DecreaseKey(v, dist(v))
+```
+
+«هذه نسخة Dijkstra في أغلب كتب الخوارزميات، وWikipedia، وحتى ورقة Dijkstra الأصلية.» وهي «البحث الأفضل أولًا» في الفصل 5.
+
+### مع حواف سالبة (متقدم)
+
+لكن NonnegativeDijkstra **تخطئ** مع حواف سالبة: الرأس المستخرج لا يعود، فإن تحسنت مسافته لاحقًا، لا ينتشر التحسين. وحتى مع أوزان موجبة كلها، ليست أسرع من Dijkstra الكاملة، «نظريًا ولا عمليًا». «ولهذين السببين، أظن أن Dijkstra تستحق اسم "خوارزمية Dijkstra" أكثر من NonnegativeDijkstra. وحتى Edsger Dijkstra كان سيوافق على أن خوارزمية صحيحة بطيئة أحيانًا (ونادرًا عمليًا) أفضل من خوارزمية سريعة لا تعمل دائمًا!»
+
+ومع حواف سالبة، صورة «الموجة المتسعة» تنهار: الرأس نفسه قد يُستخرج مرات، والحافة نفسها قد تُرخى مرات، والمسافات قد لا تُكتشف بترتيب متزايد. ارجع إلى المختبر واختر «حواف سالبة»: راقب عداد الاستخراجات.
+
+بل في الرسوم بلا دورات سالبة (وإن كان فيها حواف سالبة)، أسوأ زمن لـ Dijkstra **أسي**. عائلة بسيطة من Shier وWitzgall (الشكل 8.14) تجبرها على $\Theta(2^{V/2})$ إرخاء، وعائلة أعقد (التمرين 9) على $\Theta(2^V)$، وهذا أسوأ ما يمكن. والحاشية 9 تضحك: مثال Shier وWitzgall **dag** بـ $O(V)$ حافة، فأقصر مساراته تُحسب في $O(V)$ أصلًا، «حتى لو لم نلاحظ أن المسار المتعرج في الأعلى هو شجرة أقصر المسارات». «عمليًا، مع ذلك، Dijkstra سريعة عادةً حتى مع حواف سالبة.»
+
+</Stage>
+
+<Stage n={4} id="check" title="تحقق من فهمك" sub="أسئلة سريعة قبل التمارين">
+
+<QuickCheck
+  client:visible
+  id="q1"
+  question="مع أوزان غير سالبة، ماذا نعرف عن رأس استُخرج من طابور Dijkstra؟"
+  options={['قد تتحسن مسافته لاحقًا', 'مسافته نهائية، ولن يعود إلى الطابور', 'سيُستخرج مرة أخرى', 'لا شيء']}
+  answer={1}
+  explain="المأخذ 8.4: كل رأس يُستخرج مرة. ومسافته عند الاستخراج هي المسافة الحقيقية."
+  wrong={{ 0: 'هذا مع الأوزان السالبة.', 2: 'المأخذ 8.4 يمنعه.', 3: 'نعرف الكثير.' }}
+/>
+
+<QuickCheck
+  client:visible
+  id="q2"
+  question="أي الخوارزميتين صحيحة مع حواف سالبة (بلا دورات سالبة)؟"
+  options={['NonnegativeDijkstra فقط', 'Dijkstra بنسخة Erickson فقط', 'كلتاهما', 'لا واحدة']}
+  answer={1}
+  explain="نسخة Erickson تعيد إدخال الرأس إن تحسنت مسافته، فهي حالة من Ford. والمبسطة لا تعيده، فقد تبقى مسافات خاطئة."
+  wrong={{ 0: 'بالعكس.', 2: 'المبسطة تخطئ.', 3: 'الكاملة صحيحة، وإن كانت قد تبطؤ.' }}
+/>
+
+<QuickCheck
+  client:visible
+  id="q3"
+  question="رسم كثيف: E ≈ V². أي تطبيق أسرع نظريًا؟"
+  options={['كومة ثنائية: O(E log V) = O(V² log V)', 'مسح غاشم كما فعل Dijkstra: O(V²)', 'متساويان', 'Minty: O(VE)']}
+  answer={1}
+  explain="الحاشية 8: المسح الغاشم للجبهة $O(V^2)$ يغلب الكومة الثنائية في الرسوم الكثيفة. (والتمرين 7 من الفصل 7 الفكرة نفسها لـ Jarník.)"
+  wrong={{ 0: 'أبطأ بعامل $\log V$.', 2: 'يختلفان.', 3: '$O(V^3)$ هنا.' }}
+/>
+
+</Stage>
+
+<Stage n={5} id="exercises" title="تمارين الكتاب" sub="حلّها بالورقة والقلم، ثم سجّل حالتها. الكتاب لا ينشر حلولها">
+
+<BookExercises chapter={8} nums={[2, 3, 9, 25]} core={[2, 25]} />
+
+<Callout type="tip" title="تلميح للتمرين 2">
+تلميح الكتاب: «Modify Dijkstra's algorithm. Or don't.» الطريقة التي «لا تعدّل»: أقصر مسار إما لا يستعمل الحافة السالبة $x \to y$، وإما يستعملها **مرة** (لماذا ليس أكثر؟ لا دورة سالبة... أم هل يجب أن تتحقق من ذلك؟). فاحسب Dijkstra من $s$ ومن $y$ في رسم بلا الحافة السالبة، واجمع. (ب) مع $k$ حواف سالبة: رسم حالات (رأس، كم حافة سالبة استُعملت)، أو Dijkstra من كل طرف. كيف يعتمد الزمن على $k$؟
+</Callout>
+
+<Callout type="tip" title="تلميح للتمرين 3">
+تلميح الكتاب: «One of these problems is trivial.» (أ) كل شجرة تغطية تحتوي على **كل** الرؤوس. فما وزنها؟ (ب) حوّل وزن الرأس إلى وزن حافة: كل حافة $u \to v$ وزنها $w(v)$، ثم أضف $w(s)$. أو قسّم كل رأس إلى رأسين بينهما حافة. والرسم غير موجه: لا مشكلة، الأوزان موجبة.
+</Callout>
+
+<Callout type="tip" title="تلميح للتمرين 9">
+تلميح الكتاب: «Binary counter.» ابنِ $G_n$ استقرائيًا من $G_{n-1}$، بحيث يجبر رأس جديد Dijkstra على «إعادة» كل عمل $G_{n-1}$ مرتين. والأوزان السالبة تجعل رأسًا استُخرج مبكرًا يتحسن لاحقًا، فيعود ويعيد إرخاء كل ما بعده. انظر إلى الشكل 8.14 أولًا، وافهم لماذا يعطي $2^{V/2}$، ثم حاول أن تضاعف.
+</Callout>
+
+<Callout type="tip" title="تلميح للتمرين 25">
+أكثر المسارات **أمانًا** يعظّم **حاصل ضرب** الاحتمالات. حوّل الضرب إلى جمع، والتعظيم إلى تصغير. (التمرين الإضافي الثاني في القسم 8.2 الحيلة نفسها.) وما إشارة الأوزان الجديدة؟ (الاحتمالات بين 0 و1.) فأي خوارزمية تكفي؟ وانتبه للاحتمال صفر.
+</Callout>
+
+### تمارين إضافية بحلول كاملة
+
+<Exercise id="e1" level="apply" title="NonnegativeDijkstra تخطئ">
+
+أعط رسمًا صغيرًا بحافة سالبة واحدة (بلا دورة سالبة) تُرجع فيه NonnegativeDijkstra مسافة خاطئة.
+
+<div slot="hint">رأس يُستخرج بمسافة صغيرة، ثم يتحسن عبر حافة سالبة من رأس أبعد. واجعل له ابنًا.</div>
+<div slot="solution">
+
+$s \to a$ (1)، $s \to b$ (5)، $b \to a$ ($-5$)، $a \to t$ (1). NonnegativeDijkstra: تستخرج $s$، فـ $a = 1$ و$b = 5$. تستخرج $a$، فـ $t = 2$. تستخرج $t$. تستخرج $b$، فـ $a = 0$ (أُرخيت، لكن $a$ لن يُستخرج ثانية). النهاية: $\text{dist}(t) = 2$، والصحيح $1$. أما Dijkstra الكاملة فتعيد إدخال $a$، وتستخرجه، وتصلح $t = 1$. (هذا رسم «حواف سالبة» في المختبر تقريبًا.)
+
+</div>
+</Exercise>
+
+<Exercise id="e2" level="prove" title="لماذا DecreaseKey بدل الإدخال المكرر؟">
+
+في المختبر البرمجي لا DecreaseKey: ندفع الرأس مرة أخرى بمفتاحه الجديد، ونتجاهل النسخ القديمة. ما الزمن؟
+
+<div slot="hint">كم نسخة على الأكثر في الكومة؟</div>
+<div slot="solution">
+
+كل إرخاء يدفع نسخة، والإرخاءات $E$ على الأكثر (أوزان غير سالبة: كل حافة تُرخى مرة). فالكومة فيها $O(E)$ عنصرًا، وكل عملية $O(\log E) = O(\log V)$. والاستخراجات $O(E)$ (منها النسخ القديمة، تُرمى في $O(1)$ بعد الاستخراج). المجموع $O(E \log V)$: الحد نفسه، بكود أبسط وذاكرة $O(E)$ بدل $O(V)$.
+
+</div>
+</Exercise>
+
+### المختبر البرمجي
+
+<CodeLab
+  client:visible
+  id="book-8.6-dijkstra"
+  title="Dijkstra بكومة ثنائية"
+  exports={['dijkstra']}
+  starter={lab.starter}
+  tests={[
+    { name: 'رسم المختبر (أوزان موجبة)', code: '(() => { const N = "sabcdeft", id = (c) => N.indexOf(c), E = "sa sb ab ac bd cd ce df ef ec et ft".split(" ").map((e, k) => [id(e[0]), id(e[1]), [4, 1, 2, 5, 8, 1, 3, 6, 2, 1, 7, 3][k]]); const d = dijkstra(8, E, 0); const ref = new Array(8).fill(Infinity); ref[0] = 0; for (let i = 0; i < 8; i++) for (const [u, v, w] of E) if (ref[u] + w < ref[v]) ref[v] = ref[u] + w; return d.join() === ref.join(); })()' },
+    { name: 'أوزان صفرية وغير قابل للوصول', code: 'dijkstra(4, [[0, 1, 0], [1, 2, 0], [2, 1, 0]], 0).join() === "0,0,0,Infinity"' },
+    { name: 'رسوم عشوائية (مقارنة بـ Bellman-Ford)', code: '(() => { for (let t = 0; t < 60; t++) { const n = 1 + Math.floor(Math.random() * 15), E = []; for (let u = 0; u < n; u++) for (let v = 0; v < n; v++) if (u !== v && Math.random() < 0.25) E.push([u, v, Math.floor(Math.random() * 20)]); const ref = new Array(n).fill(Infinity); ref[0] = 0; for (let i = 0; i < n; i++) for (const [u, v, w] of E) if (ref[u] + w < ref[v]) ref[v] = ref[u] + w; if (dijkstra(n, E, 0).join() !== ref.join()) return false; } return true; })()' },
+  ]}
+  bench={{ title: 'زمن dijkstra على رسم فيه n رأسًا و4n حافة', fn: 'dijkstra', make: '(() => { const E = []; for (let v = 1; v < n; v++) E.push([Math.floor(Math.random() * v), v, Math.random() * 10]); for (let i = 0; i < 3 * n; i++) E.push([Math.floor(Math.random() * n), Math.floor(Math.random() * n), Math.random() * 10]); return [n, E, 0]; })()', spread: true, ns: [25000, 50000, 100000, 200000] }}
+  solution={lab.solution}
+/>
+
+</Stage>
+
+<Stage n={6} id="summary" title="الخلاصة">
+
+<Takeaways>
+
+- **Dijkstra:** BFS بطابور أولويات مفتاحه $\text{dist}$. ونسخة Erickson تعيد الإدخال، فهي حالة من Ford وصحيحة بلا دورة سالبة.
+- **أوزان غير سالبة:** الاستخراجات بترتيب غير متناقص (8.3)، وكل رأس مرة (8.4)، والمسافات صحيحة (8.5). $O(E \log V)$.
+- **NonnegativeDijkstra:** نسخة الكتب المعتادة. تخطئ مع حواف سالبة، وليست أسرع.
+- **حواف سالبة:** Dijkstra الكاملة صحيحة لكنها قد تكون أسية، وسريعة عادةً عمليًا.
+
+</Takeaways>
+
+</Stage>
