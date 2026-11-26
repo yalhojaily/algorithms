@@ -1,0 +1,165 @@
+---
+section: "9.3"
+summary: "إضافة ثابت إلى كل الحواف لا تنفع: المسارات ذات الحواف الأكثر تطول أسرع، فيتغير أقصر مسار. لكن حيلة أدق تنفع: أعط كل رأس سعرًا π(v)، واجعل w′(u→v) = π(u) + w(u→v) − π(v). فكل مسار من u إلى v يتغير طوله بالمقدار نفسه π(u) − π(v)، وأقصر المسارات لا تتغير."
+minutes: 30
+goals:
+  - "تفهم لماذا إضافة ثابت لكل حافة تغير أقصر المسارات"
+  - "تعرّف إعادة الوزن بأسعار الرؤوس وتبرهن أنها تحفظ أقصر المسارات"
+  - "ترى المجموع التلسكوبي - ضريبة الخروج وهدية الدخول تلغيان بعضهما"
+terms:
+  - { en: reweighting, ar: إعادة الوزن }
+  - { en: vertex price / potential, ar: سعر الرأس / الجهد }
+  - { en: telescoping sum, ar: مجموع تلسكوبي }
+---
+
+import Stage from '../../../components/book/Stage.astro';
+import ReadingGuide from '../../../components/book/ReadingGuide.astro';
+import BookPages from '../../../components/book/BookPages.astro';
+import BookExercises from '../../../components/book/BookExercises.astro';
+import Takeaways from '../../../components/book/Takeaways.astro';
+import Callout from '../../../components/Callout.astro';
+import Exercise from '../../../components/Exercise.astro';
+import QuickCheck from '../../../components/QuickCheck.tsx';
+import CodeLab from '../../../components/CodeLab.tsx';
+import { ShiftLab, PriceLab } from '../../../components/ReweightLab.tsx';
+import * as lab from '../../../labs/book-9-3-reweight.ts';
+
+<Stage n={1} id="warmup" title="تمهيد" sub="فكرة القسم قبل أي تعريف">
+
+الحواف السالبة تكلفنا عامل $V$. فلماذا لا نتخلص منها ببساطة؟ أضف 10 إلى كل حافة، فتصير كلها موجبة، ثم Dijkstra. فكرة «تخطر لكثيرين»، ولا تعمل.
+
+لكن نسخة أذكى منها تعمل. بدل أن تضيف إلى **الحواف**، ضع **سعرًا على كل مدينة**: تدفعه حين تغادرها، وتأخذه هدية حين تدخلها. وفي أي رحلة، كل مدينة في الطريق تدخلها وتغادرها، فتأخذ وتدفع المبلغ نفسه. لا يبقى إلا سعر نقطة البداية ونقطة النهاية.
+
+</Stage>
+
+<Stage n={2} id="reading" title="اقرأ من الكتاب" sub="صفحات الكتاب الأصلية لهذا القسم، ومعها دليل يوجه قراءتك">
+
+<ReadingGuide pages="311–312" minutes={8}>
+
+- **الفكرة الفاشلة والشكل 9.1:** زيادة كل الأوزان 2 تغير أقصر مسار من $s$ إلى $t$.
+- **التاريخ:** تُنسب إلى Johnson (1973)، لكنه نسبها إلى Edmonds وKarp (1972)، وقبلهما Tomizawa (1971)، وFulkerson بصيغة أخرى (1961).
+- **التعريف:** $w'(u \to v) = \pi(u) + w(u \to v) - \pi(v)$، و«exit tax» و«entrance gift».
+- **البرهان:** فقرة واحدة، و«original weight of of the path» هفوة.
+
+</ReadingGuide>
+
+<BookPages section="9.3" />
+
+</Stage>
+
+<Stage n={3} id="explain" title="الشرح والتجربة" sub="الأفكار نفسها بالعربية، بتفصيل، مع تجربتين">
+
+### لماذا لا يعمل الثابت؟
+
+لأن مفهومَي «الطول» عندنا متنافران: مسار بحواف **أكثر** قد يكون وزنه الكلي **أقل** من مسار بحواف أقل. فإن زدت كل الحواف بالمعدل نفسه $c$، فالمسار ذو $k$ حواف يزيد $ck$. والمسارات ذات الحواف الأكثر تطول **أسرع**، فقد يتغير أقصر مسار. جرّب:
+
+<ShiftLab client:visible />
+
+### الأسعار
+
+لكل رأس $v$ **سعر** $\pi(v)$، موجب أو سالب أو صفر. والأوزان الجديدة:
+
+$$
+w'(u \to v) = \pi(u) + w(u \to v) - \pi(v).
+$$
+
+والصورة: حين **تغادر** $u$ تدفع **ضريبة خروج** $\pi(u)$، وحين **تدخل** $v$ تأخذ **هدية دخول** $\pi(v)$.
+
+### لماذا تحفظ أقصر المسارات؟
+
+لأي مسار $u = x_0 \to x_1 \to \cdots \to x_k = v$:
+
+$$
+w'(P) = \sum_{i=1}^{k} \big(\pi(x_{i-1}) + w(x_{i-1} \to x_i) - \pi(x_i)\big) = \pi(u) + w(P) - \pi(v).
+$$
+
+المجموع **تلسكوبي**: كل رأس وسيط $x_i$ يأخذ $\pi(x_i)$ هدية دخول، ثم يدفعه فورًا ضريبة خروج. لا يبقى إلا ضريبة خروج $u$ وهدية دخول $v$. فـ **كل** المسارات من $u$ إلى $v$ يتغير طولها بالمقدار **نفسه** $\pi(u) - \pi(v)$، وترتيبها لا يتغير، وأقصرها يبقى الأقصر.
+
+(لكن انتبه للملاحظة بين قوسين في الكتاب: المسارات بين أزواج **مختلفة** قد يتغير طولها بمقادير مختلفة، فترتيبها بينها قد يتغير. وهذا لا يهمنا: نسأل دائمًا عن أقصر مسار بين زوج ثابت.)
+
+جرّب. غيّر الأسعار كما تشاء، وراقب أطوال المسارات الثلاثة من a إلى e: تتغير معًا دائمًا بالمقدار نفسه. ثم اضغط زر أسعار Johnson:
+
+<PriceLab client:visible />
+
+<Callout type="tip" title="والدورات؟">
+دورة تبدأ وتنتهي عند الرأس نفسه، فتتغير بـ $\pi(u) - \pi(u) = 0$. فإعادة الوزن تحفظ وزن كل دورة بالضبط. وهذا يعني: **لا** أسعار يمكن أن تُزيل دورة سالبة. فإن وُجدت أسعار تجعل كل الحواف غير سالبة، فلا دورة سالبة. والعكس هو موضوع القسم القادم.
+</Callout>
+
+</Stage>
+
+<Stage n={4} id="check" title="تحقق من فهمك" sub="أسئلة سريعة">
+
+<QuickCheck
+  client:visible
+  id="q1"
+  question="π(a) = 5 و π(e) = −2. بكم يتغير طول كل مسار من a إلى e؟"
+  options={['يزيد 7', 'ينقص 7', 'يزيد 3', 'يعتمد على المسار']}
+  answer={0}
+  explain="$\pi(a) - \pi(e) = 5 - (-2) = 7$، لكل مسار، مهما كان طوله أو حوافه."
+  wrong={{ 1: 'الإشارة: ضريبة خروج $a$ ناقص هدية دخول $e$.', 2: 'هذا $5 + (-2)$.', 3: 'هذه بالضبط النقطة: لا يعتمد.' }}
+/>
+
+<QuickCheck
+  client:visible
+  id="q2"
+  question="هل يمكن أن تجعل أسعار ما دورة سالبة غير سالبة؟"
+  options={['نعم، بأسعار كبيرة', 'لا: وزن كل دورة لا يتغير بإعادة الوزن', 'نعم، إن كانت الدورة قصيرة', 'أحيانًا']}
+  answer={1}
+  explain="الدورة من $u$ إلى $u$، فتتغير بـ $\pi(u) - \pi(u) = 0$."
+  wrong={{ 0: 'التلسكوب يلغي كل شيء على الدورة.', 2: 'لا علاقة بالطول.', 3: 'أبدًا.' }}
+/>
+
+</Stage>
+
+<Stage n={5} id="exercises" title="تمارين الكتاب" sub="حلّها بالورقة والقلم، ثم سجّل حالتها. الكتاب لا ينشر حلولها">
+
+<BookExercises chapter={9} nums={[6]} core={[6]} />
+
+<Callout type="tip" title="تلميح للتمرين 6">
+دورة المراجحة تعطي **حاصل ضرب** أكبر من 1. حوّل الضرب إلى جمع باللوغاريتم، و«أكبر من» إلى «أصغر من» بإشارة سالب: الدورة المربحة **دورة سالبة** بأوزان $-\log \text{Exch}$. (التمرين الإضافي في القسم 8.2.) ثم أي خوارزمية من هذا الفصل أو السابق تكتشفها؟ وانتبه لما يطلبه كل جزء بالضبط.
+</Callout>
+
+### تمارين إضافية بحلول كاملة
+
+<Exercise id="e1" level="prove" title="الأسعار من أي مصدر تقريبًا">
+
+برهن: إن لم تكن في $G$ دورة سالبة، و$s$ يصل إلى كل الرؤوس، فـ $\pi(v) = \text{dist}(s, v)$ يجعل كل الأوزان الجديدة غير سالبة.
+
+<div slot="hint">ما معنى أن الحافة $u \to v$ ليست مشدودة؟</div>
+<div slot="solution">
+
+المسافات النهائية لا تترك أي حافة مشدودة: $\text{dist}(s, u) + w(u \to v) \ge \text{dist}(s, v)$ لكل حافة (وإلا لكان $\text{dist}(s, v)$ أقصر). فـ $w'(u \to v) = \text{dist}(s, u) + w(u \to v) - \text{dist}(s, v) \ge 0$. ∎ (وهذا قلب خوارزمية Johnson في القسم القادم.)
+
+</div>
+</Exercise>
+
+### المختبر البرمجي
+
+<CodeLab
+  client:visible
+  id="book-9.3-reweight"
+  title="إعادة الوزن والمجموع التلسكوبي"
+  exports={['reweight', 'pathLength']}
+  starter={lab.starter}
+  tests={[
+    { name: 'reweight', code: 'reweight([[0, 1, 5], [1, 2, -3]], [2, 7, 1]).map((e) => e.join()).join("|") === "0,1,0|1,2,3"' },
+    { name: 'pathLength', code: 'pathLength([0, 1, 2], (u, v) => u * 10 + v) === 13 && pathLength([4], () => 99) === 0' },
+    { name: 'كل مسار يتغير بـ π(a) − π(b)', code: '(() => { for (let t = 0; t < 30; t++) { const n = 2 + Math.floor(Math.random() * 6), E = []; for (let u = 0; u < n; u++) for (let v = 0; v < n; v++) if (u !== v) E.push([u, v, Math.floor(Math.random() * 20) - 10]); const pi = Array.from({ length: n }, () => Math.floor(Math.random() * 20) - 10), R = reweight(E, pi); const W = (L) => (u, v) => L.find(([a, b]) => a === u && b === v)[2]; const path = [0, ...Array.from({ length: 4 }, () => Math.floor(Math.random() * n))].filter((x, i, a) => i === 0 || x !== a[i - 1]); const a = path[0], b = path.at(-1); if (pathLength(path, W(R)) - pathLength(path, W(E)) !== pi[a] - pi[b]) return false; } return true; })()' }
+  ]}
+  solution={lab.solution}
+/>
+
+</Stage>
+
+<Stage n={6} id="summary" title="الخلاصة">
+
+<Takeaways>
+
+- **الثابت لا ينفع:** المسارات ذات الحواف الأكثر تطول أسرع.
+- **الأسعار:** $w'(u \to v) = \pi(u) + w(u \to v) - \pi(v)$.
+- **التلسكوب:** كل مسار من $u$ إلى $v$ يتغير بـ $\pi(u) - \pi(v)$، فأقصر المسارات محفوظة.
+- **الدورات:** وزنها لا يتغير، فلا أسعار تُزيل دورة سالبة.
+
+</Takeaways>
+
+</Stage>

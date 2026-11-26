@@ -1,0 +1,183 @@
+---
+section: "9.4"
+summary: "Johnson: أضف مصدرًا وهميًا بحواف صفرية إلى كل الرؤوس، وشغّل Bellman-Ford منه مرة واحدة، واجعل π(v) = dist(s, v). فلا حافة مشدودة، أي كل الأوزان الجديدة غير سالبة. ثم Dijkstra من كل رأس، ثم صحّح بالأسعار. الزمن O(VE log V): الحواف السالبة لم تبطئنا في النهاية."
+minutes: 35
+goals:
+  - "تكتب خوارزمية Johnson بخطواتها الخمس"
+  - "تبرهن أن الأوزان المعاد وزنها غير سالبة لأن Bellman-Ford توقف"
+  - "تفهم لماذا المصدر الوهمي ضروري ولا يغير شيئًا"
+  - "تحلل الزمن O(VE log V)"
+terms:
+  - { en: Johnson's algorithm, ar: خوارزمية Johnson }
+  - { en: artificial source, ar: مصدر وهمي }
+  - { en: fail gracefully, ar: فشل بلطف }
+---
+
+import Stage from '../../../components/book/Stage.astro';
+import ReadingGuide from '../../../components/book/ReadingGuide.astro';
+import BookPages from '../../../components/book/BookPages.astro';
+import BookExercises from '../../../components/book/BookExercises.astro';
+import Takeaways from '../../../components/book/Takeaways.astro';
+import Callout from '../../../components/Callout.astro';
+import Exercise from '../../../components/Exercise.astro';
+import QuickCheck from '../../../components/QuickCheck.tsx';
+import CodeLab from '../../../components/CodeLab.tsx';
+import { PriceLab } from '../../../components/ReweightLab.tsx';
+import * as lab from '../../../labs/book-9-4-johnson.ts';
+
+<Stage n={1} id="warmup" title="تمهيد" sub="فكرة القسم قبل أي تعريف">
+
+القسم السابق قال: أي أسعار تحفظ أقصر المسارات. وبقي سؤال واحد: **أي** أسعار تجعل كل الحواف غير سالبة؟ والجواب كان أمامنا منذ الفصل 8: المسافات نفسها. فأقصر المسافات لا تترك حافة مشدودة، و«غير مشدودة» هي بالحرف «وزن جديد غير سالب».
+
+فالخطة: Bellman-Ford **مرة واحدة** (البطيء، لكن مرة)، ثم Dijkstra $V$ مرة (السريع). فنحصل على سرعة Dijkstra مع حواف سالبة.
+
+</Stage>
+
+<Stage n={2} id="reading" title="اقرأ من الكتاب" sub="صفحات الكتاب الأصلية لهذا القسم، ومعها دليل يوجه قراءتك">
+
+<ReadingGuide pages="312–313" minutes={8}>
+
+- **«These new weights are non-negative because Bellman-Ford halted!»**: الجملة المفتاح.
+- **المصدر الوهمي:** لماذا نحتاج إليه، ولماذا لا يغير أقصر المسارات الأصلية.
+- **الشكل 9.2:** الخوارزمية بأقسامها الخمسة.
+- **الزمن:** والحاشية 4 تحيل إلى الحاشية 3.
+
+</ReadingGuide>
+
+<BookPages section="9.4" />
+
+</Stage>
+
+<Stage n={3} id="explain" title="الشرح والتجربة" sub="الأفكار نفسها بالعربية، بتفصيل، مع تجربة تفاعلية">
+
+### الأسعار من Bellman-Ford
+
+افترض أولًا أن في الرسم رأسًا $s$ يصل إلى كل الرؤوس. شغّل Bellman-Ford منه (لا يهمه السالب)، واجعل $\pi(v) = \text{dist}(s, v)$. فالأوزان الجديدة:
+
+$$
+w'(u \to v) = \text{dist}(s, u) + w(u \to v) - \text{dist}(s, v).
+$$
+
+وهي **غير سالبة لأن Bellman-Ford توقف!** تذكر: الحافة مشدودة إن كان $\text{dist}(s, u) + w(u \to v) \lt \text{dist}(s, v)$، أي إن كان $w'(u \to v) \lt 0$. وكل خوارزميات المصدر الواحد تزيل كل الحواف المشدودة. (وإن اكتشف Bellman-Ford دورة سالبة، تتوقف Johnson، لأن أقصر المسارات غير معرّفة.)
+
+### المصدر الوهمي
+
+وإن لم يكن هناك رأس يصل إلى كل شيء؟ فمن أي رأس بدأنا، بعض الأسعار ستكون $\infty$، و$\infty - \infty$ لا معنى له. والحل: نضيف **دائمًا** رأسًا جديدًا $s$، بحواف وزنها **صفر** منه إلى كل رأس، ولا حواف إليه. وهذا لا يغير أقصر المسارات بين أي رأسين أصليين، **لأنه لا مسارات تدخل $s$**. وكل الأسعار منتهية (وغير موجبة، لأن الحافة المباشرة وزنها صفر).
+
+### الخوارزمية
+
+```
+JohnsonAPSP(V, E, w):
+  ⟨⟨Add an artificial source⟩⟩
+  add a new vertex s
+  for every vertex v
+    add a new edge s→v;  w(s→v) ← 0
+  ⟨⟨Compute vertex prices⟩⟩
+  dist[s, ·] ← BellmanFord(V, E, w, s)
+  if BellmanFord found a negative cycle
+    fail gracefully
+  ⟨⟨Reweight the edges⟩⟩
+  for every edge u→v ∈ E
+    w'(u→v) ← dist[s, u] + w(u→v) − dist[s, v]
+  ⟨⟨Compute reweighted shortest path distances⟩⟩
+  for every vertex u
+    dist'[u, ·] ← Dijkstra(V, E, w', u)
+  ⟨⟨Compute original shortest-path distances⟩⟩
+  for every vertex u
+    for every vertex v
+      dist[u, v] ← dist'[u, v] − dist[s, u] + dist[s, v]
+```
+
+والسطر الأخير يعكس إعادة الوزن: $w'(P) = \pi(u) + w(P) - \pi(v)$، فـ $w(P) = w'(P) - \pi(u) + \pi(v)$.
+
+### الزمن
+
+Bellman-Ford مرة: $O(VE)$. وDijkstra $V$ مرة: $O(VE \log V)$. والباقي $O(V + E)$ (ومعه $O(V^2)$ لملء الجدول). فالمجموع **$O(VE \log V)$**، و$O(V^3 \log V)$ في الكثيف. «الحواف السالبة لم تبطئنا في النهاية!»
+
+ارجع إلى مختبر الأسعار واضغط «أسعار Johnson». الأسعار التي تظهر هي بالضبط $\text{dist}(s, v)$ من المصدر الوهمي، وكل الحواف الحمراء تختفي:
+
+<PriceLab client:visible />
+
+</Stage>
+
+<Stage n={4} id="check" title="تحقق من فهمك" sub="أسئلة سريعة">
+
+<QuickCheck
+  client:visible
+  id="q1"
+  question="لماذا الأسعار من المصدر الوهمي كلها ≤ 0؟"
+  options={['لأن الأوزان سالبة', 'لأن الحافة المباشرة s→v وزنها 0، فالمسافة لا تتجاوز 0', 'لأن Bellman-Ford يعطي دائمًا قيمًا سالبة', 'ليست كذلك']}
+  answer={1}
+  explain="$\text{dist}(s, v) \le w(s \to v) = 0$. وتكون سالبة إن كان هناك طريق عبر حواف سالبة إلى $v$."
+  wrong={{ 0: 'قد تكون كلها موجبة، والأسعار حينئذ أصفار.', 2: 'تكون صفرًا كثيرًا.', 3: 'هي كذلك.' }}
+/>
+
+<QuickCheck
+  client:visible
+  id="q2"
+  question="رسم كثيف بحواف سالبة: Johnson أم Bellman-Ford من كل رأس؟"
+  options={['Bellman-Ford: O(V⁴)', 'Johnson: O(V³ log V)', 'متساويان', 'لا يمكن مع حواف سالبة']}
+  answer={1}
+  explain="Bellman-Ford مرة واحدة فقط، ثم Dijkstra. فالفرق عامل $V / \log V$."
+  wrong={{ 0: 'هذا الأبطأ.', 2: 'يختلفان كثيرًا.', 3: 'يمكن ما دامت لا دورات سالبة.' }}
+/>
+
+</Stage>
+
+<Stage n={5} id="exercises" title="تمارين الكتاب" sub="حلّها بالورقة والقلم، ثم سجّل حالتها. الكتاب لا ينشر حلولها">
+
+<BookExercises chapter={9} nums={[2, 5]} core={[5]} />
+
+<Callout type="tip" title="تلميح للتمرين 2">
+الأجزاء الثلاثة سؤال واحد: من أي $u$ إلى أي $v$، المسافة $-\infty$ إن وفقط إن كان $u$ يصل إلى دورة سالبة تصل إلى $v$. (أ) Johnson يكتشف الدورة في Bellman-Ford ويتوقف. بدل أن تتوقف: أين الرؤوس التي **على** دورات سالبة؟ (فكر في المكونات القوية.) ثم الوصول قبلها وبعدها. (ب) و(ج) في الخوارزميات الديناميكية، الدورة السالبة تظهر في **القطر**: $\text{dist}[x, x] \lt 0$. فكيف تستعمل ذلك؟
+</Callout>
+
+<Callout type="tip" title="تلميح للتمرين 5">
+الحد المطلوب $O(VE + kV \log V)$: أي **مرة** Bellman-Ford و$k$ مرة Dijkstra، لا $V$ مرة. فكيف تحسب $\delta(i, \cdot)$ لمجموعة كاملة $V_i$ **بتشغيل واحد**؟ (مصدر وهمي جديد بحواف صفرية إلى كل رؤوس $V_i$، لكن الحواف السالبة؟ الأسعار من Johnson مرة واحدة تكفي لكل التشغيلات.)
+</Callout>
+
+### تمارين إضافية بحلول كاملة
+
+<Exercise id="e1" level="apply" title="Johnson في رسم بلا حواف سالبة">
+
+ماذا تكون أسعار Johnson إن لم تكن في الرسم أي حافة سالبة؟ وماذا يعني ذلك؟
+
+<div slot="hint">ما المسافة من المصدر الوهمي إلى كل رأس؟</div>
+<div slot="solution">
+
+كل الأسعار **صفر**: أقصر مسار من $s$ إلى $v$ هو الحافة المباشرة بوزن 0 (أي مسار آخر يضيف أوزانًا غير سالبة). فـ $w' = w$، وJohnson تصير ObviousAPSP بـ Dijkstra، مع Bellman-Ford زائدة. ولا ضرر: $O(VE)$ أقل من $O(VE \log V)$.
+
+</div>
+</Exercise>
+
+### المختبر البرمجي
+
+<CodeLab
+  client:visible
+  id="book-9.4-johnson"
+  title="خوارزمية Johnson"
+  exports={['johnson']}
+  starter={lab.starter}
+  tests={[
+    { name: 'رسم المختبر', code: '(() => { const G6 = [6, "ab bc ad be cf de ed ef fc fb ea".split(" ").map((e, k) => [e.charCodeAt(0) - 97, e.charCodeAt(1) - 97, [3, 2, 4, 6, 5, 1, 2, 7, 1, -2, 2][k]])];const REF = (n, E) => Array.from({ length: n }, (_, s) => { const d = new Array(n).fill(Infinity); d[s] = 0; for (let i = 0; i < n; i++) for (const [u, v, w] of E) if (d[u] + w < d[v]) d[v] = d[u] + w; return d; }); return JSON.stringify(johnson(...G6)) === JSON.stringify(REF(...G6)); })()' },
+    { name: 'دورة سالبة: null', code: 'johnson(3, [[0, 1, 1], [1, 2, -3], [2, 1, 1]]) === null' },
+    { name: 'رسوم عشوائية', code: '(() => { const REF = (n, E) => Array.from({ length: n }, (_, s) => { const d = new Array(n).fill(Infinity); d[s] = 0; for (let i = 0; i < n; i++) for (const [u, v, w] of E) if (d[u] + w < d[v]) d[v] = d[u] + w; return d; });const RAND = () => { const n = 1 + Math.floor(Math.random() * 9), E = []; for (let u = 0; u < n; u++) for (let v = 0; v < n; v++) if (u !== v && Math.random() < 0.35) E.push([u, v, u < v ? Math.floor(Math.random() * 13) - 3 : 30 + Math.floor(Math.random() * 9)]); return [n, E]; }; for (let t = 0; t < 40; t++) { const [n, E] = RAND(); if (JSON.stringify(johnson(n, E)) !== JSON.stringify(REF(n, E))) return false; } return true; })()' }
+  ]}
+  bench={{ title: 'زمن johnson على رسم فيه n رأسًا ونحو 4n حافة', fn: 'johnson', make: '(() => { const E = []; for (let u = 0; u < n; u++) for (let k = 0; k < 4; k++) { const v = Math.floor(Math.random() * n); if (u !== v) E.push([u, v, u < v ? Math.floor(Math.random() * 10) - 2 : 30 + Math.floor(Math.random() * 10)]); } return [n, E]; })()', spread: true, ns: [50, 100, 200, 400] }}
+  solution={lab.solution}
+/>
+
+</Stage>
+
+<Stage n={6} id="summary" title="الخلاصة">
+
+<Takeaways>
+
+- **الأسعار:** $\pi(v) = \text{dist}(s, v)$ من مصدر وهمي بحواف صفرية. وBellman-Ford مرة واحدة.
+- **غير سالبة:** لأن Bellman-Ford لم يترك حافة مشدودة.
+- **ثم:** Dijkstra من كل رأس بالأوزان الجديدة، ثم $\text{dist} = \text{dist}' - \pi(u) + \pi(v)$.
+- **الزمن:** $O(VE \log V)$. والدورة السالبة تُكتشف في Bellman-Ford.
+
+</Takeaways>
+
+</Stage>

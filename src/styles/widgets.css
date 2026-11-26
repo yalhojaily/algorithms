@@ -1479,3 +1479,26 @@ table.gr-mat td.hit { background: var(--green-soft); outline: 2px solid var(--gr
 .ms-list span.no { opacity: 0.35; text-decoration: line-through; }
 .ms-list span.on { outline: 2px solid var(--amber); }
 .ms-list .lbl { border: 0; background: none; color: var(--ink-3); }
+
+/* ---------- All-pairs shortest paths (book chapter 9) ---------- */
+.apm-wrap { overflow-x: auto; margin-bottom: 10px; }
+table.apm-mat { border-collapse: collapse; margin: 0 auto; font-family: var(--font-mono); font-size: 0.82rem; }
+table.apm-mat th, table.apm-mat td { min-width: 34px; height: 28px; text-align: center; padding: 0 4px; border: 1px solid var(--line); }
+table.apm-mat th { color: var(--ink-3); background: var(--paper); font-weight: 600; }
+table.apm-mat td { background: var(--card); cursor: default; }
+table.apm-mat td.click { cursor: pointer; }
+table.apm-mat td.click:hover { outline: 2px solid var(--brand); outline-offset: -2px; }
+table.apm-mat td.inf { color: var(--ink-3); }
+table.apm-mat td.neg { color: var(--red); font-weight: 700; }
+table.apm-mat td.chg { background: var(--amber-soft); font-weight: 700; }
+table.apm-mat td.sel { outline: 2.5px solid var(--green); outline-offset: -2px; background: var(--green-soft); }
+table.apm-mat td.piv, table.apm-mat th.piv { background: var(--blue-soft); }
+table.apm-mat td.term { background: var(--violet-soft); }
+.apm-cap { text-align: center; font-size: 0.82rem; color: var(--ink-2); margin: 4px 0 2px; }
+.apm-two { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px; align-items: start; }
+.rw-prices { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-bottom: 10px; font-family: var(--font-mono); font-size: 0.85rem; }
+.rw-prices span { display: inline-flex; align-items: center; gap: 4px; border: 1px solid var(--line); border-radius: 8px; padding: 2px 4px; background: var(--paper); }
+.rw-prices button { width: 22px; height: 22px; border: 1px solid var(--line); border-radius: 6px; background: var(--card); cursor: pointer; padding: 0; }
+.mp-terms { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; font-family: var(--font-mono); font-size: 0.8rem; margin-bottom: 10px; }
+.mp-terms span { border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px; background: var(--card); }
+.mp-terms span.best { border-color: var(--green); background: var(--green-soft); font-weight: 700; }

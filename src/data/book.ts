@@ -154,6 +154,20 @@ export const chapters: BookChapter[] = [
       sec('8.7', 'Relax ALL the Edges: Bellman-Ford', 'أرخِ كل الحواف: Bellman-Ford', 289, [6, 8]),
     ],
   },
+  {
+    num: 9, slug: '09-apsp', en: 'All-Pairs Shortest Paths', ar: 'أقصر المسارات لكل الأزواج', pages: [309, 326], exercisesPage: 320,
+    blurb: 'أقصر المسارات بين كل زوجين من الرؤوس، في جدولين بحجم V × V. أولًا بتشغيل خوارزمية مصدر واحد من كل رأس، مع حيلة Johnson لإزالة الحواف السالبة بأسعار للرؤوس. ثم ثلاث برمجات ديناميكية مباشرة: Shimbel بعدد الحواف، وتربيع Fischer–Meyer بالضرب «المضحك» للمصفوفات، وFloyd–Warshall بالرؤوس الوسيطة في O(V³).',
+    sections: [
+      sec('9.1', 'Introduction', 'مقدمة', 309, [1]),
+      sec('9.2', 'Lots of Single Sources', 'مصادر مفردة كثيرة', 310, [7]),
+      sec('9.3', 'Reweighting', 'إعادة الوزن', 311, [6]),
+      sec('9.4', 'Johnson’s Algorithm', 'خوارزمية Johnson', 312, [2, 5]),
+      sec('9.5', 'Dynamic Programming', 'البرمجة الديناميكية', 313, [4]),
+      sec('9.6', 'Divide and Conquer', 'فرّق تسد', 315, [3]),
+      sec('9.7', 'Funny Matrix Multiplication', 'ضرب المصفوفات «المضحك»', 316, [9, 10, 12, 13]),
+      sec('9.8', '(Kleene-Roy-)Floyd-Warshall(-Ingerman)', 'خوارزمية Floyd–Warshall', 318, [8, 11]),
+    ],
+  },
 ];
 
 /** The whole book, for the table of contents (chapters not yet on the site are shown as coming). */

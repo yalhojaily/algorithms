@@ -1,0 +1,181 @@
+---
+section: "9.5"
+summary: "برمجة ديناميكية مباشرة لكل الأزواج. التكرار الواضح dist(u, v) = min dist(u, x) + w(x→v) يقع في حلقة مع الدورات، فنضيف معاملًا كما فعل Bellman: عدد الحواف ℓ. فـ ShimbelAPSP في O(V²E) = O(V⁴)، وبالتبسيط نفسه كما في Bellman-Ford نحصل على AllPairsBellmanFord: V تشغيلات متداخلة لـ Bellman-Ford."
+minutes: 35
+goals:
+  - "تكتب تكرار dist(u, v, ℓ) لكل الأزواج"
+  - "تحول التكرار إلى ShimbelAPSP ثم تبسطه إلى AllPairsBellmanFord"
+  - "ترى أن الناتج V تشغيلات متداخلة لـ Bellman-Ford"
+terms:
+  - { en: ShimbelAPSP, ar: خوارزمية Shimbel }
+  - { en: structural parameter, ar: معامل بنيوي }
+---
+
+import Stage from '../../../components/book/Stage.astro';
+import ReadingGuide from '../../../components/book/ReadingGuide.astro';
+import BookPages from '../../../components/book/BookPages.astro';
+import BookExercises from '../../../components/book/BookExercises.astro';
+import Takeaways from '../../../components/book/Takeaways.astro';
+import Callout from '../../../components/Callout.astro';
+import Exercise from '../../../components/Exercise.astro';
+import QuickCheck from '../../../components/QuickCheck.tsx';
+import CodeLab from '../../../components/CodeLab.tsx';
+import MatrixAPSPLab from '../../../components/MatrixAPSPLab.tsx';
+import * as lab from '../../../labs/book-9-5-shimbel.ts';
+
+<Stage n={1} id="warmup" title="تمهيد" sub="فكرة القسم قبل أي تعريف">
+
+بدل أن نستدعي خوارزمية مصدر واحد $V$ مرة، لنكتب برمجة ديناميكية لكل الأزواج **مباشرة**. والهدف البعيد: للرسوم الكثيفة، خوارزمية «أبسط و(قليلًا) أسرع» من Johnson. لكن الخطوة الأولى هنا ستكون أبطأ، $V^4$، ثم تتحسن في القسمين القادمين.
+
+ومن الآن يفترض الكتاب أن **لا دورات سالبة**.
+
+</Stage>
+
+<Stage n={2} id="reading" title="اقرأ من الكتاب" sub="صفحات الكتاب الأصلية لهذا القسم، ومعها دليل يوجه قراءتك">
+
+<ReadingGuide pages="313–315" minutes={10}>
+
+- **التكرار الواضح:** يعمل في dag فقط، كما في الفصل 8.
+- **dist(u, v, ℓ):** المعامل الإضافي، وتكيّف تكرار Bellman فورًا.
+- **ShimbelAPSP:** والحاشية 5 (Shimbel افترض مصفوفة كاملة).
+- **AllPairsBellmanFord:** «ليس مفاجئًا» أنها $V$ تشغيلات متداخلة لـ Bellman-Ford.
+
+</ReadingGuide>
+
+<BookPages section="9.5" />
+
+</Stage>
+
+<Stage n={3} id="explain" title="الشرح والتجربة" sub="الأفكار نفسها بالعربية، بتفصيل، مع تجربة تفاعلية">
+
+### التكرار
+
+التكرار «الواضح» لكل الأزواج:
+
+$$
+\text{dist}(u, v) = \begin{cases} 0 & u = v \\ \min_{x \to v}\big(\text{dist}(u, x) + w(x \to v)\big) & \text{otherwise} \end{cases}
+$$
+
+يعمل في dag فقط، وأي دورة موجهة تجره إلى حلقة لا نهائية. والعلاج نفسه كما في Bellman-Ford: **معامل إضافي**. ليكن $\text{dist}(u, v, \ell)$ طول أقصر مسار من $u$ إلى $v$ فيه $\ell$ حافة **على الأكثر**. وأقصر مسار يمر بـ $V - 1$ حافة على الأكثر، فالجواب $\text{dist}(u, v, V - 1)$. وتكرار Bellman يتكيف فورًا:
+
+$$
+\text{dist}(u, v, \ell) = \begin{cases} 0 & \ell = 0,\ u = v \\ \infty & \ell = 0,\ u \ne v \\ \min\Big\{\text{dist}(u, v, \ell - 1),\ \min_{x \to v}\big(\text{dist}(u, x, \ell - 1) + w(x \to v)\big)\Big\} & \text{otherwise} \end{cases}
+$$
+
+### ShimbelAPSP
+
+```
+ShimbelAPSP(V, E, w):
+  for all vertices u, v
+    dist[u, v, 0] ← (0 if u = v else ∞)
+  for ℓ ← 1 to V − 1
+    for all vertices u
+      for all vertices v ≠ u
+        dist[u, v, ℓ] ← dist[u, v, ℓ − 1]
+        for all edges x→v
+          if dist[u, v, ℓ] > dist[u, x, ℓ − 1] + w(x→v)
+            dist[u, v, ℓ] ← dist[u, x, ℓ − 1] + w(x→v)
+```
+
+لكل $\ell$، ولكل $u$، نمر على كل الحواف مرة: $O(V \cdot V \cdot E) = O(V^2 E) = O(V^4)$. رسمها Alfonso Shimbel أول مرة سنة 1954. (الحاشية 5: افترض المدخل مصفوفة مسافات $V \times V$ كاملة، فخوارزميته الأصلية $O(V^4)$ دائمًا.)
+
+### AllPairsBellmanFord
+
+وكما في القسم 8.7، لا نحتاج إلى الحلقة على $v$ ولا إلى الفهرس $\ell$:
+
+```
+AllPairsBellmanFord(V, E, w):
+  for all vertices u, v
+    dist[u, v] ← (0 if u = v else ∞)
+  for ℓ ← 1 to V − 1
+    for all vertices u
+      for all edges x→v
+        if dist[u, v] > dist[u, x] + w(x→v)
+          dist[u, v] ← dist[u, x] + w(x→v)
+```
+
+«بالنظر إلى كيف اشتققناها، لا مفاجأة» في أنها بالضبط **$V$ تشغيلات متداخلة لـ Bellman-Ford**، من كل مصدر $u$. وبعد التكرار رقم $\ell$، $\text{dist}[u, v]$ لا تتجاوز أقصر مسار بـ $\ell$ حافة على الأكثر.
+
+جرّب. كل خطوة مصفوفة جديدة: المسارات بحافة إضافية. والخانات الكهرمانية ما تغير:
+
+<MatrixAPSPLab client:visible algo="shimbel" />
+
+</Stage>
+
+<Stage n={4} id="check" title="تحقق من فهمك" sub="أسئلة سريعة">
+
+<QuickCheck
+  client:visible
+  id="q1"
+  question="لماذا يكفي ℓ = V − 1؟"
+  options={['لأن الحواف V − 1', 'لأن أقصر مسار، بلا دورات سالبة، بسيط، فيه V − 1 حافة على الأكثر', 'لأن المصفوفة V × V', 'لا يكفي دائمًا']}
+  answer={1}
+  explain="والمسافة بعد ذلك لا تتغير: $\text{dist}(u, v, \ell) = \text{dist}(u, v, V - 1)$ لكل $\ell \ge V - 1$."
+  wrong={{ 0: 'لا علاقة بعدد الحواف.', 2: 'لا علاقة بحجم المصفوفة.', 3: 'يكفي بلا دورات سالبة.' }}
+/>
+
+<QuickCheck
+  client:visible
+  id="q2"
+  question="في رسم كثيف، ShimbelAPSP مقارنة بـ Johnson؟"
+  options={['أسرع', 'أبطأ: O(V⁴) مقابل O(V³ log V)', 'متساويتان', 'لا تعمل في الكثيف']}
+  answer={1}
+  explain="هذه نقطة البداية فقط. القسمان القادمان ينزلان بها إلى $V^3 \log V$ ثم $V^3$."
+  wrong={{ 0: 'ليست بعد.', 2: 'تختلفان بعامل $V / \log V$.', 3: 'تعمل.' }}
+/>
+
+</Stage>
+
+<Stage n={5} id="exercises" title="تمارين الكتاب" sub="حلّها بالورقة والقلم، ثم سجّل حالتها. الكتاب لا ينشر حلولها">
+
+<BookExercises chapter={9} nums={[4]} core={[4]} />
+
+<Callout type="tip" title="تلميح للتمرين 4">
+(أ) دورة بطول صفر في رسم بلا دورات سالبة: كل حوافها «مشدودة بالضبط». خذ أي أسعار Johnson (أو المسافات من مصدر وهمي)، وانظر إلى الأوزان الجديدة: ما وزن كل حافة على دورة صفرية؟ (الأوزان الجديدة غير سالبة، ومجموعها على الدورة صفر...) (ب) احتفظ بالحواف ذات الوزن الجديد صفر فقط. لكن ليس كلها على دورات: ما الذي يميز الحافة التي على دورة؟ (المكونات القوية.)
+</Callout>
+
+### تمارين إضافية بحلول كاملة
+
+<Exercise id="e1" level="apply" title="مسارات بعدد حواف محدود">
+
+في رسم فيه دورات سالبة، هل $\text{dist}(u, v, k)$ ما زالت معرّفة ومفيدة لـ $k$ ثابت؟ ماذا تحسب ShimbelAPSP بعد $k$ جولات؟
+
+<div slot="hint">المشي بـ $k$ حافة على الأكثر: كم مشيًا كهذا؟</div>
+<div slot="solution">
+
+نعم: عدد المشي بـ $k$ حافة على الأكثر **منته**، فلأقصرها قيمة معرّفة، حتى مع دورات سالبة. وShimbelAPSP بعد $k$ جولات (بالنسخة ذات الفهرس $\ell$، لا المبسطة) تحسبها بالضبط: أقصر مشي بـ $k$ حافة على الأكثر. أما المبسطة فتعطي قيمًا $\le$ ذلك، وليس بالضبط. وهذا مفيد مثلًا لأقصر طريق «بـ $k$ توقفات على الأكثر».
+
+</div>
+</Exercise>
+
+### المختبر البرمجي
+
+<CodeLab
+  client:visible
+  id="book-9.5-shimbel"
+  title="AllPairsBellmanFord"
+  exports={['allPairsBellmanFord']}
+  starter={lab.starter}
+  tests={[
+    { name: 'رسم المختبر', code: '(() => { const G6 = [6, "ab bc ad be cf de ed ef fc fb ea".split(" ").map((e, k) => [e.charCodeAt(0) - 97, e.charCodeAt(1) - 97, [3, 2, 4, 6, 5, 1, 2, 7, 1, -2, 2][k]])];const REF = (n, E) => Array.from({ length: n }, (_, s) => { const d = new Array(n).fill(Infinity); d[s] = 0; for (let i = 0; i < n; i++) for (const [u, v, w] of E) if (d[u] + w < d[v]) d[v] = d[u] + w; return d; }); return JSON.stringify(allPairsBellmanFord(...G6)) === JSON.stringify(REF(...G6)); })()' },
+    { name: 'رأس واحد', code: 'allPairsBellmanFord(1, []).join() === "0"' },
+    { name: 'رسوم عشوائية (مقارنة بـ V مرة Bellman-Ford)', code: '(() => { const REF = (n, E) => Array.from({ length: n }, (_, s) => { const d = new Array(n).fill(Infinity); d[s] = 0; for (let i = 0; i < n; i++) for (const [u, v, w] of E) if (d[u] + w < d[v]) d[v] = d[u] + w; return d; });const RAND = () => { const n = 1 + Math.floor(Math.random() * 9), E = []; for (let u = 0; u < n; u++) for (let v = 0; v < n; v++) if (u !== v && Math.random() < 0.35) E.push([u, v, u < v ? Math.floor(Math.random() * 13) - 3 : 30 + Math.floor(Math.random() * 9)]); return [n, E]; }; for (let t = 0; t < 40; t++) { const [n, E] = RAND(); if (JSON.stringify(allPairsBellmanFord(n, E)) !== JSON.stringify(REF(n, E))) return false; } return true; })()' }
+  ]}
+  bench={{ title: 'زمن allPairsBellmanFord على رسم فيه n رأسًا ونحو 4n حافة', fn: 'allPairsBellmanFord', make: '(() => { const E = []; for (let u = 0; u < n; u++) for (let k = 0; k < 4; k++) { const v = Math.floor(Math.random() * n); if (u !== v) E.push([u, v, u < v ? Math.floor(Math.random() * 10) - 2 : 30 + Math.floor(Math.random() * 10)]); } return [n, E]; })()', spread: true, ns: [25, 50, 100, 200] }}
+  solution={lab.solution}
+/>
+
+</Stage>
+
+<Stage n={6} id="summary" title="الخلاصة">
+
+<Takeaways>
+
+- **التكرار:** $\text{dist}(u, v, \ell)$ بعدد الحواف معاملًا، كـ Bellman.
+- **ShimbelAPSP:** $O(V^2 E) = O(V^4)$.
+- **AllPairsBellmanFord:** بلا $\ell$ ولا حلقة $v$: $V$ تشغيلات متداخلة لـ Bellman-Ford.
+- **البداية فقط:** القسمان القادمان يحسّنانها.
+
+</Takeaways>
+
+</Stage>

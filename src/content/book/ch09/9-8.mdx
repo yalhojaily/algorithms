@@ -1,0 +1,233 @@
+---
+section: "9.8"
+summary: "معامل ثالث مختلف: لا عدد الحواف، بل أي الرؤوس يسمح للمسار أن يمر بها. π(u, v, r) أقصر مسار وسطاؤه من 1 إلى r فقط. فإما لا يمر بـ r، وإما يمر به مرة: من u إلى r ثم من r إلى v. والتكرار يُقيّم في O(V³)، وبحذف البعد الثالث نحصل على Floyd–Warshall: ثلاث حلقات، والفرق عن Leyzorek ترتيب الحلقات فقط."
+minutes: 40
+goals:
+  - "تعرّف π(u, v, r) - أقصر مسار وسطاؤه أرقامهم r على الأكثر"
+  - "تشتق تكرار Kleene–Roy–Warshall من حالتين - يمر بـ r أو لا"
+  - "تكتب KleeneAPSP ثم FloydWarshall في O(V³)"
+  - "تفهم أن الفرق عن Leyzorek ترتيب الحلقات وحده"
+terms:
+  - { en: Floyd–Warshall algorithm, ar: خوارزمية Floyd–Warshall }
+  - { en: intermediate vertex, ar: رأس وسيط }
+  - { en: transitive closure, ar: الانغلاق المتعدي }
+  - { en: loop order, ar: ترتيب الحلقات }
+---
+
+import Stage from '../../../components/book/Stage.astro';
+import ReadingGuide from '../../../components/book/ReadingGuide.astro';
+import BookPages from '../../../components/book/BookPages.astro';
+import BookExercises from '../../../components/book/BookExercises.astro';
+import Takeaways from '../../../components/book/Takeaways.astro';
+import Callout from '../../../components/Callout.astro';
+import Exercise from '../../../components/Exercise.astro';
+import QuickCheck from '../../../components/QuickCheck.tsx';
+import CodeLab from '../../../components/CodeLab.tsx';
+import MatrixAPSPLab from '../../../components/MatrixAPSPLab.tsx';
+import * as lab from '../../../labs/book-9-8-floyd.ts';
+
+<Stage n={1} id="warmup" title="تمهيد" sub="فكرة القسم قبل أي تعريف">
+
+حتى الآن قيّدنا المسارات **بطولها**: بحافة، ثم بحافتين، ثم بأربع. والفكرة الجديدة: قيّدها بـ **أين يُسمح لها أن تمر**. في البداية، لا يُسمح بالمرور بأي مدينة: الطرق المباشرة فقط. ثم يُسمح بالمرور بالمدينة 1. ثم بـ 1 و2. وهكذا حتى تُسمح كلها.
+
+وكل خطوة سؤال واحد بسيط لكل زوج: هل المرور بالمدينة الجديدة يختصر الطريق؟ وهذا يعطي $V$ خطوات، كل واحدة $V^2$: المجموع $V^3$ بلا لوغاريتم.
+
+</Stage>
+
+<Stage n={2} id="reading" title="اقرأ من الكتاب" sub="صفحات الكتاب الأصلية لهذا القسم، ومعها دليل يوجه قراءتك">
+
+<ReadingGuide pages="318–320" minutes={12}>
+
+- **العنوان الطويل:** Floyd وIngerman (1962) عمّما خوارزمية Warshall (1962)، التي اكتشفها Roy قبلهم (1959)، ونمطها عند Kleene (1951).
+- **الحاشية 8:** نطق Kleene: «clay knee». ونمط استقرائه لتحويل الآلات المنتهية إلى تعابير نمطية هو نمط Floyd–Warshall.
+- **«pass through»:** يعني «يدخل ويخرج». والمثال $w \to x \to y \to z$.
+- **الشكل 9.3:** البنية الاستدعائية: يمر بـ $r$ أو لا.
+- **KleeneAPSP ثم FloydWarshall:** والجملة الأخيرة عن ترتيب الحلقات.
+
+</ReadingGuide>
+
+<BookPages section="9.8" />
+
+</Stage>
+
+<Stage n={3} id="explain" title="الشرح والتجربة" sub="الأفكار نفسها بالعربية، بتفصيل، مع تجربة تفاعلية">
+
+### معامل ثالث مختلف
+
+ما زالت أسرع برمجة ديناميكية عندنا أبطأ من Johnson بعامل $\log V$. وصيغة أخرى تزيل هذا العامل، اقترحها Robert Floyd ثم Peter Ingerman مستقلًا سنة 1962، معممين خوارزمية لـ Stephen Warshall من السنة نفسها. وخوارزمية Warshall اكتشفها Bernard Roy سنة 1959، ونمطها الاستدعائي استعمله Stephen Kleene سنة 1951.
+
+والفكرة (لـ Warshall وRoy وKleene): معامل ثالث **مختلف**. لا مسارات بعدد محدود من الحواف، بل مسارات **تمر فقط برؤوس معينة**. و«تمر» تعني «تدخل وتخرج»: المسار $w \to x \to y \to z$ يبدأ بـ $w$، ويمر بـ $x$ و$y$، وينتهي بـ $z$.
+
+رقّم الرؤوس كيفما شئت من 1 إلى $V$. ولكل $u$ و$v$ وعدد $r$:
+
+> $\pi(u, v, r)$ أقصر مسار (إن وُجد) من $u$ إلى $v$ **لا يمر إلا برؤوس أرقامها $r$ على الأكثر**.
+
+فـ $\pi(u, v, V)$ أقصر مسار حقيقي.
+
+### البنية الاستدعائية
+
+- **$r = 0$:** $\pi(u, v, 0)$ لا يمر بأي رأس، فهو **الحافة** (إن وُجدت) من $u$ إلى $v$.
+- **$r \gt 0$:** إما يمر $\pi(u, v, r)$ بالرأس $r$، وإما لا.
+  - **يمر بـ $r$:** فهو مسار جزئي من $u$ إلى $r$، ثم مسار جزئي من $r$ إلى $v$. وكل منهما لا يمر إلا برؤوس أرقامها $r - 1$ على الأكثر (يمر بـ $r$ مرة واحدة، وهي نقطة اللصق)، وكل منهما **أقصر ما يمكن** بهذا القيد. فهما $\pi(u, r, r - 1)$ و$\pi(r, v, r - 1)$.
+  - **لا يمر بـ $r$:** فهو لا يمر إلا برؤوس أرقامها $r - 1$ على الأكثر، وهو الأقصر بهذا القيد: $\pi(u, v, r) = \pi(u, v, r - 1)$.
+
+ولتكن $\text{dist}(u, v, r)$ طول $\pi(u, v, r)$. فالتكرار مباشرة:
+
+$$
+\text{dist}(u, v, r) = \begin{cases} w(u \to v) & r = 0 \\ \min\big\{\text{dist}(u, v, r - 1),\ \text{dist}(u, r, r - 1) + \text{dist}(r, v, r - 1)\big\} & \text{otherwise} \end{cases}
+$$
+
+### KleeneAPSP ثم FloydWarshall
+
+```
+KleeneAPSP(V, E, w):
+  for all vertices u, v
+    dist[u, v, 0] ← w(u→v)
+  for r ← 1 to V
+    for all vertices u, v
+      dist[u, v, r] ← min{dist[u, v, r−1], dist[u, r, r−1] + dist[r, v, r−1]}
+```
+
+$V$ قيمة لكل من $r$ و$u$ و$v$، وعمل ثابت لكل خانة: **$O(V^3)$**. وكما في كل البرمجات الديناميكية لأقصر المسارات، نحذف البعد الثالث. ولأن الترقيم اعتباطي، لا داعي لذكره صراحة. فنصل إلى «تحسين Floyd لخوارزمية Warshall»:
+
+```
+FloydWarshall(V, E, w):
+  for all vertices u, v
+    dist[u, v] ← w(u→v)
+  for all vertices r
+    for all vertices u
+      for all vertices v
+        if dist[u, v] > dist[u, r] + dist[r, v]
+          dist[u, v] ← dist[u, r] + dist[r, v]
+```
+
+(ولماذا يصح الحذف؟ في الجولة $r$، الخانات $\text{dist}[u, r]$ و$\text{dist}[r, v]$ **لا تتغير**: المرور بـ $r$ لا يختصر طريقًا يبدأ أو ينتهي عند $r$، ما دامت $\text{dist}[r, r] = 0$. فالقراءة من المصفوفة نفسها آمنة.)
+
+جرّب. الصف والعمود الأزرقان للرأس الجديد المسموح، ولا يتغيران أبدًا في جولتهما:
+
+<MatrixAPSPLab client:visible algo="floyd" />
+
+### ترتيب الحلقات
+
+قارن FloydWarshall بـ LeyzorekAPSP: الثلاث حلقات نفسها حرفيًا، وجسم الحلقة نفسه حرفيًا. لكن Leyzorek تحتاج إلى $O(\log V)$ مرورًا على كل الثلاثيات، وFloydWarshall إلى **مرور واحد فقط**، «وإنما لأنها تستعمل ترتيبًا مختلفًا للحلقات الثلاث!» في Leyzorek الحلقة الخارجية على $u$ (والأوسط $x$ الأعمق). وفي Floyd–Warshall الحلقة الخارجية على الوسيط $r$.
+
+<Callout type="tip" title="خلاصة الفصل في جدول">
+
+<div className="table-scroll">
+
+| الخوارزمية | المعامل الثالث | الزمن |
+| --- | --- | --- |
+| Johnson | (لا يوجد: مصادر مفردة) | $O(VE \log V)$ |
+| Shimbel | عدد الحواف، +1 | $O(V^2 E)$ |
+| Fischer–Meyer / Leyzorek | عدد الحواف، ×2 | $O(V^3 \log V)$ |
+| Floyd–Warshall | أكبر رقم وسيط | $O(V^3)$ |
+
+</div>
+
+وفي الرسوم الكثيفة Floyd–Warshall هي الأبسط والأسرع، وفي المتفرقة Johnson.
+</Callout>
+
+</Stage>
+
+<Stage n={4} id="check" title="تحقق من فهمك" sub="أسئلة سريعة">
+
+<QuickCheck
+  client:visible
+  id="q1"
+  question="في جولة Floyd–Warshall للرأس r، لماذا لا تتغير الخانات dist[u, r] و dist[r, v]؟"
+  options={['لأنها ∞', 'لأن المرور بـ r لا يختصر طريقًا يبدأ أو ينتهي عند r، إذ dist[r, r] = 0', 'لأنها محسوبة سابقًا', 'تتغير أحيانًا']}
+  answer={1}
+  explain="$\text{dist}[u, r] + \text{dist}[r, r] = \text{dist}[u, r]$، فلا تحسن. ولهذا حذف البعد الثالث آمن."
+  wrong={{ 0: 'قد تكون منتهية.', 2: 'السبب الحقيقي القطر الصفري.', 3: 'بلا دورات سالبة لا تتغير.' }}
+/>
+
+<QuickCheck
+  client:visible
+  id="q2"
+  question="الفرق الحقيقي بين Floyd–Warshall وLeyzorek؟"
+  options={['جسم الحلقة', 'ترتيب الحلقات: الوسيط في الخارج', 'Floyd تستعمل ثلاث مصفوفات', 'Leyzorek لا تعمل مع السالب']}
+  answer={1}
+  explain="الجسم نفسه حرفيًا. ووضع الوسيط في الحلقة الخارجية يكفي مرورًا واحدًا بدل $\lg V$."
+  wrong={{ 0: 'هو نفسه.', 2: 'كلتاهما بمصفوفة واحدة.', 3: 'كلتاهما تعمل بلا دورات سالبة.' }}
+/>
+
+</Stage>
+
+<Stage n={5} id="exercises" title="تمارين الكتاب" sub="حلّها بالورقة والقلم، ثم سجّل حالتها. الكتاب لا ينشر حلولها">
+
+<BookExercises chapter={9} nums={[8, 11]} core={[8]} />
+
+<Callout type="tip" title="تلميح للتمرين 8">
+(أ) لحذف $v$ دون تغيير أي مسافة: كل مسار كان يمر بـ $v$ كان يدخله من $u$ ويخرج إلى $w$. فأضف حافة «مختصرة» $u \to w$... بأي وزن؟ ولكل زوج $(u, w)$: $O(V^2)$. (ب) $\text{dist}(v, x) = \min_{v \to y}(w(v \to y) + \text{dist}'(y, x))$، وبالمثل إلى $v$. (ج) احذف رأسًا، وحل الباقي استدعائيًا، وأعده. ما التكرار؟ ولاحظ ملاحظة الكتاب عن أي خوارزمية تصير.
+</Callout>
+
+<Callout type="tip" title="تلميح للتمرين 11">
+تلميح الكتاب: «نسخة مبعثرة من Floyd–Warshall». ما الذي يحتاج إليه Floyd–Warshall ليكون صحيحًا؟ أن تُعالج الوسطاء $k$ **بالترتيب**، وأن يكتمل كل تحديث بوسيط $k$ قبل أن يُستعمل في وسيط أكبر. فتتبع: في أي ترتيب تُستدعى الثلاثيات $(i, j, k)$؟ هل يحترم هذا الترتيب ما يحتاج إليه Floyd–Warshall؟ والزمن: $T(n) = 8T(n/2) + O(1)$.
+</Callout>
+
+### تمارين إضافية بحلول كاملة
+
+<Exercise id="e1" level="apply" title="الانغلاق المتعدي بـ Warshall">
+
+خوارزمية Warshall الأصلية تحسب **الانغلاق المتعدي**: هل يوجد مسار من $u$ إلى $v$؟ اكتبها بتعديل Floyd–Warshall.
+
+<div slot="hint">استبدل min بـ «أو»، و+ بـ «و».</div>
+<div slot="solution">
+
+```
+Warshall(V, E):
+  for all u, v:  reach[u, v] ← (u = v) or (u→v ∈ E)
+  for all r
+    for all u
+      for all v
+        reach[u, v] ← reach[u, v] or (reach[u, r] and reach[r, v])
+```
+
+$O(V^3)$. والصحة بالبنية الاستدعائية نفسها: مسار وسطاؤه $\le r$ إما لا يمر بـ $r$، وإما يمر به فينقسم إلى مسارين وسطاؤهما $\le r - 1$. وهذا ضرب المصفوفات في نصف حلقة «أو-و» (التمرين 9).
+
+</div>
+</Exercise>
+
+<Exercise id="e2" level="prove" title="هل يهم ترتيب الرؤوس؟">
+
+برهن أن النتيجة النهائية لـ Floyd–Warshall لا تعتمد على الترتيب الذي تُعالج به الرؤوس في الحلقة الخارجية.
+
+<div slot="hint">الترقيم «اعتباطي». ما الذي في التكرار يعتمد على الترقيم؟</div>
+<div slot="solution">
+
+أي ترتيب للحلقة الخارجية هو ترقيم للرؤوس: الأول رقمه 1، والثاني 2، وهكذا. والتكرار صحيح **لأي ترقيم** (البرهان لم يفترض شيئًا عن الأرقام). وفي النهاية $\text{dist}(u, v, V)$ أقصر مسار حقيقي، يُسمح فيه بكل الرؤوس، ولا يعتمد على الترقيم. فالمصفوفات الوسيطة تختلف، والنهائية واحدة. ∎
+
+</div>
+</Exercise>
+
+### المختبر البرمجي
+
+<CodeLab
+  client:visible
+  id="book-9.8-floyd"
+  title="Floyd–Warshall مع السوابق"
+  exports={['floydWarshall']}
+  starter={lab.starter}
+  tests={[
+    { name: 'رسم المختبر: المسافات', code: '(() => { const G6 = [6, "ab bc ad be cf de ed ef fc fb ea".split(" ").map((e, k) => [e.charCodeAt(0) - 97, e.charCodeAt(1) - 97, [3, 2, 4, 6, 5, 1, 2, 7, 1, -2, 2][k]])];const REF = (n, E) => Array.from({ length: n }, (_, s) => { const d = new Array(n).fill(Infinity); d[s] = 0; for (let i = 0; i < n; i++) for (const [u, v, w] of E) if (d[u] + w < d[v]) d[v] = d[u] + w; return d; }); return JSON.stringify(floydWarshall(...G6).dist) === JSON.stringify(REF(...G6)); })()' },
+    { name: 'السوابق تعطي مسارات بطول المسافة (عشوائي)', code: '(() => { const REF = (n, E) => Array.from({ length: n }, (_, s) => { const d = new Array(n).fill(Infinity); d[s] = 0; for (let i = 0; i < n; i++) for (const [u, v, w] of E) if (d[u] + w < d[v]) d[v] = d[u] + w; return d; });const RAND = () => { const n = 1 + Math.floor(Math.random() * 9), E = []; for (let u = 0; u < n; u++) for (let v = 0; v < n; v++) if (u !== v && Math.random() < 0.35) E.push([u, v, u < v ? Math.floor(Math.random() * 13) - 3 : 30 + Math.floor(Math.random() * 9)]); return [n, E]; }; for (let t = 0; t < 40; t++) { const [n, E] = RAND(), { dist, pred } = floydWarshall(n, E), R = REF(n, E); if (JSON.stringify(dist) !== JSON.stringify(R)) return false; const W = (a, b) => Math.min(...E.filter(([x, y]) => x === a && y === b).map((e) => e[2])); for (let u = 0; u < n; u++) for (let v = 0; v < n; v++) { if (u === v || R[u][v] === Infinity) { if (pred[u][v] !== -1 && u === v) return false; continue; } let x = v, L = 0, k = 0; while (x !== u && k++ <= n) { const p = pred[u][x]; if (p < 0) return false; L += W(p, x); x = p; } if (x !== u || L !== R[u][v]) return false; } } return true; })()' }
+  ]}
+  bench={{ title: 'زمن floydWarshall على رسم فيه n رأسًا', fn: 'floydWarshall', make: '(() => { const E = []; for (let u = 0; u < n; u++) for (let k = 0; k < 4; k++) { const v = Math.floor(Math.random() * n); if (u !== v) E.push([u, v, u < v ? Math.floor(Math.random() * 10) - 2 : 30 + Math.floor(Math.random() * 10)]); } return [n, E]; })()', spread: true, ns: [50, 100, 200, 400] }}
+  solution={lab.solution}
+/>
+
+</Stage>
+
+<Stage n={6} id="summary" title="الخلاصة">
+
+<Takeaways>
+
+- **المعامل:** $\pi(u, v, r)$ أقصر مسار وسطاؤه $\le r$.
+- **التكرار:** يمر بـ $r$ (فيلصق $\pi(u, r, r-1)$ و$\pi(r, v, r-1)$) أو لا ($\pi(u, v, r-1)$).
+- **FloydWarshall:** ثلاث حلقات، الوسيط في الخارج، $O(V^3)$، ومصفوفة واحدة.
+- **مقارنة:** الجسم نفسه في Leyzorek، والترتيب وحده يزيل عامل $\log V$.
+- **في الكثيف:** Floyd–Warshall؛ وفي المتفرق: Johnson.
+
+</Takeaways>
+
+</Stage>

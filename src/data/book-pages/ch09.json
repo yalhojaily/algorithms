@@ -1,0 +1,323 @@
+{
+ "chapter": 9,
+ "offset": 18,
+ "pages": [
+  309,
+  326
+ ],
+ "exercisesPage": 320,
+ "reading": {
+  "9.1": [
+   {
+    "src": "book/ch09/9.1-1.webp",
+    "w": 985,
+    "h": 1558,
+    "page": 309
+   },
+   {
+    "src": "book/ch09/9.1-2.webp",
+    "w": 994,
+    "h": 578,
+    "page": 310
+   }
+  ],
+  "9.2": [
+   {
+    "src": "book/ch09/9.2-1.webp",
+    "w": 994,
+    "h": 870,
+    "page": 310
+   },
+   {
+    "src": "book/ch09/9.2-2.webp",
+    "w": 985,
+    "h": 171,
+    "page": 311
+   }
+  ],
+  "9.3": [
+   {
+    "src": "book/ch09/9.3-1.webp",
+    "w": 985,
+    "h": 1279,
+    "page": 311
+   },
+   {
+    "src": "book/ch09/9.3-2.webp",
+    "w": 994,
+    "h": 356,
+    "page": 312
+   }
+  ],
+  "9.4": [
+   {
+    "src": "book/ch09/9.4-1.webp",
+    "w": 994,
+    "h": 1108,
+    "page": 312
+   },
+   {
+    "src": "book/ch09/9.4-2.webp",
+    "w": 985,
+    "h": 706,
+    "page": 313
+   }
+  ],
+  "9.5": [
+   {
+    "src": "book/ch09/9.5-1.webp",
+    "w": 985,
+    "h": 771,
+    "page": 313
+   },
+   {
+    "src": "book/ch09/9.5-2.webp",
+    "w": 994,
+    "h": 1492,
+    "page": 314
+   },
+   {
+    "src": "book/ch09/9.5-3.webp",
+    "w": 985,
+    "h": 190,
+    "page": 315
+   }
+  ],
+  "9.6": [
+   {
+    "src": "book/ch09/9.6-1.webp",
+    "w": 985,
+    "h": 1272,
+    "page": 315
+   },
+   {
+    "src": "book/ch09/9.6-2.webp",
+    "w": 994,
+    "h": 576,
+    "page": 316
+   }
+  ],
+  "9.7": [
+   {
+    "src": "book/ch09/9.7-1.webp",
+    "w": 994,
+    "h": 892,
+    "page": 316
+   },
+   {
+    "src": "book/ch09/9.7-2.webp",
+    "w": 985,
+    "h": 1492,
+    "page": 317
+   }
+  ],
+  "9.8": [
+   {
+    "src": "book/ch09/9.8-1.webp",
+    "w": 994,
+    "h": 1498,
+    "page": 318
+   },
+   {
+    "src": "book/ch09/9.8-2.webp",
+    "w": 985,
+    "h": 1506,
+    "page": 319
+   },
+   {
+    "src": "book/ch09/9.8-3.webp",
+    "w": 994,
+    "h": 85,
+    "page": 320
+   }
+  ]
+ },
+ "exercises": [
+  {
+   "num": 1,
+   "group": null,
+   "strips": [
+    {
+     "src": "book/ch09/ex1-1.webp",
+     "w": 994,
+     "h": 234,
+     "page": 320
+    }
+   ]
+  },
+  {
+   "num": 2,
+   "group": null,
+   "strips": [
+    {
+     "src": "book/ch09/ex2-1.webp",
+     "w": 994,
+     "h": 673,
+     "page": 320
+    }
+   ]
+  },
+  {
+   "num": 3,
+   "group": null,
+   "strips": [
+    {
+     "src": "book/ch09/ex3-1.webp",
+     "w": 994,
+     "h": 363,
+     "page": 320
+    },
+    {
+     "src": "book/ch09/ex3-2.webp",
+     "w": 985,
+     "h": 85,
+     "page": 321
+    }
+   ]
+  },
+  {
+   "num": 4,
+   "group": null,
+   "strips": [
+    {
+     "src": "book/ch09/ex4-1.webp",
+     "w": 985,
+     "h": 419,
+     "page": 321
+    }
+   ]
+  },
+  {
+   "num": 5,
+   "group": null,
+   "strips": [
+    {
+     "src": "book/ch09/ex5-1.webp",
+     "w": 985,
+     "h": 364,
+     "page": 321
+    }
+   ]
+  },
+  {
+   "num": 6,
+   "group": null,
+   "strips": [
+    {
+     "src": "book/ch09/ex6-1.webp",
+     "w": 985,
+     "h": 597,
+     "page": 321
+    },
+    {
+     "src": "book/ch09/ex6-2.webp",
+     "w": 994,
+     "h": 265,
+     "page": 322
+    }
+   ]
+  },
+  {
+   "num": 7,
+   "group": null,
+   "strips": [
+    {
+     "src": "book/ch09/ex7-1.webp",
+     "w": 994,
+     "h": 706,
+     "page": 322
+    }
+   ]
+  },
+  {
+   "num": 8,
+   "group": null,
+   "strips": [
+    {
+     "src": "book/ch09/ex8-1.webp",
+     "w": 994,
+     "h": 486,
+     "page": 322
+    },
+    {
+     "src": "book/ch09/ex8-2.webp",
+     "w": 985,
+     "h": 120,
+     "page": 323
+    }
+   ]
+  },
+  {
+   "num": 9,
+   "group": null,
+   "strips": [
+    {
+     "src": "book/ch09/ex9-1.webp",
+     "w": 985,
+     "h": 560,
+     "page": 323
+    }
+   ]
+  },
+  {
+   "num": 10,
+   "group": null,
+   "strips": [
+    {
+     "src": "book/ch09/ex10-1.webp",
+     "w": 985,
+     "h": 654,
+     "page": 323
+    }
+   ]
+  },
+  {
+   "num": 11,
+   "group": null,
+   "strips": [
+    {
+     "src": "book/ch09/ex11-1.webp",
+     "w": 985,
+     "h": 120,
+     "page": 323
+    },
+    {
+     "src": "book/ch09/ex11-2.webp",
+     "w": 994,
+     "h": 477,
+     "page": 324
+    }
+   ]
+  },
+  {
+   "num": 12,
+   "group": null,
+   "strips": [
+    {
+     "src": "book/ch09/ex12-1.webp",
+     "w": 994,
+     "h": 1002,
+     "page": 324
+    },
+    {
+     "src": "book/ch09/ex12-2.webp",
+     "w": 985,
+     "h": 91,
+     "page": 325
+    }
+   ]
+  },
+  {
+   "num": 13,
+   "group": null,
+   "strips": [
+    {
+     "src": "book/ch09/ex13-1.webp",
+     "w": 985,
+     "h": 1389,
+     "page": 325
+    }
+   ]
+  }
+ ]
+}

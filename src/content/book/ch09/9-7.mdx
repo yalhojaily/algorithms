@@ -1,0 +1,191 @@
+---
+section: "9.7"
+summary: "الحلقة الداخلية في Fischer–Meyer هي ضرب مصفوفات، مع min بدل الجمع، والجمع بدل الضرب: ضرب min-plus أو «المضحك». فـ Shimbel قوى متتالية لمصفوفة الأوزان، وFischer–Meyer تربيع متكرر. لكن خوارزميات الضرب السريعة (Strassen وما بعدها) تحتاج إلى الطرح، ولا طرح لـ min. وفي النهاية: لا أحد يعرف APSP عامة في O(V^2.999999)، وقد يكون ذلك مستحيلًا."
+minutes: 35
+goals:
+  - "ترى الحلقة الداخلية ضرب مصفوفات min-plus"
+  - "تفهم Shimbel قوى متتالية وFischer–Meyer تربيعًا متكررًا"
+  - "تعرف لماذا لا تنطبق Strassen على min-plus"
+  - "تعرف حدود المعرفة - Seidel للرسوم غير الموزونة، وفرضية APSP"
+terms:
+  - { en: min-plus product, ar: ضرب min-plus }
+  - { en: funny matrix multiplication, ar: الضرب المضحك }
+  - { en: Strassen's algorithm, ar: خوارزمية Strassen }
+  - { en: subcubic, ar: دون التكعيبي }
+---
+
+import Stage from '../../../components/book/Stage.astro';
+import ReadingGuide from '../../../components/book/ReadingGuide.astro';
+import BookPages from '../../../components/book/BookPages.astro';
+import BookExercises from '../../../components/book/BookExercises.astro';
+import Takeaways from '../../../components/book/Takeaways.astro';
+import Callout from '../../../components/Callout.astro';
+import Exercise from '../../../components/Exercise.astro';
+import QuickCheck from '../../../components/QuickCheck.tsx';
+import CodeLab from '../../../components/CodeLab.tsx';
+import MinPlusLab from '../../../components/MinPlusLab.tsx';
+import * as lab from '../../../labs/book-9-7-power.ts';
+
+<Stage n={1} id="warmup" title="تمهيد" sub="فكرة القسم قبل أي تعريف">
+
+انظر إلى ثلاث حلقات متداخلة: لكل $i$، لكل $j$، اجمع على كل $k$ حاصل $A[i, k] \cdot B[k, j]$. هذا ضرب المصفوفات المعتاد. والآن: لكل $u$، لكل $v$، خذ **أصغر** $D[u, x] + D[x, v]$ على كل $x$. هذه حلقة Fischer–Meyer.
+
+هما **الخوارزمية نفسها**، مع تبديل عمليتين: الجمع صار min، والضرب صار جمعًا. ومن هذه الملاحظة البسيطة، التي لاحظها Shimbel ثم Bellman، يأتي كل شيء في هذا القسم.
+
+</Stage>
+
+<Stage n={2} id="reading" title="اقرأ من الكتاب" sub="صفحات الكتاب الأصلية لهذا القسم، ومعها دليل يوجه قراءتك">
+
+<ReadingGuide pages="316–318" minutes={12}>
+
+- **MatrixSquare وFischerMeyerInnerLoop جنبًا إلى جنب.**
+- **«min-plus» أو «distance» أو «funny»:** ثلاثة أسماء.
+- **ἀρπεδονάπται:** «شادّو الحبال» المصريون من الفصل 1، وخوارزمية الضرب بالمضاعفة.
+- **Strassen والسؤال بين قوسين:** «What's the inverse operation for min?»
+- **Galil–Margalit وSeidel:** والحاشية 7 عن ورقة وُصفت خوارزميتها كاملة في الملخص.
+- **الفقرة الأخيرة:** «So maybe "not obvious" does mean "impossible" after all.»
+
+</ReadingGuide>
+
+<BookPages section="9.7" />
+
+</Stage>
+
+<Stage n={3} id="explain" title="الشرح والتجربة" sub="الأفكار نفسها بالعربية، بتفصيل، مع تجربة تفاعلية">
+
+### الضرب المضحك
+
+```
+MatrixSquare(A):                        FischerMeyerInnerLoop(D):
+  for i ← 1 to n                          for all vertices u
+    for j ← 1 to n                          for all vertices v
+      A'[i, j] ← 0                            D'[u, v] ← ∞
+      for k ← 1 to n                          for all vertices x
+        A'[i,j] ← A'[i,j] + A[i,k]·A[k,j]       D'[u,v] ← min{D'[u,v], D[u,x] + D[x,v]}
+```
+
+الفرق الوحيد: الجمع ← min، والضرب ← جمع. (والصفر، محايد الجمع، ← $\infty$، محايد min.) ولهذا تسمى الحلقة الداخلية **ضرب min-plus**، أو ضرب «المسافات»، أو الضرب «**المضحك**» (funny):
+
+$$
+(A \otimes B)[i, j] = \min_k \big(A[i, k] + B[k, j]\big).
+$$
+
+ومعناه في الرسوم: إن كانت $A$ أقصر المسارات بـ $a$ حافة على الأكثر، و$B$ بـ $b$، فـ $A \otimes B$ أقصر المسارات بـ $a + b$ حافة على الأكثر.
+
+جرّب. انقر أي خانة في الناتج لترى الحدود التي أُخذ أصغرها:
+
+<MinPlusLab client:visible />
+
+### قوى مصفوفة الأوزان
+
+الآن كل الخوارزميات السابقة صارت جبرًا:
+
+- **ShimbelAPSP** الخوارزمية التكرارية المعتادة لحساب **القوة $(V - 1)$** بضرب min-plus لمصفوفة الأوزان $W$. حلقاتها الأولى تبني **مصفوفة الوحدة min-plus**: أصفار على القطر و$\infty$ في كل مكان آخر. وكل تكرار يضرب في $W$ مرة.
+- **FischerMeyerAPSP** تستبدل بالتكرار **التربيع المتكرر**، «بالضبط كما في آخر الفصل 1»: $W^2, W^4, W^8, \ldots$. «مرة أخرى نرى تأثير الـ ἀρπεδονάπται المصريين القدماء!»
+
+### لماذا لا Strassen؟
+
+لضرب المصفوفات **المعتاد** خوارزميات فرّق-تسد أسرع من $n^3$، تشبه Karatsuba للأعداد. أولها لـ Volker Strassen سنة 1969: تختزل ضرب مصفوفتين $n \times n$ إلى **سبع** ضربات لمصفوفات $n/2 \times n/2$، فتعمل في $O(n^{\lg 7}) = O(n^{2.807})$. وتحسنت كثيرًا منذئذ، وأسرعها (حتى 2018، وقت كتابة الكتاب) $O(n^{2.372864})$.
+
+لكن **كلها تستعمل الطرح**، و«لا مقابل مضحك للطرح». فما العملية العكسية لـ min؟ إن عرفت أن $\min(a, b) = 3$ و$a = 3$، فلا تعرف $b$. فلا طريقة واضحة لتسريع الحلقة الداخلية للرسوم العامة.
+
+### «غير واضح» لا يعني «مستحيل»... أم يعني؟
+
+لحالات خاصة، توجد خوارزميات أسرع بكثير. من أجملها خوارزمية عشوائية بسيطة لـ Galil وMargalit (1991)، بسّطها Raimund Seidel (1992): كل المسافات في رسم **غير موجه غير موزون** في $O(M(V) \log V)$ زمنًا متوقعًا، و$M(n)$ زمن ضرب مصفوفتين صحيحتين «بجدية» (التمرين 12). والحاشية 7: ورقة Seidel من الأوراق النادرة التي وُصفت فيها الخوارزمية وحُللت **كاملة في الملخص**. وتعممت الفكرة لاحقًا إلى رسوم موجهة بأوزان صحيحة صغيرة، في زمن «دون تكعيبي بقوة».
+
+لكن للأوزان العامة: «لا أحد يعرف كيف يحسب أقصر المسارات لكل الأزواج في $O(V^{2.999999})$، لأي عدد من التسعات. بل هناك بعض الأدلة على أن خوارزمية كهذه مستحيلة!» (هذه «فرضية APSP» في نظرية التعقيد الدقيق.) «فربما "غير واضح" يعني "مستحيل" في النهاية.»
+
+<Callout type="tip" title="لماذا تعمل الخوارزمية مع min وجمع؟">
+كل ما يحتاج إليه التربيع المتكرر: أن تكون العملية «الكبيرة» (min) تبديلية وتجميعية ولها محايد ($\infty$)، وأن تكون العملية «الصغيرة» (+) تجميعية وتتوزع عليها: $a + \min(b, c) = \min(a + b, a + c)$. هذا ما يسمى **نصف حلقة** (semiring). أما Strassen فتحتاج إلى **حلقة** كاملة، بمعكوس للجمع. والتمرين 9 يستعمل نصف حلقة أخرى: «أو» و«و» المنطقيتان.
+</Callout>
+
+</Stage>
+
+<Stage n={4} id="check" title="تحقق من فهمك" sub="أسئلة سريعة">
+
+<QuickCheck
+  client:visible
+  id="q1"
+  question="ما «مصفوفة الوحدة» في ضرب min-plus؟"
+  options={['أصفار في كل مكان', 'آحاد على القطر وأصفار في غيره', 'أصفار على القطر و∞ في غيره', '∞ في كل مكان']}
+  answer={2}
+  explain="$\min_k(I[i, k] + A[k, j])$ يجب أن يساوي $A[i, j]$: الحد $k = i$ يعطي $0 + A[i, j]$، والباقي $\infty$."
+  wrong={{ 0: 'هذا يعطي $\min_k A[k, j]$.', 1: 'هذه وحدة الضرب العادي.', 3: 'هذا محايد min، أي «صفر» نصف الحلقة.' }}
+/>
+
+<QuickCheck
+  client:visible
+  id="q2"
+  question="لماذا لا نستطيع استعمال Strassen لضرب min-plus؟"
+  options={['لأنها بطيئة', 'لأنها تحتاج إلى الطرح، ولا معكوس لـ min', 'لأن المصفوفات ليست مربعة', 'يمكن']}
+  answer={1}
+  explain="Strassen تحسب مجاميع ثم تطرح ما زاد. ومع min، ما «زاد» لا يُستعاد."
+  wrong={{ 0: 'أسرع تقاربيًا.', 2: 'مربعة.', 3: 'لا أحد يعرف كيف.' }}
+/>
+
+</Stage>
+
+<Stage n={5} id="exercises" title="تمارين الكتاب" sub="حلّها بالورقة والقلم، ثم سجّل حالتها. الكتاب لا ينشر حلولها">
+
+<BookExercises chapter={9} nums={[9, 10, 12, 13]} core={[9, 10]} />
+
+<Callout type="tip" title="تلميح للتمرين 9">
+(أ) «صحيح» و«خطأ» ← أي عددين، بحيث «و» يصير جمعًا و«أو» يصير min؟ (فكّر: صحيح ← 0، خطأ ← ∞.) (ب) الضرب العادي لمصفوفتين من 0 و1 يعدّ **كم** $k$ يحقق الشرط. فمتى تكون «أو» صحيحة؟ (حين يكون العدد موجبًا.) وما حجم الأعداد؟
+</Callout>
+
+<Callout type="tip" title="تلميح للتمرين 10">
+(أ) الانغلاق المتعدي = قوة المصفوفة المنطقية، فالتربيع المتكرر. (ب) التلميح: «افعل ما تفعله دائمًا مع الـ dags» (ترتيب طوبولوجي)، ثم اقسم الرؤوس نصفين: الأول ثم الثاني. فالمصفوفة مثلثية بالكتل: ما الذي يحتاج إلى حساب في الكتلة العلوية اليمنى؟ و«$\omega \ge 2$» يجعل التكرار $T(n) = 2T(n/2) + O(n^\omega)$ يحل إلى $O(n^\omega)$. (ج) «افعل ما تفعله دائمًا لتحويل رسم إلى dag»: المكونات القوية.
+</Callout>
+
+<Callout type="tip" title="تلميح للتمرين 12">
+(أ) $A^2$ بالضرب العادي، ثم «أو» مع $A$. (ب) تافه تقريبًا: ما المسافات الممكنة إن كان $G^2$ كاملًا؟ (ج) وما بعده خطوات Seidel: اعمل استدعائيًا على $G^2$، والمفتاح كيف تسترجع المسافات في $G$ من مسافات $G^2$ (كل مسافة في $G$ إما $2d$ أو $2d - 1$). اتبع أجزاء التمرين بالترتيب.
+</Callout>
+
+<Callout type="tip" title="تلميح للتمرين 13">
+الفكرة: $(nM)^{-A[i,j]}$ تجعل **الأصغر** يصير **الأكبر** بفارق ضخم. فمجموع $\sum_j (nM)^{-(A[i,j] + B[j,k])}$ يغلب عليه الحد ذو الأس الأصغر. كيف تستخرجه؟ (فكّر في التمثيل بالأساس $nM$.) وفي (ج) احسب حجم الأعداد بالبتات.
+</Callout>
+
+### تمارين إضافية بحلول كاملة
+
+<Exercise id="e1" level="prove" title="التجميعية">
+
+برهن أن ضرب min-plus **تجميعي**: $(A \otimes B) \otimes C = A \otimes (B \otimes C)$. ولماذا نحتاج إلى ذلك للتربيع المتكرر؟
+
+<div slot="hint">اكتب الخانة $[i, l]$ في الطرفين.</div>
+<div slot="solution">
+
+$((A \otimes B) \otimes C)[i, l] = \min_k \big(\min_j (A[i,j] + B[j,k]) + C[k,l]\big) = \min_{j,k} (A[i,j] + B[j,k] + C[k,l])$، لأن الجمع يتوزع على min: $\min_j(x_j) + c = \min_j(x_j + c)$. والطرف الآخر يعطي العبارة نفسها بالترتيب المعاكس للـ min. ∎ والتربيع المتكرر يحسب $W^{8}$ مثلًا بـ $((W^2)^2)^2$، وهذا يساوي $W \otimes W \otimes \cdots \otimes W$ (8 مرات) **فقط** لأن الضرب تجميعي.
+
+</div>
+</Exercise>
+
+### المختبر البرمجي
+
+<CodeLab
+  client:visible
+  id="book-9.7-power"
+  title="ضرب min-plus والقوة بالتربيع"
+  exports={['minPlus', 'minPlusPower']}
+  starter={lab.starter}
+  tests={[
+    { name: 'minPlus', code: 'minPlus([[0, 3, Infinity], [Infinity, 0, -1], [2, Infinity, 0]], [[0, 3, Infinity], [Infinity, 0, -1], [2, Infinity, 0]]).map((r) => r.join()).join("|") === "0,3,2|1,0,-1|2,5,0"' },
+    { name: 'minPlusPower', code: 'JSON.stringify(minPlusPower([[0, 3, Infinity], [Infinity, 0, -1], [2, Infinity, 0]], 2)) === JSON.stringify(minPlus([[0, 3, Infinity], [Infinity, 0, -1], [2, Infinity, 0]], [[0, 3, Infinity], [Infinity, 0, -1], [2, Infinity, 0]])) && JSON.stringify(minPlusPower([[0, 3, Infinity], [Infinity, 0, -1], [2, Infinity, 0]], 1)) === JSON.stringify([[0, 3, Infinity], [Infinity, 0, -1], [2, Infinity, 0]])' },
+    { name: 'القوة k تساوي k ضربات (عشوائي)', code: '(() => { for (let t = 0; t < 30; t++) { const n = 1 + Math.floor(Math.random() * 5), W = Array.from({ length: n }, (_, i) => Array.from({ length: n }, (_, j) => (i === j ? 0 : Math.random() < 0.4 ? Infinity : Math.floor(Math.random() * 10) - 2))); const k = 1 + Math.floor(Math.random() * 9); let P = W; for (let i = 1; i < k; i++) P = minPlus(P, W); if (JSON.stringify(minPlusPower(W, k)) !== JSON.stringify(P)) return false; } return true; })()' }
+  ]}
+  solution={lab.solution}
+/>
+
+</Stage>
+
+<Stage n={6} id="summary" title="الخلاصة">
+
+<Takeaways>
+
+- **min-plus:** $(A \otimes B)[i, j] = \min_k(A[i, k] + B[k, j])$. ضرب المصفوفات بعد تبديل العمليتين.
+- **Shimbel** قوى متتالية لـ $W$، و**Fischer–Meyer** تربيع متكرر.
+- **Strassen لا تنفع:** تحتاج إلى طرح، ولا معكوس لـ min.
+- **الحدود:** Seidel للرسوم غير الموزونة دون تكعيبي، أما الأوزان العامة فلا أحد يعرف $O(V^{3 - \varepsilon})$.
+
+</Takeaways>
+
+</Stage>

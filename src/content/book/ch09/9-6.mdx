@@ -1,0 +1,178 @@
+---
+section: "9.6"
+summary: "Fischer وMeyer (1971): بدل أن تقسم أقصر مسار إلى مسار أقصر قليلًا وحافة، اقسمه في المنتصف إلى نصفين. dist(u, v, ℓ) = min_x dist(u, x, ℓ/2) + dist(x, v, ℓ/2). فيكفي lg V قيمة لـ ℓ، والزمن O(V³ log V). وبحذف البعد الثالث نحصل على خوارزمية Leyzorek (1957)، من الورقة نفسها التي فيها Dijkstra."
+minutes: 35
+goals:
+  - "تكتب تكرار التقسيم في المنتصف وتفهم لماذا ℓ قوة للعدد 2"
+  - "تحلل FischerMeyerAPSP في O(V³ log V)"
+  - "تفهم لماذا حذف البعد الثالث (LeyzorekAPSP) يبقى صحيحًا"
+terms:
+  - { en: divide and conquer, ar: فرّق تسد }
+  - { en: middle vertex, ar: الرأس الأوسط }
+  - { en: repeated squaring, ar: التربيع المتكرر }
+---
+
+import Stage from '../../../components/book/Stage.astro';
+import ReadingGuide from '../../../components/book/ReadingGuide.astro';
+import BookPages from '../../../components/book/BookPages.astro';
+import BookExercises from '../../../components/book/BookExercises.astro';
+import Takeaways from '../../../components/book/Takeaways.astro';
+import Callout from '../../../components/Callout.astro';
+import Exercise from '../../../components/Exercise.astro';
+import QuickCheck from '../../../components/QuickCheck.tsx';
+import CodeLab from '../../../components/CodeLab.tsx';
+import MatrixAPSPLab from '../../../components/MatrixAPSPLab.tsx';
+import * as lab from '../../../labs/book-9-6-squaring.ts';
+
+<Stage n={1} id="warmup" title="تمهيد" sub="فكرة القسم قبل أي تعريف">
+
+تكرار Bellman يقسم أقصر مسار إلى «مسار أقصر بحافة واحدة» و«حافة أخيرة». فيحتاج إلى $V - 1$ خطوة لينتقل من حافة إلى $V - 1$ حافة. وهذا كمن يصعد درجًا درجةً درجة.
+
+والبديل: اقسم المسار **في المنتصف**. مسار بـ $\ell$ حافة = نصف بـ $\ell/2$ + نصف بـ $\ell/2$. فمن الحافة الواحدة: 2، ثم 4، ثم 8... وتصل إلى $V$ في $\lg V$ خطوة. قفز لا صعود.
+
+</Stage>
+
+<Stage n={2} id="reading" title="اقرأ من الكتاب" sub="صفحات الكتاب الأصلية لهذا القسم، ومعها دليل يوجه قراءتك">
+
+<ReadingGuide pages="315–316" minutes={8}>
+
+- **التكرار الجديد:** الأساس $\ell = 1$ لا 0، ولماذا. وتعريف $w(v \to v) = 0$. (وفي الصيغة «if i = 1» والمقصود $\ell = 1$.)
+- **قوى 2:** «that's not really a problem».
+- **FischerMeyerAPSP:** المصفوفة تخزن $\text{dist}(u, v, 2^i)$.
+- **LeyzorekAPSP:** حذف البعد الثالث، من سنة 1957.
+
+</ReadingGuide>
+
+<BookPages section="9.6" />
+
+</Stage>
+
+<Stage n={3} id="explain" title="الشرح والتجربة" sub="الأفكار نفسها بالعربية، بتفصيل، مع تجربة تفاعلية">
+
+### التكرار في المنتصف
+
+اقترحه Michael Fischer وAlbert Meyer سنة 1971: اقسم أقصر مسار إلى أقصر مسارين أقصر منه، **عند الرأس الأوسط**. وللتبسيط عرّف $w(v \to v) = 0$ لكل رأس. فالدالة نفسها $\text{dist}(u, v, \ell)$ تحقق تكرارًا جديدًا:
+
+$$
+\text{dist}(u, v, \ell) = \begin{cases} w(u \to v) & \ell = 1 \\ \min_x \big(\text{dist}(u, x, \ell/2) + \text{dist}(x, v, \ell/2)\big) & \text{otherwise} \end{cases}
+$$
+
+والأساس $\ell = 1$ لا 0، لأن مسارًا بحافة واحدة على الأكثر لا «منتصف» له. ولماذا $w(v \to v) = 0$؟ لكي يسمح «النصف» بأن يكون أقصر من $\ell/2$ فعلًا: الرأس الأوسط $x$ قد يساوي $u$ أو $v$.
+
+**قوى 2.** كما هو مكتوب، التكرار يعمل حين $\ell$ قوة للعدد 2 (وإلا فـ «$\ell/2$ حافة» كسر). «لكن هذه ليست مشكلة»: $\text{dist}(u, v, \ell)$ المسافة الحقيقية لكل $\ell \ge V - 1$، فاستعمل $\ell = 2^{\lceil \lg V \rceil} \lt 2V$.
+
+### FischerMeyerAPSP
+
+حتى قبل أن نكتب الخوارزمية، الزمن واضح: $V$ قيمة لكل من $u$ و$v$ و$x$، و$\lceil \lg V \rceil$ قيمة فقط لـ $\ell$. فـ **$O(V^3 \log V)$**. والخانة $\text{dist}[u, v, i]$ تخزن $\text{dist}(u, v, 2^i)$:
+
+```
+FischerMeyerAPSP(V, E, w):
+  for all vertices u, v
+    dist[u, v, 0] ← w(u→v)
+  for i ← 1 to ⌈lg V⌉                  ⟨⟨ℓ = 2^i⟩⟩
+    for all vertices u, v
+      dist[u, v, i] ← ∞
+      for all vertices x
+        if dist[u, v, i] > dist[u, x, i−1] + dist[x, v, i−1]
+          dist[u, v, i] ← dist[u, x, i−1] + dist[x, v, i−1]
+```
+
+وبعكس الخوارزميات السابقة، هذه **ليست** $V$ تشغيلات لأي خوارزمية مصدر واحد: الحلقة الداخلية لا ترخي حواف مشدودة، بل تجمع **مسارين**.
+
+### LeyzorekAPSP: بلا البعد الثالث
+
+ومع ذلك يمكن حذف البعد الأخير، واستعمال $\text{dist}[u, v]$ بدل $\text{dist}[u, v, i]$ في كل مكان، كما في Bellman-Ford. فالذاكرة تنزل من $O(V^3)$... بل من $O(V^2 \log V)$ في الحقيقة، إلى $O(V^2)$. وصحتها بالحجة نفسها: القيم في المكان تكون **أصغر أو مساوية**، وما زالت أطوال مشي حقيقية. ووصفها Leyzorek وزملاؤه سنة 1957، «في الورقة نفسها التي وصفوا فيها خوارزمية Dijkstra»:
+
+```
+LeyzorekAPSP(V, E, w):
+  for all vertices u, v
+    dist[u, v] ← w(u→v)
+  for i ← 1 to ⌈lg V⌉
+    for all vertices u, v, x
+      if dist[u, v] > dist[u, x] + dist[x, v]
+        dist[u, v] ← dist[u, x] + dist[x, v]
+```
+
+جرّب. قارن عدد الجولات بـ Shimbel: كل جولة تضاعف عدد الحواف المسموح:
+
+<MatrixAPSPLab client:visible algo="squaring" />
+
+</Stage>
+
+<Stage n={4} id="check" title="تحقق من فهمك" sub="أسئلة سريعة">
+
+<QuickCheck
+  client:visible
+  id="q1"
+  question="V = 1000. كم جولة تحتاج FischerMeyerAPSP، وكم Shimbel؟"
+  options={['10 و 999', '999 و 10', '1000 و 1000', '20 و 999']}
+  answer={0}
+  explain="$\lceil \lg 1000 \rceil = 10$ تربيعات، مقابل $V - 1 = 999$ جولة. لكن جولة التربيع $V^3$، وجولة Shimbel $VE$."
+  wrong={{ 1: 'بالعكس.', 2: 'التربيع يضاعف.', 3: '$2^{10} = 1024 \ge 999$.' }}
+/>
+
+<QuickCheck
+  client:visible
+  id="q2"
+  question="لماذا نحتاج إلى w(v→v) = 0 في التكرار؟"
+  options={['لأن الرسم بسيط', 'لكي يسمح كل نصف بأقل من ℓ/2 حافة، فيشمل dist(u, v, ℓ) المسارات الأقصر', 'لأن الدورات ممنوعة', 'لا نحتاج إليه']}
+  answer={1}
+  explain="الحرف «على الأكثر» في التعريف: البقاء في المكان حافة بوزن صفر."
+  wrong={{ 0: 'لا علاقة.', 2: 'هذه حلقة بوزن صفر، لا دورة ضارة.', 3: 'بدونه $\text{dist}(u, v, 2)$ يتطلب حافتين بالضبط.' }}
+/>
+
+</Stage>
+
+<Stage n={5} id="exercises" title="تمارين الكتاب" sub="حلّها بالورقة والقلم، ثم سجّل حالتها. الكتاب لا ينشر حلولها">
+
+<BookExercises chapter={9} nums={[3]} core={[3]} />
+
+<Callout type="tip" title="تلميح للتمرين 3">
+الأجزاء الثلاثة: أعد **دورة سالبة** صريحة إن وُجدت. (أ) Johnson: Bellman-Ford يكتشفها؛ والتمرين 6 (أ) من الفصل 8 يستخرجها. (ب) و(ج) في الخوارزميات الديناميكية، دورة سالبة تجعل $\text{dist}[x, x] \lt 0$ لرأس ما عليها. فإن احتفظت بجدول سوابق (التمرين 1)، كيف تمشي من $x$ رجوعًا لتجد الدورة؟ وانتبه: هل جدول السوابق متسق مع وجود دورة سالبة؟
+</Callout>
+
+### تمارين إضافية بحلول كاملة
+
+<Exercise id="e1" level="prove" title="لماذا يصح التحديث في المكان؟">
+
+برهن: في LeyzorekAPSP، بعد الجولة $i$، $\text{dist}[u, v] \le \text{dist}(u, v, 2^i)$، وهو طول مشي ما من $u$ إلى $v$.
+
+<div slot="hint">استقراء على $i$. القيمة في المكان لا تزيد أبدًا.</div>
+<div slot="solution">
+
+بالاستقراء. بعد الجولة $i - 1$: $\text{dist}[a, b] \le \text{dist}(a, b, 2^{i-1})$ لكل زوج. وفي الجولة $i$، حين نفحص $x$ الأوسط الأمثل لـ $(u, v)$: القيمتان الحاليتان $\text{dist}[u, x]$ و$\text{dist}[x, v]$ **لا تزيدان** عن قيمهما بعد الجولة $i - 1$ (القيم في المكان لا تزيد). فـ $\text{dist}[u, v] \le \text{dist}(u, x, 2^{i-1}) + \text{dist}(x, v, 2^{i-1}) = \text{dist}(u, v, 2^i)$. والقيمة طول مشي لأن كل تحديث يلصق مشيين حقيقيين. وبلا دورات سالبة، أقصر مشي هو المسافة الحقيقية، فلا تنزل تحتها. ∎
+
+</div>
+</Exercise>
+
+### المختبر البرمجي
+
+<CodeLab
+  client:visible
+  id="book-9.6-squaring"
+  title="Leyzorek: تربيع في المكان"
+  exports={['leyzorek']}
+  starter={lab.starter}
+  tests={[
+    { name: 'رسم المختبر', code: '(() => { const G6 = [6, "ab bc ad be cf de ed ef fc fb ea".split(" ").map((e, k) => [e.charCodeAt(0) - 97, e.charCodeAt(1) - 97, [3, 2, 4, 6, 5, 1, 2, 7, 1, -2, 2][k]])];const REF = (n, E) => Array.from({ length: n }, (_, s) => { const d = new Array(n).fill(Infinity); d[s] = 0; for (let i = 0; i < n; i++) for (const [u, v, w] of E) if (d[u] + w < d[v]) d[v] = d[u] + w; return d; }); return JSON.stringify(leyzorek(...G6)) === JSON.stringify(REF(...G6)); })()' },
+    { name: 'رأسان', code: 'leyzorek(2, [[0, 1, -4]]).map((r) => r.join()).join("|") === "0,-4|Infinity,0"' },
+    { name: 'رسوم عشوائية (مقارنة بـ V مرة Bellman-Ford)', code: '(() => { const REF = (n, E) => Array.from({ length: n }, (_, s) => { const d = new Array(n).fill(Infinity); d[s] = 0; for (let i = 0; i < n; i++) for (const [u, v, w] of E) if (d[u] + w < d[v]) d[v] = d[u] + w; return d; });const RAND = () => { const n = 1 + Math.floor(Math.random() * 9), E = []; for (let u = 0; u < n; u++) for (let v = 0; v < n; v++) if (u !== v && Math.random() < 0.35) E.push([u, v, u < v ? Math.floor(Math.random() * 13) - 3 : 30 + Math.floor(Math.random() * 9)]); return [n, E]; }; for (let t = 0; t < 40; t++) { const [n, E] = RAND(); if (JSON.stringify(leyzorek(n, E)) !== JSON.stringify(REF(n, E))) return false; } return true; })()' }
+  ]}
+  bench={{ title: 'زمن leyzorek على رسم فيه n رأسًا', fn: 'leyzorek', make: '(() => { const E = []; for (let u = 0; u < n; u++) for (let k = 0; k < 4; k++) { const v = Math.floor(Math.random() * n); if (u !== v) E.push([u, v, u < v ? Math.floor(Math.random() * 10) - 2 : 30 + Math.floor(Math.random() * 10)]); } return [n, E]; })()', spread: true, ns: [25, 50, 100, 200] }}
+  solution={lab.solution}
+/>
+
+</Stage>
+
+<Stage n={6} id="summary" title="الخلاصة">
+
+<Takeaways>
+
+- **في المنتصف:** $\text{dist}(u, v, \ell) = \min_x(\text{dist}(u, x, \ell/2) + \text{dist}(x, v, \ell/2))$، مع $w(v \to v) = 0$.
+- **قوى 2:** $\lceil \lg V \rceil$ جولة تكفي.
+- **FischerMeyer:** $O(V^3 \log V)$، وليست $V$ تشغيلات لمصدر واحد.
+- **Leyzorek:** بلا البعد الثالث، ذاكرة $O(V^2)$، والقيم في المكان لا تفسد شيئًا.
+
+</Takeaways>
+
+</Stage>

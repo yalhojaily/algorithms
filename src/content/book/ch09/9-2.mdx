@@ -1,0 +1,156 @@
+---
+section: "9.2"
+summary: "أوضح حل: شغّل خوارزمية مصدر واحد من كل رأس. والزمن يعتمد على الخوارزمية: BFS أو dag في O(VE)، وDijkstra في O(VE log V)، وBellman-Ford في O(V²E) أي O(V⁴) في الرسوم الكثيفة. والحواف السالبة هي الثمن الكبير: عامل V كامل."
+minutes: 20
+goals:
+  - "تحلل ObviousAPSP مع كل خوارزمية مصدر واحد من الفصل 8"
+  - "تعرف أن الحواف السالبة تكلف عامل V تقريبًا"
+  - "تعرف بدائل Dijkstra - مصفوفة غير مرتبة O(V³)، وكومة Fibonacci"
+terms:
+  - { en: ObviousAPSP, ar: الحل الواضح }
+  - { en: dense graph, ar: رسم كثيف }
+---
+
+import Stage from '../../../components/book/Stage.astro';
+import ReadingGuide from '../../../components/book/ReadingGuide.astro';
+import BookPages from '../../../components/book/BookPages.astro';
+import BookExercises from '../../../components/book/BookExercises.astro';
+import Takeaways from '../../../components/book/Takeaways.astro';
+import Callout from '../../../components/Callout.astro';
+import Exercise from '../../../components/Exercise.astro';
+import QuickCheck from '../../../components/QuickCheck.tsx';
+import CodeLab from '../../../components/CodeLab.tsx';
+import * as lab from '../../../labs/book-9-2-bfs.ts';
+
+<Stage n={1} id="warmup" title="تمهيد" sub="فكرة القسم قبل أي تعريف">
+
+عندك آلة تحسب المسافات من مدينة واحدة إلى كل المدن. وتريد جدول كل المدن إلى كل المدن. الحل الواضح: شغّل الآلة مرة لكل مدينة، واملأ صفًا في كل مرة.
+
+لا شيء عبقري هنا. لكن هذا القسم الصغير يضع **المعيار** الذي يجب أن تغلبه كل خوارزمية بعده. ويكشف المشكلة الحقيقية: الحواف السالبة تضاعف الثمن بعامل $V$ تقريبًا.
+
+</Stage>
+
+<Stage n={2} id="reading" title="اقرأ من الكتاب" sub="صفحات الكتاب الأصلية لهذا القسم، ومعها دليل يوجه قراءتك">
+
+<ReadingGuide pages="310–311" minutes={6}>
+
+- **ObviousAPSP:** ثلاثة أسطر.
+- **أربعة خيارات:** BFS، وdag، وDijkstra، وBellman-Ford، وزمن كل منها.
+- **الحاشية 3:** Dijkstra بمصفوفة غير مرتبة $O(V^3)$ مهما كانت الحواف، وبكومة Fibonacci $O(VE + V^2 \log V)$. وفي الحاشية «gives us a running time to»: هفوة.
+
+</ReadingGuide>
+
+<BookPages section="9.2" />
+
+</Stage>
+
+<Stage n={3} id="explain" title="الشرح" sub="الأفكار نفسها بالعربية، بتفصيل">
+
+### الحل الواضح
+
+```
+ObviousAPSP(V, E, w):
+  for every vertex s
+    dist[s, ·] ← SSSP(V, E, w, s)
+```
+
+ولكل رسم الخوارزمية المناسبة من الفصل 8. وفي الرسوم الكثيفة $E = \Theta(V^2)$، فـ $VE = \Theta(V^3)$:
+
+<div className="table-scroll">
+
+| الرسم | خوارزمية المصدر الواحد | APSP بـ $V$ تشغيلات | كثيف |
+| --- | --- | --- | --- |
+| بلا أوزان | BFS | $O(VE)$ | $O(V^3)$ |
+| dag | ترتيب طوبولوجي | $O(VE)$ | $O(V^3)$ |
+| أوزان غير سالبة | Dijkstra (كومة ثنائية) | $O(VE \log V)$ | $O(V^3 \log V)$ |
+| أي أوزان | Bellman-Ford | $O(V^2 E)$ | $O(V^4)$ |
+
+</div>
+
+### الحاشية 3: Dijkstra دون كومة
+
+إن استبدلت بالكومة الثنائية مصفوفة **غير مرتبة** (المسح الغاشم الأصلي لـ Dijkstra)، فكل تشغيل $O(V^2)$، والمجموع $O(V^3)$، **مهما كان عدد الحواف**. وبكومة Fibonacci: $O(V(E + V \log V)) = O(VE + V^2 \log V)$، وهو $O(V^3)$ في الكثيف أيضًا.
+
+### الفجوة
+
+انظر إلى السطر الأخير: الأوزان السالبة تحوّل $V^3$ إلى $V^4$. عامل $V$ كامل، فقط لأن Dijkstra لا تقبل حواف سالبة. والسؤال الطبيعي للقسم القادم: **هل يمكن التخلص من الحواف السالبة** دون أن تتغير أقصر المسارات؟
+
+</Stage>
+
+<Stage n={4} id="check" title="تحقق من فهمك" sub="أسئلة سريعة">
+
+<QuickCheck
+  client:visible
+  id="q1"
+  question="رسم متفرق: E = O(V)، وكل الأوزان موجبة. ما زمن ObviousAPSP بـ Dijkstra بكومة ثنائية؟"
+  options={['O(V³)', 'O(V² log V)', 'O(V²)', 'O(V⁴)']}
+  answer={1}
+  explain="$O(VE \log V)$ مع $E = O(V)$: $O(V^2 \log V)$. قريب من الحد الأدنى $V^2$."
+  wrong={{ 0: 'هذا للكثيف.', 2: 'ينقص عامل $\log V$ للكومة.', 3: 'هذا Bellman-Ford في الكثيف.' }}
+/>
+
+<QuickCheck
+  client:visible
+  id="q2"
+  question="لماذا ObviousAPSP بـ Bellman-Ford أبطأ بعامل V تقريبًا من Dijkstra؟"
+  options={['لأن Bellman-Ford O(VE) لكل مصدر، وDijkstra O(E log V)', 'لأنها تكتشف الدورات السالبة', 'لأنها لا تستعمل كومة', 'ليست أبطأ']}
+  answer={0}
+  explain="$V \cdot VE$ مقابل $V \cdot E \log V$: الفرق $V / \log V$."
+  wrong={{ 1: 'الاكتشاف جولة إضافية واحدة فقط.', 2: 'السبب الجولات $V - 1$.', 3: 'أبطأ بوضوح.' }}
+/>
+
+</Stage>
+
+<Stage n={5} id="exercises" title="تمارين الكتاب" sub="حلّها بالورقة والقلم، ثم سجّل حالتها. الكتاب لا ينشر حلولها">
+
+<BookExercises chapter={9} nums={[7]} core={[7]} />
+
+<Callout type="tip" title="تلميح للتمرين 7">
+Morty يمشي ثلاث مراحل: البوابة ← plumbus ← fleeb ← البوابة. وقيد الانفجار يمس المرحلة الثانية فقط. فكم خوارزمية مصدر واحد تحتاج، ومن أين؟ (من البوابة، وإلى البوابة: الثاني في $\text{rev}(G)$.) والمرحلة الوسطى: لكل plumbus $p$، أقرب fleeb **ضمن 137**. هل تحتاج إلى بحث من كل plumbus؟ فكر في الحجم: $|P|$ تشغيلًا لـ Dijkstra. والمطلوب في الكتاب يحدد الزمن المقبول؛ اقرأه.
+</Callout>
+
+### تمارين إضافية بحلول كاملة
+
+<Exercise id="e1" level="apply" title="القطر">
+
+**قطر** رسم غير موجه غير موزون متصل: أكبر مسافة بين أي رأسين. ما زمن حسابه بالحل الواضح؟ ولماذا لا يكفي بحث واحد؟
+
+<div slot="hint">بحث واحد من $s$ يعطي أبعد رأس **عن $s$** فقط.</div>
+<div slot="solution">
+
+$V$ بحثًا بالعرض: $O(V(V + E)) = O(VE)$ (الرسم متصل، فـ $E \ge V - 1$). ثم أكبر قيمة في الجدول. وبحث واحد لا يكفي: أبعد رأس عن $s$ ليس بالضرورة طرف القطر، لأن القطر قد يكون بين رأسين كلاهما قريب من $s$ نسبيًا. (في **الأشجار** يكفي بحثان: من أي رأس إلى أبعد رأس $x$، ثم من $x$. وفي الرسوم العامة لا.)
+
+</div>
+</Exercise>
+
+### المختبر البرمجي
+
+<CodeLab
+  client:visible
+  id="book-9.2-bfs"
+  title="كل الأزواج بـ V بحثًا بالعرض"
+  exports={['allPairsBFS']}
+  starter={lab.starter}
+  tests={[
+    { name: 'مسار ودورة', code: 'allPairsBFS([[1], [2], [0]]).map((r) => r.join()).join("|") === "0,1,2|2,0,1|1,2,0"' },
+    { name: 'غير قابل للوصول', code: 'allPairsBFS([[1], [], []]).map((r) => r.join()).join("|") === "0,1,Infinity|Infinity,0,Infinity|Infinity,Infinity,0"' },
+    { name: 'رسوم عشوائية', code: '(() => { for (let t = 0; t < 40; t++) { const n = 1 + Math.floor(Math.random() * 10), adj = Array.from({ length: n }, () => []), E = []; for (let u = 0; u < n; u++) for (let v = 0; v < n; v++) if (u !== v && Math.random() < 0.25) { adj[u].push(v); E.push([u, v, 1]); } const REF = (n, E) => Array.from({ length: n }, (_, s) => { const d = new Array(n).fill(Infinity); d[s] = 0; for (let i = 0; i < n; i++) for (const [u, v, w] of E) if (d[u] + w < d[v]) d[v] = d[u] + w; return d; }); if (JSON.stringify(allPairsBFS(adj)) !== JSON.stringify(REF(n, E))) return false; } return true; })()' }
+  ]}
+  bench={{ title: 'زمن allPairsBFS على رسم فيه n رأسًا و4n حافة', fn: 'allPairsBFS', make: '(() => { const adj = Array.from({ length: n }, () => []); for (let i = 0; i < 4 * n; i++) adj[Math.floor(Math.random() * n)].push(Math.floor(Math.random() * n)); return [adj]; })()', spread: true, ns: [250, 500, 1000, 2000] }}
+  solution={lab.solution}
+/>
+
+</Stage>
+
+<Stage n={6} id="summary" title="الخلاصة">
+
+<Takeaways>
+
+- **ObviousAPSP:** خوارزمية مصدر واحد من كل رأس.
+- **الزمن:** $O(VE)$ بلا أوزان أو dag، و$O(VE \log V)$ بـ Dijkstra، و$O(V^2 E)$ بـ Bellman-Ford.
+- **الكثيف:** $V^3$ أو $V^3 \log V$ مقابل $V^4$: الحواف السالبة تكلف عامل $V$.
+- **السؤال القادم:** هل يمكن إزالة الحواف السالبة؟
+
+</Takeaways>
+
+</Stage>
