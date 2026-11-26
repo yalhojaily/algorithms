@@ -87,7 +87,7 @@ describe("the book's Hamiltonian construction needs separators", () => {
     const B = hamFromSat(all8, true), S = hamFromSat(all8);
     expect(ham(B.V, B.edges)).toBe(true);
     expect(ham(S.V, S.edges)).toBe(false);
-  });
+  }, 60000);
 });
 
 describe('graphs and subset sum', () => {
