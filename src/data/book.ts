@@ -130,6 +130,17 @@ export const chapters: BookChapter[] = [
       sec('6.6', 'Strong Components in Linear Time', 'المكونات القوية في زمن خطي', 238, [4, 5, 19, 21]),
     ],
   },
+  {
+    num: 7, slug: '07-mst', en: 'Minimum Spanning Trees', ar: 'أشجار التغطية الصغرى', pages: [257, 272], exercisesPage: 268,
+    blurb: 'أرخص طريقة لربط كل الرؤوس. مع أوزان مختلفة الشجرة الصغرى وحيدة، وكل خوارزمياتها تقريبًا حالة من خوارزمية عامة واحدة: أضف حواف آمنة. ثم الثلاث الكلاسيكية: Borůvka تضيف كل الحواف الآمنة دفعة واحدة، وJarník يكبّر شجرة واحدة، وKruskal يمر على الحواف من الأخف، ومعه بنية المجموعات المنفصلة.',
+    sections: [
+      sec('7.1', 'Distinct Edge Weights', 'أوزان مختلفة', 257, [2]),
+      sec('7.2', 'The Only Minimum Spanning Tree Algorithm', 'خوارزمية الشجرة الصغرى الوحيدة', 259, [1, 3]),
+      sec('7.3', 'Borůvka’s Algorithm', 'خوارزمية Borůvka', 261, [8, 10]),
+      sec('7.4', 'Jarník’s (“Prim’s”) Algorithm', 'خوارزمية Jarník («Prim»)', 263, [7, 9]),
+      sec('7.5', 'Kruskal’s Algorithm', 'خوارزمية Kruskal', 265, [4, 5, 6]),
+    ],
+  },
 ];
 
 /** The whole book, for the table of contents (chapters not yet on the site are shown as coming). */

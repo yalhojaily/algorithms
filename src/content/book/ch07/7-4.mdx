@@ -1,0 +1,208 @@
+---
+section: "7.4"
+summary: "Jarník (1929) يكبّر شجرة واحدة T من رأس واحد، ويضيف كل مرة حافة T الآمنة. وتطبيقه بطابور أولويات للحواف ليس إلا «البحث الأفضل أولًا» من الفصل 5، في O(E log V). ثم تحسين نظري بكومة Fibonacci: الرؤوس في الطابور لا الحواف، مع DecreaseKey بزمن ثابت مستهلك، فيصير O(E + V log V). وقصة الاسم: الخوارزمية اكتُشفت ست مرات، وتحمل اسم الثالث."
+minutes: 45
+goals:
+  - تفهم Jarník حالة من الخوارزمية العامة - مكون واحد كبير
+  - تطبقه بطابور أولويات للحواف وتربطه بالبحث الأفضل أولًا
+  - تحلل الزمن O(E log V) بكومة ثنائية
+  - تفهم صيغة الرؤوس مع DecreaseKey وزمن O(E + V log V) بكومة Fibonacci
+terms:
+  - { en: Jarník's algorithm, ar: خوارزمية Jarník }
+  - { en: priority queue, ar: طابور الأولويات }
+  - { en: binary heap, ar: كومة ثنائية }
+  - { en: Fibonacci heap, ar: كومة Fibonacci }
+  - { en: DecreaseKey, ar: إنقاص المفتاح }
+  - { en: amortized time, ar: زمن مستهلك }
+---
+
+import Stage from '../../../components/book/Stage.astro';
+import ReadingGuide from '../../../components/book/ReadingGuide.astro';
+import BookPages from '../../../components/book/BookPages.astro';
+import BookExercises from '../../../components/book/BookExercises.astro';
+import Takeaways from '../../../components/book/Takeaways.astro';
+import Callout from '../../../components/Callout.astro';
+import Exercise from '../../../components/Exercise.astro';
+import QuickCheck from '../../../components/QuickCheck.tsx';
+import MSTAlgoLab from '../../../components/MSTAlgoLab.tsx';
+import CodeLab from '../../../components/CodeLab.tsx';
+import * as lab from '../../../labs/book-7-4-jarnik.ts';
+
+<Stage n={1} id="warmup" title="تمهيد" sub="فكرة القسم قبل أي تعريف">
+
+Borůvka يبني جسورًا من كل الجزر معًا. وJarník يفعل العكس: **جزيرة واحدة** فقط تنمو. تبدأ بمدينة واحدة، وكل مرة تبني أرخص جسر يخرج من جزيرتك إلى مدينة لم تصل إليها بعد. تبتلع المدينة، وتكرر.
+
+هذا ما رأيته في الفصل 5 دون اسمه: البحث الأفضل أولًا بأولوية وزن الحافة. وقال الكتاب هناك إنه «يُعرف عادةً (لكن، كالعادة، خطأً) بخوارزمية Prim». والآن القصة كاملة.
+
+</Stage>
+
+<Stage n={2} id="reading" title="اقرأ من الكتاب" sub="صفحات الكتاب الأصلية لهذا القسم، ومعها دليل يوجه قراءتك">
+
+<ReadingGuide pages="263–265" minutes={15}>
+
+- **التاريخ:** Jarník في رسالة إلى Borůvka سنة 1929، ثم Kruskal 1956، وPrim 1957 («arguably»)، وLoberman وWeinberger 1957، وDijkstra 1958. (و«Lobermand» في الكتاب هفوة مطبعية.)
+- **السطر الواحد:** «Repeatedly add T's safe edge to T.»
+- **الفقرة بعد الشكل 7.4:** «in other words, Jarník's algorithm is a variant of best-first search».
+- **قسم كومة Fibonacci (متقدم):** والحاشية 4 عن الزمن المستهلك.
+- **الشكل 7.5:** JarníkInit وJarníkLoop.
+- **الفقرة الأخيرة:** لماذا التحسين نادرًا ما يفيد عمليًا.
+
+</ReadingGuide>
+
+<BookPages section="7.4" />
+
+</Stage>
+
+<Stage n={3} id="explain" title="الشرح والتجربة" sub="الأفكار نفسها بالعربية، بتفصيل، مع تجربة تفاعلية">
+
+### اكتُشفت ست مرات
+
+وصفها التشيكي Vojtěch Jarník أول مرة في رسالة إلى Borůvka سنة 1929، ونشرها في السنة التالية. ثم أعاد اكتشافها مستقلين: Joseph Kruskal (1956)، وRobert Prim (1957، «ربما»)، وHarry Loberman وArnold Weinberger (1957)، وأخيرًا Edsger Dijkstra (1958). وPrim وLoberman وWeinberger وDijkstra كلهم عرفوا ورقة Kruskal واستشهدوا بها (في النهاية). لكن Kruskal وصف في الورقة نفسها **خوارزميتين أخريين**، فصار هذا «Prim's algorithm»، وأحيانًا «Prim/Dijkstra»، رغم أن Dijkstra كان قد صار له سنة 1958 خوارزمية أخرى «سُميت باسمه (على نحو غير لائق)». ولهذا يكتب Erickson العنوان «Jarník's ("Prim's")».
+
+### سطر واحد
+
+في Jarník، الغابة الوسيطة $F$ فيها مكون **واحد** غير بديهي $T$، وكل المكونات الأخرى رؤوس معزولة. في البداية $T$ رأس واحد اختياري. ثم:
+
+> **Jarník: أضف حافة $T$ الآمنة إلى $T$، وكرر.**
+
+وحافة $T$ الآمنة: أخف حافة لها طرف واحد في $T$. والمأخذ 7.2 يضمن الصحة.
+
+### التطبيق: البحث الأفضل أولًا
+
+نحتفظ بكل الحواف المجاورة لـ $T$ في **طابور أولويات** بأولوية الوزن. نُخرج الأخف. إن كان طرفاها في $T$، فهي عديمة الفائدة: نرميها. وإلا، فهي حافة $T$ الآمنة: نضيفها إلى $T$، ونُدخل حواف الرأس الجديد إلى الطابور.
+
+«بكلمات أخرى، خوارزمية Jarník نوع من البحث الأفضل أولًا، كما في آخر الفصل 5!» وبكومة ثنائية قياسية، كل عملية $O(\log E)$، وكل حافة تدخل وتخرج مرة على الأكثر من كل طرف، فالزمن $O(E \log E) = O(E \log V)$. (و$\log E \le \log V^2 = 2 \log V$.)
+
+جرّب. الطابور تحت الرسم، والأخف في أوله. لاحظ الحواف التي تخرج من الطابور وقد صارت عديمة الفائدة (طرفاها في $T$ الآن):
+
+<MSTAlgoLab client:visible algo="jarnik" />
+
+### تحسين نظري: كومة Fibonacci
+
+يمكن تحسين Jarník بطابور أولويات أعقد: **كومة Fibonacci** (Fibonacci heap)، لـ Fredman وTarjan سنة 1984. وهي تدعم العمليات نفسها، Insert وExtractMin و**DecreaseKey**، لكن Insert وDecreaseKey بزمن **ثابت مستهلك**، وExtractMin بزمن $O(\log n)$ مستهلك.
+
+و**الزمن المستهلك** (amortized) في الحاشية 4 «حيلة محاسبية»: أي متتالية من $I$ عمليات Insert و$D$ عمليات DecreaseKey و$X$ عمليات ExtractMin تستغرق $O(I + D + X \log n)$ **في أسوأ الأحوال**. فالمتوسط على المتتالية ثابت لـ Insert وDecreaseKey، لكن عملية واحدة قد تطول. ولا عشوائية في أي شيء: هو متوسط على المتتالية، لا على المدخلات.
+
+ولاستعمالها نغير ما في الطابور: **الرؤوس** بدل الحواف. أولوية الرأس $v$ وزن أخف حافة بينه وبين $T$، أو $\infty$ إن لم توجد. ونحفظ معها $\text{edge}(v)$، تلك الحافة نفسها:
+
+```
+JarníkInit(V, E, s):                    JarníkLoop(V, E, s):
+  for each vertex v ∈ V \ {s}             T ← ({s}, ∅)
+    if vs ∈ E                             for i ← 1 to |V| − 1
+      edge(v) ← vs                          v ← ExtractMin
+      priority(v) ← w(vs)                   add v and edge(v) to T
+    else                                    for each neighbor u of v
+      edge(v) ← Null                          if u ∉ T and priority(u) > w(uv)
+      priority(v) ← ∞                           edge(u) ← uv
+    Insert(v)                                   DecreaseKey(u, w(uv))
+```
+
+والعدّ: Insert وExtractMin كل منهما $O(V)$ مرة (مرة لكل رأس عدا $s$)، وDecreaseKey $O(E)$ مرة (مرتين على الأكثر لكل حافة). فبكومة Fibonacci:
+
+$$
+O(V) + O(E) + O(V \log V) = O(E + V \log V),
+$$
+
+وهذا أسرع من Borůvka «إلا إن كان $E = O(V)$».
+
+لكن عمليًا، «نادرًا ما يكون هذا التحسين أسرع من التطبيق الساذج بكومة ثنائية، إلا إن كان الرسم ضخمًا جدًا وكثيفًا». خوارزميات كومة Fibonacci معقدة، وثوابتها الخفية في الزمن والذاكرة كبيرة، «ليست فاحشة، لكنها بالتأكيد أكبر من الثابت 1» في $O(\log n)$ للكومة الثنائية.
+
+<Callout type="tip" title="Jarník هو Dijkstra تقريبًا">
+قارن بالفصل 5: Jarník أولوية الحافة $w(uv)$، وDijkstra أولويتها $\text{dist}(v) + w(uv)$. والكود نفسه حرفيًا، والسطر المختلف واحد. ولهذا اكتشفهما Dijkstra الاثنين، ولهذا سترى الصيغة مع DecreaseKey مرة أخرى في الفصل 8.
+</Callout>
+
+</Stage>
+
+<Stage n={4} id="check" title="تحقق من فهمك" sub="أسئلة سريعة قبل التمارين">
+
+<QuickCheck
+  client:visible
+  id="q1"
+  question="في Jarník بطابور حواف، أخرجنا حافة طرفاها في T. ماذا نفعل؟"
+  options={['نضيفها', 'نرميها: عديمة الفائدة', 'نعيدها إلى الطابور', 'نتوقف']}
+  answer={1}
+  explain="طرفاها في مكون واحد، فهي عديمة الفائدة، وستبقى كذلك. وهذا مثل «إن كان معلَّمًا فتجاهله» في البحث أيًا كان أولًا."
+  wrong={{ 0: 'تصنع دورة.', 2: 'لن تصير مفيدة أبدًا.', 3: 'قد يكون في الطابور حواف آمنة بعدها.' }}
+/>
+
+<QuickCheck
+  client:visible
+  id="q2"
+  question="رسم كثيف جدًا: E ≈ V². أي حد أفضل؟"
+  options={['O(E log V) بكومة ثنائية = O(V² log V)', 'O(E + V log V) بكومة Fibonacci = O(V²)', 'متساويان', 'O(V log V)']}
+  answer={1}
+  explain="الفرق عامل $\log V$ في الرسوم الكثيفة. (والتمرين 7 يصل إلى $O(V^2)$ نفسه بلا كومة Fibonacci أصلًا.)"
+  wrong={{ 0: 'أبطأ بعامل $\log V$.', 2: 'يختلفان بعامل $\log V$.', 3: 'لا بد من قراءة الحواف.' }}
+/>
+
+</Stage>
+
+<Stage n={5} id="exercises" title="تمارين الكتاب" sub="حلّها بالورقة والقلم، ثم سجّل حالتها. الكتاب لا ينشر حلولها">
+
+<BookExercises chapter={7} nums={[7, 9]} core={[7]} />
+
+<Callout type="tip" title="تلميح للتمرين 7">
+استعمل صيغة الرؤوس (الشكل 7.5)، لكن بدل الكومة، **مصفوفة** عادية: $\text{priority}[1 .. V]$. كم يكلف ExtractMin الآن؟ وDecreaseKey؟ ثم اضرب في عدد المرات. وفي رسم كثيف، هل $O(V^2)$ أفضل من $O(E \log V)$؟ (والقراءة بمصفوفة جوار طبيعية هنا.)
+</Callout>
+
+<Callout type="tip" title="تلميح للتمرين 9">
+(أ) التمرين 1 (أ) بالمقلوب: في **الشجرة العظمى**، ماذا عن **أخف** حافة في أي دورة؟ ثم افترض أن أوسع مسار بين $s$ و$t$ يمر بحافة خارج الشجرة العظمى... (ب) سؤال وصول: احذف كل الحواف التي... ثم بحث واحد. (ج) i. حذف حافة أخف من $B$ لا يمس أوسع مسار. فكر في (ج) ii. بالاتجاه المعاكس: ماذا يحدث إن **قلّصت** حواف أثقل من $B$؟ والهدف في (د) خوارزمية $O(V + E)$: كل خطوة تتخلص من نصف الحواف، بإيجاد **الوسيط** في زمن خطي (القسم 1.8).
+</Callout>
+
+### تمارين إضافية بحلول كاملة
+
+<Exercise id="e1" level="apply" title="من أي رأس نبدأ؟">
+
+هل تعتمد الشجرة التي يعيدها Jarník على رأس البداية؟ وترتيب إضافة الحواف؟
+
+<div slot="hint">المأخذ 7.1.</div>
+<div slot="solution">
+
+**الشجرة: لا.** الأوزان مختلفة، فالشجرة الصغرى وحيدة، وJarník يعيدها دائمًا. **الترتيب: نعم.** من رؤوس مختلفة تُضاف الحواف بترتيبات مختلفة. (جرّب في المختبر: البداية دائمًا من s، لكن تخيل البداية من h: أول حافة تُضاف وزنها 14، أخف حافتي h.)
+
+</div>
+</Exercise>
+
+<Exercise id="e2" level="prove" title="Jarník كترتيب Kruskal مقيد">
+
+برهن: الحافة التي يضيفها Jarník في كل خطوة هي الأخف بين **كل** الحواف غير عديمة الفائدة التي لها طرف في $T$. هل هي الأخف بين كل الحواف غير عديمة الفائدة في $G$؟
+
+<div slot="hint">في Jarník، المكونات الأخرى رؤوس معزولة. فما الحواف «غير عديمة الفائدة» عمومًا؟</div>
+<div slot="solution">
+
+الطابور يحتوي على كل الحواف التي لها طرف في $T$ (أُدخلت حين دخل طرفها $T$). والحواف غير عديمة الفائدة منها هي التي لها طرف **واحد** في $T$. والأخف بينها هي حافة $T$ الآمنة، وهي ما يُخرجه الطابور بعد رمي عديمة الفائدة. **لكن ليست الأخف في $G$ كله**: حافة خفيفة جدًا بين رأسين معزولين بعيدين عن $T$ غير عديمة الفائدة، ولن يضيفها Jarník حتى يصل إليها. وهذا الفرق بينه وبين Kruskal.
+
+</div>
+</Exercise>
+
+### المختبر البرمجي
+
+<CodeLab
+  client:visible
+  id="book-7.4-jarnik"
+  title="Jarník بكومة ثنائية"
+  exports={['jarnik']}
+  starter={lab.starter}
+  tests={[
+    { name: 'مثلث', code: 'jarnik(3, [[0, 1, 3], [1, 2, 1], [0, 2, 2]]).slice().sort().join() === "1,2"' },
+    { name: 'رسم المختبر: الوزن 46', code: '(() => { const E = [[0, 1, 4], [0, 2, 8], [1, 2, 11], [1, 3, 2], [2, 3, 7], [1, 4, 9], [3, 4, 6], [3, 5, 1], [2, 5, 12], [4, 6, 3], [5, 6, 5], [4, 7, 10], [6, 7, 13], [6, 8, 14], [5, 8, 15]]; const T = jarnik(9, E); return T.length === 8 && T[0] === 0 && T.reduce((s, k) => s + E[k][2], 0) === 46; })()' },
+    { name: 'رسوم عشوائية (مقارنة بـ Kruskal)', code: '(() => { for (let t = 0; t < 50; t++) { const n = 2 + Math.floor(Math.random() * 20), E = []; for (let v = 1; v < n; v++) E.push([Math.floor(Math.random() * v), v]); for (let u = 0; u < n; u++) for (let v = u + 1; v < n; v++) if (Math.random() < 0.2 && !E.some(([a, b]) => a === u && b === v)) E.push([u, v]); const ws = E.map((_, i) => i + 1).sort(() => Math.random() - 0.5); E.forEach((e, i) => e.push(ws[i])); const o = E.map((_, k) => k).sort((a, b) => E[a][2] - E[b][2]), p = [...Array(n).keys()], f = (x) => (p[x] === x ? x : (p[x] = f(p[x]))), M = []; for (const k of o) { const [u, v] = E[k]; if (f(u) !== f(v)) { p[f(u)] = f(v); M.push(k); } } const T = jarnik(n, E); if (T.slice().sort((a, b) => a - b).join() !== M.sort((a, b) => a - b).join()) return false; } return true; })()' },
+  ]}
+  bench={{ title: 'زمن jarnik على رسم متصل فيه n رأسًا و3n حافة', fn: 'jarnik', make: '(() => { const E = []; for (let v = 1; v < n; v++) E.push([Math.floor(Math.random() * v), v, Math.random()]); for (let i = 0; i < 2 * n; i++) E.push([Math.floor(Math.random() * n), Math.floor(Math.random() * n), Math.random()]); return [n, E]; })()', spread: true, ns: [25000, 50000, 100000, 200000] }}
+  solution={lab.solution}
+/>
+
+</Stage>
+
+<Stage n={6} id="summary" title="الخلاصة">
+
+<Takeaways>
+
+- **Jarník:** شجرة واحدة $T$ تنمو، وكل مرة حافة $T$ الآمنة. اكتُشفت ست مرات، وتُسمى غالبًا «Prim».
+- **بطابور حواف:** البحث الأفضل أولًا نفسه، $O(E \log V)$ بكومة ثنائية.
+- **بطابور رؤوس وDecreaseKey:** $O(E + V \log V)$ بكومة Fibonacci، وثوابتها كبيرة فنادرًا ما تفيد عمليًا.
+- **قريب من Dijkstra:** الأولوية وحدها تختلف.
+
+</Takeaways>
+
+</Stage>

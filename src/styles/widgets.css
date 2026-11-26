@@ -1460,3 +1460,22 @@ table.gr-mat td.hit { background: var(--green-soft); outline: 2px solid var(--gr
 .df-order span.v { padding: 1px 7px; border: 1px solid var(--line); border-radius: 6px; background: var(--card); }
 .df-order span.v.on { border-color: var(--amber); background: var(--amber-soft); }
 .df-order .lbl { color: var(--ink-3); font-size: 0.78rem; margin-right: 4px; }
+
+/* ---------- Minimum spanning trees (book chapter 7) ---------- */
+.gv-e.useless line { stroke-dasharray: 4 4; opacity: 0.3; }
+.gv-e.cut line { stroke: var(--amber); stroke-width: 2.2; opacity: 0.9; }
+.gv-e.safe line { stroke: var(--green); stroke-width: 4; opacity: 1; }
+.gv-e.mstghost line { stroke: var(--brand); stroke-width: 6; opacity: 0.18; }
+.mc-edges { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; margin-bottom: 10px; }
+.mc-edges button { font-family: var(--font-mono); font-size: 0.82rem; padding: 3px 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--paper); cursor: pointer; }
+.mc-edges button:hover { border-color: var(--brand); }
+.mc-trees { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; margin-bottom: 10px; }
+.mc-tree { border: 1px solid var(--line); border-radius: 10px; padding: 4px; background: var(--paper); text-align: center; font-size: 0.75rem; color: var(--ink-3); }
+.mc-tree.pick { border-color: var(--green); background: var(--green-soft); }
+.mc-tree .gv-svg { margin-bottom: 0; }
+.ms-list { display: flex; flex-wrap: wrap; gap: 3px; font-family: var(--font-mono); font-size: 0.78rem; margin-bottom: 10px; }
+.ms-list span { padding: 1px 6px; border: 1px solid var(--line); border-radius: 6px; background: var(--card); }
+.ms-list span.in { background: var(--brand); color: var(--card); border-color: var(--brand); }
+.ms-list span.no { opacity: 0.35; text-decoration: line-through; }
+.ms-list span.on { outline: 2px solid var(--amber); }
+.ms-list .lbl { border: 0; background: none; color: var(--ink-3); }
