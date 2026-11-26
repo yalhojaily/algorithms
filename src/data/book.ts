@@ -118,6 +118,18 @@ export const chapters: BookChapter[] = [
       sec('5.7', 'Graph Reductions: Flood Fill', 'الاختزال إلى رسم: ملء المناطق', 205, [11, 14, 16, 19]),
     ],
   },
+  {
+    num: 6, slug: '06-dfs', en: 'Depth-First Search', ar: 'البحث بالعمق', pages: [225, 256], exercisesPage: 244,
+    blurb: 'البحث بالعمق في الرسوم الموجهة، بساعة تسجل متى يبدأ كل رأس ومتى ينتهي. من هذين الرقمين وحدهما: تصنيف الحواف، وكشف الدورات، والترتيب الطوبولوجي، ورؤية البرمجة الديناميكية بحثًا بالعمق في الرسم الاعتمادي، ثم المكونات القوية في زمن خطي بخوارزميتي Kosaraju–Sharir وTarjan.',
+    sections: [
+      sec('6.1', 'Preorder and Postorder', 'الترتيب القبلي والبعدي', 227, [10]),
+      sec('6.2', 'Detecting Cycles', 'كشف الدورات', 231, [11]),
+      sec('6.3', 'Topological Sort', 'الترتيب الطوبولوجي', 232, [1, 12]),
+      sec('6.4', 'Memoization and Dynamic Programming', 'الحفظ والبرمجة الديناميكية', 234, [3, 13]),
+      sec('6.5', 'Strong Connectivity', 'الاتصال القوي', 237, [0, 2, 9]),
+      sec('6.6', 'Strong Components in Linear Time', 'المكونات القوية في زمن خطي', 238, [4, 5, 19, 21]),
+    ],
+  },
 ];
 
 /** The whole book, for the table of contents (chapters not yet on the site are shown as coming). */

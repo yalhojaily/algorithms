@@ -51,6 +51,11 @@ CHAPTERS = {
         ("5.4", "Data Structures"), ("5.5", "Whatever-First Search"), ("5.6", "Important Variants"),
         ("5.7", "Graph Reductions: Flood Fill"),
     ]),
+    6: dict(first=225, last=256, exercises=244, sections=[
+        ("6.1", "Preorder and Postorder"), ("6.2", "Detecting Cycles"), ("6.3", "Topological Sort"),
+        ("6.4", "Memoization and Dynamic Programming"), ("6.5", "Strong Connectivity"),
+        ("6.6", "Strong Components in Linear Time"),
+    ]),
     1: dict(first=21, last=70, exercises=44, sections=[
         ("1.1", "Reductions"), ("1.2", "Simplify and Delegate"), ("1.3", "Tower of Hanoi"),
         ("1.4", "Mergesort"), ("1.5", "Quicksort"), ("1.6", "The Pattern"), ("1.7", "Recursion Trees"),

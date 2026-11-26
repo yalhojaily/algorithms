@@ -1,0 +1,541 @@
+{
+ "chapter": 6,
+ "offset": 18,
+ "pages": [
+  225,
+  256
+ ],
+ "exercisesPage": 244,
+ "reading": {
+  "6.1": [
+   {
+    "src": "book/ch06/6.1-1.webp",
+    "w": 1011,
+    "h": 1560,
+    "page": 225
+   },
+   {
+    "src": "book/ch06/6.1-2.webp",
+    "w": 1002,
+    "h": 1494,
+    "page": 226
+   },
+   {
+    "src": "book/ch06/6.1-3.webp",
+    "w": 1011,
+    "h": 1492,
+    "page": 227
+   },
+   {
+    "src": "book/ch06/6.1-4.webp",
+    "w": 1002,
+    "h": 1496,
+    "page": 228
+   },
+   {
+    "src": "book/ch06/6.1-5.webp",
+    "w": 1011,
+    "h": 1508,
+    "page": 229
+   },
+   {
+    "src": "book/ch06/6.1-6.webp",
+    "w": 1002,
+    "h": 1508,
+    "page": 230
+   },
+   {
+    "src": "book/ch06/6.1-7.webp",
+    "w": 1011,
+    "h": 91,
+    "page": 231
+   }
+  ],
+  "6.2": [
+   {
+    "src": "book/ch06/6.2-1.webp",
+    "w": 1011,
+    "h": 1331,
+    "page": 231
+   }
+  ],
+  "6.3": [
+   {
+    "src": "book/ch06/6.3-1.webp",
+    "w": 1002,
+    "h": 1500,
+    "page": 232
+   },
+   {
+    "src": "book/ch06/6.3-2.webp",
+    "w": 1011,
+    "h": 1500,
+    "page": 233
+   },
+   {
+    "src": "book/ch06/6.3-3.webp",
+    "w": 1002,
+    "h": 680,
+    "page": 234
+   }
+  ],
+  "6.4": [
+   {
+    "src": "book/ch06/6.4-1.webp",
+    "w": 1002,
+    "h": 773,
+    "page": 234
+   },
+   {
+    "src": "book/ch06/6.4-2.webp",
+    "w": 1011,
+    "h": 1504,
+    "page": 235
+   },
+   {
+    "src": "book/ch06/6.4-3.webp",
+    "w": 1002,
+    "h": 1177,
+    "page": 236
+   },
+   {
+    "src": "book/ch06/6.4-4.webp",
+    "w": 1011,
+    "h": 822,
+    "page": 237
+   }
+  ],
+  "6.5": [
+   {
+    "src": "book/ch06/6.5-1.webp",
+    "w": 1011,
+    "h": 648,
+    "page": 237
+   },
+   {
+    "src": "book/ch06/6.5-2.webp",
+    "w": 1002,
+    "h": 983,
+    "page": 238
+   }
+  ],
+  "6.6": [
+   {
+    "src": "book/ch06/6.6-1.webp",
+    "w": 1002,
+    "h": 479,
+    "page": 238
+   },
+   {
+    "src": "book/ch06/6.6-2.webp",
+    "w": 1011,
+    "h": 1466,
+    "page": 239
+   },
+   {
+    "src": "book/ch06/6.6-3.webp",
+    "w": 1002,
+    "h": 1494,
+    "page": 240
+   },
+   {
+    "src": "book/ch06/6.6-4.webp",
+    "w": 1011,
+    "h": 1357,
+    "page": 241
+   },
+   {
+    "src": "book/ch06/6.6-5.webp",
+    "w": 1002,
+    "h": 1502,
+    "page": 242
+   },
+   {
+    "src": "book/ch06/6.6-6.webp",
+    "w": 1011,
+    "h": 1498,
+    "page": 243
+   },
+   {
+    "src": "book/ch06/6.6-7.webp",
+    "w": 1002,
+    "h": 684,
+    "page": 244
+   }
+  ]
+ },
+ "exercises": [
+  {
+   "num": 0,
+   "group": null,
+   "strips": [
+    {
+     "src": "book/ch06/ex0-1.webp",
+     "w": 1002,
+     "h": 335,
+     "page": 244
+    }
+   ]
+  },
+  {
+   "num": 1,
+   "group": null,
+   "strips": [
+    {
+     "src": "book/ch06/ex1-1.webp",
+     "w": 1002,
+     "h": 260,
+     "page": 244
+    },
+    {
+     "src": "book/ch06/ex1-2.webp",
+     "w": 1011,
+     "h": 85,
+     "page": 245
+    }
+   ]
+  },
+  {
+   "num": 2,
+   "group": null,
+   "strips": [
+    {
+     "src": "book/ch06/ex2-1.webp",
+     "w": 1011,
+     "h": 538,
+     "page": 245
+    }
+   ]
+  },
+  {
+   "num": 3,
+   "group": null,
+   "strips": [
+    {
+     "src": "book/ch06/ex3-1.webp",
+     "w": 1011,
+     "h": 427,
+     "page": 245
+    }
+   ]
+  },
+  {
+   "num": 4,
+   "group": null,
+   "strips": [
+    {
+     "src": "book/ch06/ex4-1.webp",
+     "w": 1011,
+     "h": 356,
+     "page": 245
+    },
+    {
+     "src": "book/ch06/ex4-2.webp",
+     "w": 1002,
+     "h": 551,
+     "page": 246
+    }
+   ]
+  },
+  {
+   "num": 5,
+   "group": null,
+   "strips": [
+    {
+     "src": "book/ch06/ex5-1.webp",
+     "w": 1002,
+     "h": 630,
+     "page": 246
+    }
+   ]
+  },
+  {
+   "num": 6,
+   "group": null,
+   "strips": [
+    {
+     "src": "book/ch06/ex6-1.webp",
+     "w": 1002,
+     "h": 289,
+     "page": 246
+    },
+    {
+     "src": "book/ch06/ex6-2.webp",
+     "w": 1011,
+     "h": 171,
+     "page": 247
+    }
+   ]
+  },
+  {
+   "num": 7,
+   "group": null,
+   "strips": [
+    {
+     "src": "book/ch06/ex7-1.webp",
+     "w": 1011,
+     "h": 1309,
+     "page": 247
+    },
+    {
+     "src": "book/ch06/ex7-2.webp",
+     "w": 1002,
+     "h": 241,
+     "page": 248
+    }
+   ]
+  },
+  {
+   "num": 8,
+   "group": null,
+   "strips": [
+    {
+     "src": "book/ch06/ex8-1.webp",
+     "w": 1002,
+     "h": 763,
+     "page": 248
+    }
+   ]
+  },
+  {
+   "num": 9,
+   "group": null,
+   "strips": [
+    {
+     "src": "book/ch06/ex9-1.webp",
+     "w": 1002,
+     "h": 465,
+     "page": 248
+    },
+    {
+     "src": "book/ch06/ex9-2.webp",
+     "w": 1011,
+     "h": 162,
+     "page": 249
+    }
+   ]
+  },
+  {
+   "num": 10,
+   "group": null,
+   "strips": [
+    {
+     "src": "book/ch06/ex10-1.webp",
+     "w": 1011,
+     "h": 755,
+     "page": 249
+    }
+   ]
+  },
+  {
+   "num": 11,
+   "group": null,
+   "strips": [
+    {
+     "src": "book/ch06/ex11-1.webp",
+     "w": 1011,
+     "h": 541,
+     "page": 249
+    },
+    {
+     "src": "book/ch06/ex11-2.webp",
+     "w": 1002,
+     "h": 613,
+     "page": 250
+    }
+   ]
+  },
+  {
+   "num": 12,
+   "group": "Dynamic Programming",
+   "strips": [
+    {
+     "src": "book/ch06/ex12-1.webp",
+     "w": 1002,
+     "h": 527,
+     "page": 250
+    }
+   ]
+  },
+  {
+   "num": 13,
+   "group": "Dynamic Programming",
+   "strips": [
+    {
+     "src": "book/ch06/ex13-1.webp",
+     "w": 1002,
+     "h": 262,
+     "page": 250
+    },
+    {
+     "src": "book/ch06/ex13-2.webp",
+     "w": 1011,
+     "h": 363,
+     "page": 251
+    }
+   ]
+  },
+  {
+   "num": 14,
+   "group": "Dynamic Programming",
+   "strips": [
+    {
+     "src": "book/ch06/ex14-1.webp",
+     "w": 1011,
+     "h": 566,
+     "page": 251
+    }
+   ]
+  },
+  {
+   "num": 15,
+   "group": "Dynamic Programming",
+   "strips": [
+    {
+     "src": "book/ch06/ex15-1.webp",
+     "w": 1011,
+     "h": 535,
+     "page": 251
+    },
+    {
+     "src": "book/ch06/ex15-2.webp",
+     "w": 1002,
+     "h": 197,
+     "page": 252
+    }
+   ]
+  },
+  {
+   "num": 16,
+   "group": "Dynamic Programming",
+   "strips": [
+    {
+     "src": "book/ch06/ex16-1.webp",
+     "w": 1002,
+     "h": 554,
+     "page": 252
+    }
+   ]
+  },
+  {
+   "num": 17,
+   "group": "Dynamic Programming",
+   "strips": [
+    {
+     "src": "book/ch06/ex17-1.webp",
+     "w": 1002,
+     "h": 682,
+     "page": 252
+    },
+    {
+     "src": "book/ch06/ex17-2.webp",
+     "w": 1011,
+     "h": 203,
+     "page": 253
+    }
+   ]
+  },
+  {
+   "num": 18,
+   "group": "Dynamic Programming",
+   "strips": [
+    {
+     "src": "book/ch06/ex18-1.webp",
+     "w": 1011,
+     "h": 522,
+     "page": 253
+    }
+   ]
+  },
+  {
+   "num": 19,
+   "group": "Dynamic Programming",
+   "strips": [
+    {
+     "src": "book/ch06/ex19-1.webp",
+     "w": 1011,
+     "h": 293,
+     "page": 253
+    }
+   ]
+  },
+  {
+   "num": 20,
+   "group": "Dynamic Programming",
+   "strips": [
+    {
+     "src": "book/ch06/ex20-1.webp",
+     "w": 1011,
+     "h": 393,
+     "page": 253
+    }
+   ]
+  },
+  {
+   "num": 21,
+   "group": "Dynamic Programming",
+   "strips": [
+    {
+     "src": "book/ch06/ex21-1.webp",
+     "w": 1002,
+     "h": 744,
+     "page": 254
+    }
+   ]
+  },
+  {
+   "num": 22,
+   "group": "Dynamic Programming",
+   "strips": [
+    {
+     "src": "book/ch06/ex22-1.webp",
+     "w": 1002,
+     "h": 740,
+     "page": 254
+    }
+   ]
+  },
+  {
+   "num": 23,
+   "group": "Dynamic Programming",
+   "strips": [
+    {
+     "src": "book/ch06/ex23-1.webp",
+     "w": 1011,
+     "h": 634,
+     "page": 255
+    }
+   ]
+  },
+  {
+   "num": 24,
+   "group": "Dynamic Programming",
+   "strips": [
+    {
+     "src": "book/ch06/ex24-1.webp",
+     "w": 1011,
+     "h": 565,
+     "page": 255
+    }
+   ]
+  },
+  {
+   "num": 25,
+   "group": "Dynamic Programming",
+   "strips": [
+    {
+     "src": "book/ch06/ex25-1.webp",
+     "w": 1011,
+     "h": 264,
+     "page": 255
+    },
+    {
+     "src": "book/ch06/ex25-2.webp",
+     "w": 1002,
+     "h": 661,
+     "page": 256
+    }
+   ]
+  }
+ ]
+}

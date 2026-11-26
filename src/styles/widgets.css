@@ -1424,3 +1424,39 @@ table.gr-mat td.hit { background: var(--green-soft); outline: 2px solid var(--gr
 .fl-px { aspect-ratio: 1; border: 0; padding: 0; cursor: crosshair; border-radius: 2px; }
 .fl-px.cur { outline: 2px solid var(--ink); outline-offset: -2px; }
 .fl-px.seed { box-shadow: inset 0 0 0 2px var(--ink); }
+
+/* ---------- Depth-first search (book chapter 6) ---------- */
+.gv-e.dir path { fill: none; stroke: var(--ink-3); stroke-width: 1.4; opacity: 0.6; }
+.gv-e.dir polygon { fill: var(--ink-3); opacity: 0.6; }
+.gv-e.dir.tree path { stroke: var(--brand); stroke-width: 3; opacity: 1; }
+.gv-e.dir.tree polygon { fill: var(--brand); opacity: 1; }
+.gv-e.dir.fwd path { stroke: var(--blue); stroke-width: 2.2; opacity: 1; stroke-dasharray: 6 3; }
+.gv-e.dir.fwd polygon { fill: var(--blue); opacity: 1; }
+.gv-e.dir.back path { stroke: var(--red); stroke-width: 2.2; opacity: 1; stroke-dasharray: 2 3; }
+.gv-e.dir.back polygon { fill: var(--red); opacity: 1; }
+.gv-e.dir.cross path { stroke: var(--olive); stroke-width: 2.2; opacity: 1; stroke-dasharray: 8 3 2 3; }
+.gv-e.dir.cross polygon { fill: var(--olive); opacity: 1; }
+.gv-e.dir.hot path { stroke: var(--amber); stroke-width: 3.2; opacity: 1; stroke-dasharray: none; }
+.gv-e.dir.hot polygon { fill: var(--amber); opacity: 1; }
+.gv-e.dir.dim path, .gv-e.dir.dim polygon { opacity: 0.15; }
+.gv-n.st-active circle { fill: var(--amber-soft); stroke: var(--amber); stroke-width: 2.5; }
+.gv-n.st-done circle { fill: var(--ink-3); stroke: var(--ink-2); }
+.gv-n.st-done text { fill: var(--card); }
+.gv-n.st-done text.gv-lab { fill: var(--ink-2); }
+.df-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 0.82rem; margin: -2px 0 10px; color: var(--ink-2); }
+.df-legend i { display: inline-block; width: 24px; height: 0; border-top: 3px solid; vertical-align: middle; margin-inline-end: 4px; }
+.df-legend .tree { border-color: var(--brand); }
+.df-legend .fwd { border-color: var(--blue); border-top-style: dashed; }
+.df-legend .back { border-color: var(--red); border-top-style: dotted; }
+.df-legend .cross { border-color: var(--olive); border-top-style: dashed; }
+.df-time { position: relative; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); padding: 8px 8px 4px; margin-bottom: 10px; overflow-x: auto; }
+.df-row { display: grid; grid-template-columns: 22px 1fr; align-items: center; gap: 4px; height: 17px; font-family: var(--font-mono); font-size: 0.75rem; }
+.df-track { position: relative; height: 12px; }
+.df-bar { position: absolute; top: 1px; height: 10px; border-radius: 4px; background: var(--ink-3); }
+.df-bar.open { background: var(--amber); }
+.df-axis { display: grid; grid-template-columns: 22px 1fr; font-family: var(--font-mono); font-size: 0.62rem; color: var(--ink-3); margin-top: 2px; }
+.df-axis div { display: flex; justify-content: space-between; }
+.df-order { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; font-family: var(--font-mono); font-size: 0.85rem; margin-bottom: 10px; }
+.df-order span.v { padding: 1px 7px; border: 1px solid var(--line); border-radius: 6px; background: var(--card); }
+.df-order span.v.on { border-color: var(--amber); background: var(--amber-soft); }
+.df-order .lbl { color: var(--ink-3); font-size: 0.78rem; margin-right: 4px; }
